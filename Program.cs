@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using PowerGrid.API.Models;
-
+using System.IO;
 
 namespace PowerGrid.API
 {
@@ -12,6 +12,8 @@ namespace PowerGrid.API
         {
             var host = new WebHostBuilder()
                 .UseKestrel()
+                .UseContentRoot(Directory.GetCurrentDirectory())
+                 .UseIISIntegration()//
                 .UseStartup<Program>()
                 .Build();
 
