@@ -59,15 +59,17 @@ namespace PowerGridEngine
 			return p.Id;
 		}
 
-		public bool CheckIfAuthorized(string playerId, out string errMsg)
+		public Player CheckIfAuthorized(string playerId, out string errMsg)
 		{
-			errMsg = string.Empty;
-			if (string.IsNullOrWhiteSpace(playerId) || !Players.ContainsKey(playerId))
+            var userId = MakeId(playerId);
+
+            errMsg = string.Empty;
+			if (string.IsNullOrWhiteSpace(playerId) || !Players.ContainsKey(userId))
 			{
 				errMsg = Constants.Instance.CONST_ERR_MSG_YOUARE_UNAUTHORIZED;
-				return false;
+				return null;
 			}
-			return true;
+			return Players[userId];
 		}
 
 		//MAPS:
@@ -144,11 +146,14 @@ namespace PowerGridEngine
 			if (lookupSettings == null)
 				lookupSettings = new RoomLookupSettings();
 			errMsg = string.Empty;
-			if (!CheckIfAuthorized(playerId, out errMsg))
-				return new GameRoom[0];
+
+            var player = CheckIfAuthorized(playerId, out errMsg);
+            if (player == null)
+                return new GameRoom[0];
+
 			if (lookupSettings.CurrentPlayerInside)
 			{
-				var gr = Players[playerId].GameRoomRef;
+				var gr = player.GameRoomRef;
 				if (gr != null)
 					return new GameRoom[] { gr };
 				return new GameRoom[0];
@@ -181,27 +186,29 @@ namespace PowerGridEngine
 		public Player LookupPlayer(string playerId, out string errMsg, bool itsYou = true)
 		{
 			errMsg = string.Empty;
-			if (!CheckIfAuthorized(playerId, out errMsg))
+            var player = CheckIfAuthorized(playerId, out errMsg);
+            if (player == null)
 			{
 				if (!itsYou)
 					errMsg = Constants.Instance.CONST_ERR_MSG_CANT_FIND_SUCH_PLAYER;
 				return null;
 			}
-			return Players[playerId];
+			return player;
 		}
 
-		public GameRoom LookupGameRoom(string playerId, string gameRoomId, out string errMsg)
-		{
-			errMsg = string.Empty;
-			if (!CheckIfAuthorized(playerId, out errMsg))
-				return null;
-			if (!GameRooms.ContainsKey(gameRoomId ?? ""))
-			{
-				errMsg = string.Format(Constants.Instance.CONST_ERR_MSG_CANT_FIND_GAME_ROOM, gameRoomId);
-				return null;
-			}
-			return GameRooms[gameRoomId];
-		}
+        public GameRoom LookupGameRoom(string playerId, string gameRoomId, out string errMsg)
+        {
+            errMsg = string.Empty;
+            var player = CheckIfAuthorized(playerId, out errMsg);
+            if (player == null)
+                return null;
+            if (!GameRooms.ContainsKey(gameRoomId ?? ""))
+            {
+                errMsg = string.Format(Constants.Instance.CONST_ERR_MSG_CANT_FIND_GAME_ROOM, gameRoomId);
+                return null;
+            }
+            return GameRooms[gameRoomId];
+        }
         
 	}
 }

@@ -86,6 +86,22 @@ namespace PowerGridApi.Controllers
         }
 
         [HttpGet("RoomList")]
+        public GameRoomsModel GetGameRoomList(string userId)
+        {
+            var errMsg = string.Empty;
+            var rooms = EnergoServer.GetGameRoomList(userId, out errMsg, null);
+            var rvm = new List<GameRoomViewModel>();
+            foreach (var r in rooms)
+                rvm.Add((GameRoomViewModel)r.ToViewModel());
+            return new GameRoomsModel()
+            {
+                GameRooms = rvm.ToArray(),
+                Message = errMsg,
+                IsSuccess = string.IsNullOrWhiteSpace(errMsg)
+            };
+        }
+
+        [HttpPost("RoomList1")]
         public GameRoomsModel GetGameRoomList(string userId, RoomsViewModelOptions options = null, RoomLookupSettings lookupSettings = null)
         {
             var errMsg = string.Empty;
