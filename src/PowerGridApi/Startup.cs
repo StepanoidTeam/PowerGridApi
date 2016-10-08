@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using PowerGridEngine;
 
 namespace PowerGridApi
 {
@@ -20,6 +21,10 @@ namespace PowerGridApi
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
+
+            //init energo server
+            EnergoServer.Current.Settings.SimpleOrGuidPlayerId = true;
+            ServerContext.InitCurrentContext(EnergoServer.Current, new Logger());
         }
 
         public IConfigurationRoot Configuration { get; }
@@ -29,6 +34,28 @@ namespace PowerGridApi
         {
             // Add framework services.
             services.AddMvc();
+
+            var xmlPath = GetXmlCommentsPath();
+            services.AddSwaggerGen();
+            services.ConfigureSwaggerGen(options =>
+            {
+                options.SingleApiVersion(new Swashbuckle.Swagger.Model.Info
+                {
+                    Version = Controllers.MainController.Version,
+                    Title = "Power Grid API",
+                    Description = "API for Power Grid Game developed by AgeStone Team",
+                    TermsOfService = "None"
+                });
+                options.IncludeXmlComments(xmlPath);
+                options.DescribeAllEnumsAsStrings();
+            });
+
+        }
+
+        private string GetXmlCommentsPath()
+        {
+            var app = Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Application;
+            return System.IO.Path.Combine(app.ApplicationBasePath, "PowerGridApi.xml");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -38,6 +65,10 @@ namespace PowerGridApi
             loggerFactory.AddDebug();
 
             app.UseMvc();
+            app.UseSwagger();
+
+            var ver = Controllers.MainController.Version;
+            app.UseSwaggerUi("api/help", string.Format("/swagger/{0}/swagger.json", ver));
         }
     }
 }

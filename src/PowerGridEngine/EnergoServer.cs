@@ -9,7 +9,22 @@ namespace PowerGridEngine
 {
 	public class EnergoServer
 	{
-		public static string MakeId(string str)
+        private static EnergoServer _current;
+
+        /// <summary>
+        /// You can use this singleton instance or create new one (and store it somewhere else), as you wish
+        /// </summary>
+        public static EnergoServer Current
+        {
+            get
+            {
+                if (_current == null)
+                    _current = new EnergoServer();
+                return _current;
+            }
+        }
+
+        public static string MakeId(string str)
 		{
 			if (string.IsNullOrWhiteSpace(str))
 				return string.Empty;
@@ -93,11 +108,16 @@ namespace PowerGridEngine
 				return null;
 			}
 			return Maps[idd];
-		}
+        }
 
-		//GAME ROOMS:
+        public List<string> GetAllMapIds()
+        {
+            return Maps.Keys.ToList();
+        }
 
-		public void CreateGameRoom(Player player, GameRoom gameRoom)
+        //GAME ROOMS:
+
+        public void CreateGameRoom(Player player, GameRoom gameRoom)
 		{
 			if (player == null || gameRoom == null)
 				return;
