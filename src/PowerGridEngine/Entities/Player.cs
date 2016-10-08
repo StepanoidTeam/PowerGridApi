@@ -8,7 +8,7 @@ namespace PowerGridEngine
 {
 	public class Player : BaseEnergoEntity
 	{
-		public override BaseEnergoViewModel ToViewModel(IViewModelOptions options = null)
+		public override BaseEnergoModel ToModel(IViewModelOptions options = null)
 		{
 			var ret = new PlayerViewModel();
 			var opts = new PlayerViewModelOptions(true);

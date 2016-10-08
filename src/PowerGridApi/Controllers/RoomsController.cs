@@ -9,28 +9,34 @@ using PowerGridEngine;
 
 namespace PowerGridApi.Controllers
 {
+    /// <summary>
+    /// Create your room or join to some existing one
+    /// </summary>
     [Route("api/[controller]")]
     public class RoomsController : BaseController
     {
+        /// <summary>
+        /// Rooms list
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         [HttpGet("")]
-        public GameRoomsModel GetGameRoomList(string userId)
+        public MessageModel GetGameRoomList(string userId)
         {
             var errMsg = string.Empty;
-            var rooms = EnergoServer.Current.GetGameRoomList(userId, out errMsg, null);
-            var rvm = new List<GameRoomViewModel>();
-            foreach (var r in rooms)
-                rvm.Add((GameRoomViewModel)r.ToViewModel());
+            var rooms = EnergoServer.Current.GetGameRoomList(userId, out errMsg);
+            if (!string.IsNullOrWhiteSpace(errMsg))
+                return FormatReturn(errMsg);
+            
             return new GameRoomsModel()
             {
-                GameRooms = rvm.ToArray(),
+                GameRooms = rooms.Select(m => m.ToModel()).ToArray(),
                 Message = errMsg,
                 IsSuccess = string.IsNullOrWhiteSpace(errMsg)
             };
         }
-
-        [HttpGet("Create")] //it's just for test purposes, for production we should use POSTs in case create data
-        [HttpGet("Create/{userId}/{name}")] //it's just for test purposes, for production we should use POSTs in case create data
-        [HttpPost("Create")]
+        
+        [HttpPost("Create/{userId}/{name}")]
         public MessageModel CreateGameRoom(string userId, string name)
         {
             var errMsg = string.Empty;
@@ -39,22 +45,22 @@ namespace PowerGridApi.Controllers
         }
        
         [HttpPost("List")]
-        public GameRoomsModel GetGameRoomList(string userId, RoomsViewModelOptions options = null, RoomLookupSettings lookupSettings = null)
+        public MessageModel GetGameRoomList(string userId, RoomsViewModelOptions options = null, RoomLookupSettings lookupSettings = null)
         {
             var errMsg = string.Empty;
             var rooms = EnergoServer.Current.GetGameRoomList(userId, out errMsg, lookupSettings);
-            var rvm = new List<GameRoomViewModel>();
-            foreach (var r in rooms)
-                rvm.Add((GameRoomViewModel)r.ToViewModel(options));
+            if (!string.IsNullOrWhiteSpace(errMsg))
+                return FormatReturn(errMsg);
+
             return new GameRoomsModel()
             {
-                GameRooms = rvm.ToArray(),
+                GameRooms = rooms.Select(m => m.ToModel(options)).ToArray(),
                 Message = errMsg,
                 IsSuccess = string.IsNullOrWhiteSpace(errMsg)
             };
         }
 
-        [HttpGet("Join")]
+        [HttpPost("Join")]
         public MessageModel JoinGameRoom(string userId, string gameRoomId)
         {
             var errMsg = string.Empty;
@@ -70,7 +76,7 @@ namespace PowerGridApi.Controllers
             return FormatReturn(errMsg, gameRoom.Id);
         }
 
-        [HttpGet("Leave")]
+        [HttpPost("Leave")]
         public MessageModel LeaveGameRoom(string userId)
         {
             var errMsg = string.Empty;
@@ -85,7 +91,7 @@ namespace PowerGridApi.Controllers
             return FormatReturn(errMsg);
         }
 
-        [HttpGet("Kick")]
+        [HttpPost("Kick")]
         public MessageModel Kick(string userId, string username)
         {
             var errMsg = string.Empty;
@@ -104,17 +110,27 @@ namespace PowerGridApi.Controllers
             return FormatReturn(errMsg);
         }
 
-        [HttpGet("SetReadyMark")]
-        public MessageModel SetReadyMarkTo(string userId, bool state)
+        /// <summary>
+        /// Set if player ready to start or not
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="state">in case it's not null - set ready mark to specified value, otherwise it will be toogled according to curent state</param>
+        /// <returns></returns>
+        [HttpPost("ToogleReady")]
+        public MessageModel SetReadyMarkTo(string userId, bool? state = null)
         {
             var errMsg = string.Empty;
             var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return FormatReturn(errMsg);
-            var ret = player.GameRoomRef.SetReadyMarkTo(player, state, out errMsg);
+            bool result = false;
+            if (state.HasValue)
+                player.GameRoomRef.SetReadyMarkTo(player, state.Value, out errMsg);
+            else
+                player.GameRoomRef.ToogleReadyMark(player, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return FormatReturn(errMsg);
-            return FormatReturn(null, ret);
+            return FormatReturn(null, result);
         }
 
     }

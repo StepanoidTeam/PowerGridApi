@@ -10,7 +10,7 @@ namespace PowerGridEngine
     
     public class GameRoom : BaseEnergoEntity
     {
-        public override BaseEnergoViewModel ToViewModel(IViewModelOptions options = null)
+        public override BaseEnergoModel ToModel(IViewModelOptions options = null)
         {
             var ret = new GameRoomViewModel();
             var opts = new RoomsViewModelOptions(true);
@@ -50,7 +50,7 @@ namespace PowerGridEngine
                     var players = Players.Values.ToArray();
                     ret.PlayerDetails = new PlayerViewModel[Players.Count()];
                     for (int i = 0; i < ret.PlayerDetails.Length; i++)
-                        ret.PlayerDetails[i] = (PlayerViewModel)players[i].Player.ToViewModel(opts.PlayerViewOptions);
+                        ret.PlayerDetails[i] = (PlayerViewModel)players[i].Player.ToModel(opts.PlayerViewOptions);
                 }
             }
             return ret;
@@ -210,6 +210,21 @@ namespace PowerGridEngine
             return false;
         }
 
+        public bool ToogleReadyMark(Player player, out string errMsg)
+        {
+            errMsg = string.Empty;
+
+            if (player == null)
+                return ReturnError(Constants.Instance.CONST_ERR_MSG_PLAYER_CANT_BE_NULL, out errMsg);
+            if (player.GameRoomRef == null)
+                return ReturnError(Constants.Instance.CONST_ERR_MSG_YOUARE_OUTSIDE_OF_GAME_ROOMS, out errMsg);
+            var players = player.GameRoomRef.Players;
+            if (!players.ContainsKey(player.Id))
+                return ReturnError(Constants.Instance.CONST_ERR_MSG_YOU_ARE_NOT_IN_THIS_GAME, out errMsg);
+            players[player.Id].ReadyMark = !players[player.Id].ReadyMark;
+            return players[player.Id].ReadyMark;
+        }
+        
         public bool SetReadyMarkTo(Player player, bool state, out string errMsg)
         {
             errMsg = string.Empty;

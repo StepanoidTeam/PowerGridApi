@@ -9,7 +9,7 @@ namespace PowerGridEngine
 	
 	public class GameBoard : BaseEnergoEntity
 	{
-		public override BaseEnergoViewModel ToViewModel(IViewModelOptions options = null)
+		public override BaseEnergoModel ToModel(IViewModelOptions options = null)
 		{
 			var ret = new GameBoardViewModel();
 			ret.Status = this.Status;

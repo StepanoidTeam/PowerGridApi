@@ -57,7 +57,7 @@ namespace PowerGridApi.Controllers
             return new GameBoardModel()
             {
                 IsSuccess = true,
-                GameBoard = (GameBoardViewModel)player.GameRoomRef.GameBoardRef.ToViewModel()
+                GameBoard = (GameBoardViewModel)player.GameRoomRef.GameBoardRef.ToModel()
             };
         }
 
@@ -71,7 +71,7 @@ namespace PowerGridApi.Controllers
             return new PlayerModel()
             {
                 IsSuccess = true,
-                PlayerInfo = (PlayerViewModel)player.ToViewModel()
+                PlayerInfo = (PlayerViewModel)player.ToModel()
             };
         }
 

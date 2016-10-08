@@ -9,6 +9,6 @@ namespace PowerGridEngine
 {
     public class GameRoomsModel : MessageModel
     {
-        public GameRoomViewModel[] GameRooms { get; set; }
+        public BaseEnergoModel[] GameRooms { get; set; }
     }
 }

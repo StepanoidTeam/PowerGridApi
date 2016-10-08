@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace PowerGridEngine
 {
     
-    public class GameRoomViewModel : BaseEnergoViewModel
+    public class GameRoomViewModel : BaseEnergoModel
     {
         
         public string Id { get; set; }

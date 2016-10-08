@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace PowerGridEngine
 {
     
-    public class PlayerViewModel : BaseEnergoViewModel
+    public class PlayerViewModel : BaseEnergoModel
     {
         
         public string UserId { get; set; }

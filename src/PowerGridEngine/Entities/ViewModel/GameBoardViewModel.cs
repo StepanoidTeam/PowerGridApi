@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace PowerGridEngine
 {
     
-    public class GameBoardViewModel : BaseEnergoViewModel
+    public class GameBoardViewModel : BaseEnergoModel
     {
         
         public GameStatusEnum Status { get; set; }
