@@ -1,24 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PowerGridEngine
-{
-	
+{	
 	public class GameBoard : BaseEnergoEntity
 	{
-		public override BaseEnergoModel ToModel(IViewModelOptions options = null)
-		{
-			var ret = new GameBoardViewModel();
-			ret.Status = this.Status;
-			ret.PlayersTurnOrder = this.PlayersTurnOrder;
-			ret.CurrentTurnPlayer = this.CurrentTurnPlayer;
-			ret.PlayersInfo = context.PlayerBoards.ToDictionary(n => n.Key, m => m.Value.Money.ToString());
-			return ret;
-		}
-
         private GameContext context { get; set; }
 
 		public Map Map { get; private set; }

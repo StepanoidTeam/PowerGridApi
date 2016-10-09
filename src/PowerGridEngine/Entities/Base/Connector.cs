@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PowerGridEngine
 {
-    
-    public class Connector
+    public class Connector: BaseEnergoEntity
     {
         public Map MapRef { get; set; }
 
@@ -19,8 +14,7 @@ namespace PowerGridEngine
         public City City2Ref { get; private set; }
 
         private string key;
-        
-        
+             
         public string Id
         {
             get
@@ -42,7 +36,6 @@ namespace PowerGridEngine
             {
             }
         }
-
         
         public string City1Key
         {
@@ -54,8 +47,7 @@ namespace PowerGridEngine
             }
             set { }
         }
-
-        
+     
         public string City2Key
         {
             get

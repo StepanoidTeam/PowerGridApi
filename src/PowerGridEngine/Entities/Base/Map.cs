@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PowerGridEngine
-{
-	
+{	
 	public class Map: ChildableBaseEntity<Dictionary<string, Region>>
     {
         public IDictionary<string, Region> Regions { get { return Childs; } }
@@ -17,36 +14,6 @@ namespace PowerGridEngine
             {
                 return Regions.SelectMany(m => m.Value.Cities).ToDictionary(k => k.Key, v => v.Value);
             }
-        }
-
-        //[DataMember(Name = "Cities")]
-        private City[] cities
-        {
-            get
-            {
-                return Cities.Values.ToArray();
-            }
-            set { }
-        }
-
-        //[DataMember(Name = "Regions")]
-        private Region[] regions
-        {
-            get
-            {
-                return Regions.Values.ToArray();
-            }
-            set { }
-        }
-
-        //[DataMember(Name = "Connectors")]
-        private Connector[] connectors
-        {
-            get
-            {
-                return Connectors.Values.ToArray();
-            }
-            set { }
         }
 
         public MapSettings Settings { get; private set; }
@@ -171,7 +138,7 @@ namespace PowerGridEngine
 		}
 
 		/// <summary>
-		///  check map for unique names (regions and cities)
+		/// Check map for unique names (regions and cities)
 		/// </summary>
 		/// <returns></returns>
 		public bool Check()
@@ -191,5 +158,5 @@ namespace PowerGridEngine
 			}
 			return flag;
 		}
-	}
+    }
 }

@@ -7,7 +7,11 @@
 
   "frameworks": {
     "netstandard1.6": {
-      "imports": "dnxcore50"
+      "imports": "dnxcore50",
+      "dependencies": {
+        "System.Dynamic.Runtime": "4.0.0-beta-22231",
+        "Microsoft.CSharp": "4.0.0-beta-22231"
+      }
     }
   }
 }

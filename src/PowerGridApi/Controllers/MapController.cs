@@ -10,6 +10,9 @@ using System.Globalization;
 
 namespace PowerGridApi.Controllers
 {
+    /// <summary>
+    /// Maps related actions
+    /// </summary>
     [Route("api/[controller]")]
     public class MapsController : BaseController
     {
@@ -17,11 +20,11 @@ namespace PowerGridApi.Controllers
         /// Get list of registered maps
         /// </summary>
         /// <returns></returns>
-        [HttpGet("")]
-        public MessageModel GetAll()
+        [HttpGet]
+        public ApiResponseModel GetAll()
         {
-            var map = EnergoServer.Current.GetAllMapIds();
-            return new MessageModel(map);
+            var maps = EnergoServer.Current.GetAllMapIds();
+            return FormatSuccessReturn(maps);
         }
 
         /// <summary>
@@ -30,26 +33,31 @@ namespace PowerGridApi.Controllers
         /// <param name="mapId">map id could by found in map list</param>
         /// <returns></returns>
         [HttpGet("{mapId}")]
-        public MapMessageModel GetMap(string mapId)
+        public ApiResponseModel GetMap(string mapId)
         {
-            var ret = new MapMessageModel();
             if (string.IsNullOrWhiteSpace(mapId))
                 mapId = Constants.CONST_DEFAULT_MAP_ID;
             var errMsg = string.Empty;
             var map = EnergoServer.Current.LookupMap(mapId, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
-            {
-                ret.Message = errMsg;
-            }
-            else
-            {
-                ret.IsSuccess = true;
-                ret.Map = map;
-            }
-            return ret;
+                return FormatReturn(errMsg);
+            var mapModel = new MapModel(map);
+            return FormatSuccessReturn(mapModel.GetInfo());
         }
+  
+        //todo something wrong with this method or swagger, it brokes swagger UI loading
 
-    
-
+        //[HttpPost("WithOptions")]
+        //public ApiResponseModel GetMapWithOptions(string mapId, MapModelViewOptions options)
+        //{
+        //    if (string.IsNullOrWhiteSpace(mapId))
+        //        mapId = Constants.CONST_DEFAULT_MAP_ID;
+        //    var errMsg = string.Empty;
+        //    var map = EnergoServer.Current.LookupMap(mapId, out errMsg);
+        //    if (!string.IsNullOrWhiteSpace(errMsg))
+        //        return FormatReturn(errMsg);
+        //    var mapModel = new MapModel(map);
+        //    return FormatSuccessReturn(mapModel.GetInfo());
+        //}
     }
 }

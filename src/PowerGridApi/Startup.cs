@@ -41,7 +41,7 @@ namespace PowerGridApi
             {
                 options.SingleApiVersion(new Swashbuckle.Swagger.Model.Info
                 {
-                    Version = Controllers.MainController.Version,
+                    Version = Controllers.CommonController.Version,
                     Title = "Power Grid API",
                     Description = "API for Power Grid Game developed by AgeStone Team",
                     TermsOfService = "None"
@@ -67,7 +67,7 @@ namespace PowerGridApi
             app.UseMvc();
             app.UseSwagger();
 
-            var ver = Controllers.MainController.Version;
+            var ver = Controllers.CommonController.Version;
             app.UseSwaggerUi("api/help", string.Format("/swagger/{0}/swagger.json", ver));
         }
     }

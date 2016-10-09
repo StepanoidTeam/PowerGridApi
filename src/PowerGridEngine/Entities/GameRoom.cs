@@ -1,70 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PowerGridEngine
 {
     
     public class GameRoom : BaseEnergoEntity
     {
-        public override BaseEnergoModel ToModel(IViewModelOptions options = null)
-        {
-            var ret = new GameRoomViewModel();
-            var opts = new RoomsViewModelOptions(true);
-            if (options != null)
-                opts = options as RoomsViewModelOptions;
-            if (opts.Id)
-                ret.Id = Id;
-            if (opts.Name)
-                ret.Name = Name;
-            if (opts.IsInGame)
-                ret.IsInGame = IsInGame;
-            if (opts.PlayerCount)
-            {
-                if (Players == null)
-                    ret.PlayerCount = 0;
-                else
-                    ret.PlayerCount = Players.Count();
-            }
-            if (opts.PlayerHeaders)
-            {
-                if (Players == null)
-                    ret.PlayerHeaders = new IdNameModel[0];
-                else
-                {
-                    var players = Players.Values.ToArray();
-                    ret.PlayerHeaders = new IdNameModel[Players.Count()];
-                    for (int i = 0; i < ret.PlayerHeaders.Length; i++)
-                        ret.PlayerHeaders[i] = new IdNameModel { Id = players[i].Player.Id, Name = players[i].Player.Username };
-                }
-            }
-            if (opts.PlayerDetails)
-            {
-                if (Players == null)
-                    ret.PlayerDetails = new PlayerViewModel[0];
-                else
-                {
-                    var players = Players.Values.ToArray();
-                    ret.PlayerDetails = new PlayerViewModel[Players.Count()];
-                    for (int i = 0; i < ret.PlayerDetails.Length; i++)
-                        ret.PlayerDetails[i] = (PlayerViewModel)players[i].Player.ToModel(opts.PlayerViewOptions);
-                }
-            }
-            return ret;
-        }
-
-        //PROPERTIES:
-
+       
         public string Id { get; private set; }
 
         public string Name { get; private set; }
 
         public IDictionary<string, PlayerInRoom> Players { get; private set; }
-
-        public IDictionary<string, bool> PlayerReadyMarks { get; private set; }
 
         public Player Leader { get; private set; }
 

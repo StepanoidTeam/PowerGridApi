@@ -9,13 +9,19 @@ using PowerGridEngine;
 
 namespace PowerGridApi.Controllers
 {
+    /// <summary>
+    /// Game (started and currently in process) related actions
+    /// </summary>
     [Route("api/[controller]")]
     public class GameController : BaseController
     {
-        //IN GAME
-
-        [HttpGet("AllowedActions")]
-        public MessageModel GetAllowedActions(string userId)
+        /// <summary>
+        /// Get all allowable actions for current user according to current game state
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        [HttpGet("AllowedActions/{userId}")]
+        public ApiResponseModel GetAllowedActions(string userId)
         {
             var errMsg = string.Empty;
             var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
@@ -24,13 +30,17 @@ namespace PowerGridApi.Controllers
             if (!player.IsInGame())
                 return FormatReturn("Not in game");
             var lst = player.GameRoomRef.GameBoardRef.GetAllowedActions(userId, out errMsg);
-            if (!string.IsNullOrWhiteSpace(errMsg))
-                return FormatReturn(errMsg);
-            return FormatReturn(null, lst);
+            return FormatReturn(errMsg, lst);
         }
 
-        [HttpGet("DoAction")]
-        public MessageModel DoAction(string userId, GameActionEnum action)
+        /// <summary>
+        /// Do specific game action
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        [HttpPost("DoAction/{userId}/{userAction}")]
+        public ApiResponseModel DoAction(string userId, GameActionEnum userAction)
         {
             var errMsg = string.Empty;
             var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
@@ -39,7 +49,7 @@ namespace PowerGridApi.Controllers
             if (!player.IsInGame())
                 return FormatReturn("Not in game");
             var gbRef = player.GameRoomRef.GameBoardRef;
-            switch (action)
+            switch (userAction)
             {
                 case GameActionEnum.AuctionPass:
                     if (!gbRef.AuctionPass(userId, out errMsg))

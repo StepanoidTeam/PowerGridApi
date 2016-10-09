@@ -1,32 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace PowerGridEngine
 {
 	public class Player : BaseEnergoEntity
 	{
-		public override BaseEnergoModel ToModel(IViewModelOptions options = null)
-		{
-			var ret = new PlayerViewModel();
-			var opts = new PlayerViewModelOptions(true);
-			if (options != null)
-				opts = options as PlayerViewModelOptions;
-			if (opts.Id)
-				ret.UserId = this.Id;
-			if (opts.Name)
-				ret.Username = this.Username;
-			if (opts.GameRoomId)
-				ret.GameRoomId = this.GameRoomRef == null ? null : this.GameRoomRef.Id;
-			if (opts.ReadyMark)
-				ret.ReadyMark = this.GameRoomRef == null ? false : this.GameRoomRef.Players[this.Id].ReadyMark;
-			return ret;
-		}
-
 		public string Id { get; private set; }
+
 		public string Username { get; private set; }
+
 		public GameRoom GameRoomRef { get; set; }
 
 		public Player(string username, string id = null)

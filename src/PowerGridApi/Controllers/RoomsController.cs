@@ -20,24 +20,20 @@ namespace PowerGridApi.Controllers
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        [HttpGet("")]
-        public MessageModel GetGameRoomList(string userId)
+        [HttpGet("{userId}")]
+        public ApiResponseModel GetGameRoomList(string userId)
         {
             var errMsg = string.Empty;
             var rooms = EnergoServer.Current.GetGameRoomList(userId, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return FormatReturn(errMsg);
-            
-            return new GameRoomsModel()
-            {
-                GameRooms = rooms.Select(m => m.ToModel()).ToArray(),
-                Message = errMsg,
-                IsSuccess = string.IsNullOrWhiteSpace(errMsg)
-            };
+            var roomModels = rooms.Select(m => new GameRoomModel(m)).ToArray();
+            var info = roomModels.Select(m => m.GetInfo());
+            return FormatSuccessReturn(info);
         }
         
         [HttpPost("Create/{userId}/{name}")]
-        public MessageModel CreateGameRoom(string userId, string name)
+        public ApiResponseModel CreateGameRoom(string userId, string name)
         {
             var errMsg = string.Empty;
             var gameRoomId = EnergoServer.Current.CreateGameRoom(userId, name, out errMsg);
@@ -45,23 +41,20 @@ namespace PowerGridApi.Controllers
         }
        
         [HttpPost("List")]
-        public MessageModel GetGameRoomList(string userId, RoomsViewModelOptions options = null, RoomLookupSettings lookupSettings = null)
+        public ApiResponseModel GetGameRoomList(string userId, RoomModelViewOptions options = null, RoomLookupSettings lookupSettings = null)
         {
             var errMsg = string.Empty;
             var rooms = EnergoServer.Current.GetGameRoomList(userId, out errMsg, lookupSettings);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return FormatReturn(errMsg);
 
-            return new GameRoomsModel()
-            {
-                GameRooms = rooms.Select(m => m.ToModel(options)).ToArray(),
-                Message = errMsg,
-                IsSuccess = string.IsNullOrWhiteSpace(errMsg)
-            };
+            var roomModels = rooms.Select(m => new GameRoomModel(m)).ToArray();
+            var info = roomModels.Select(m => m.GetInfo(options));
+            return FormatSuccessReturn(info);
         }
 
         [HttpPost("Join")]
-        public MessageModel JoinGameRoom(string userId, string gameRoomId)
+        public ApiResponseModel JoinGameRoom(string userId, string gameRoomId)
         {
             var errMsg = string.Empty;
             var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
@@ -77,7 +70,7 @@ namespace PowerGridApi.Controllers
         }
 
         [HttpPost("Leave")]
-        public MessageModel LeaveGameRoom(string userId)
+        public ApiResponseModel LeaveGameRoom(string userId)
         {
             var errMsg = string.Empty;
             var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
@@ -92,7 +85,7 @@ namespace PowerGridApi.Controllers
         }
 
         [HttpPost("Kick")]
-        public MessageModel Kick(string userId, string username)
+        public ApiResponseModel Kick(string userId, string username)
         {
             var errMsg = string.Empty;
             var leader = EnergoServer.Current.LookupPlayer(userId, out errMsg);
@@ -117,7 +110,7 @@ namespace PowerGridApi.Controllers
         /// <param name="state">in case it's not null - set ready mark to specified value, otherwise it will be toogled according to curent state</param>
         /// <returns></returns>
         [HttpPost("ToogleReady")]
-        public MessageModel SetReadyMarkTo(string userId, bool? state = null)
+        public ApiResponseModel SetReadyMarkTo(string userId, bool? state = null)
         {
             var errMsg = string.Empty;
             var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
@@ -131,6 +124,21 @@ namespace PowerGridApi.Controllers
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return FormatReturn(errMsg);
             return FormatReturn(null, result);
+        }
+
+        [HttpGet("StartGame")]
+        public ApiResponseModel StartGame(string userId)
+        {
+            var errMsg = string.Empty;
+            var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
+            if (!string.IsNullOrWhiteSpace(errMsg))
+                return FormatReturn(errMsg);
+            if (player.GameRoomRef != null)
+            {
+                player.GameRoomRef.Init(out errMsg);
+                player.GameRoomRef.GameBoardRef.Start();
+            }
+            return FormatReturn(errMsg);
         }
 
     }

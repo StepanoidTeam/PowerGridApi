@@ -1,41 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PowerGridEngine
 {
-	
 	public class City: ParentableBaseEntity<Region>
     {
-		private Map MapRef
+		public Map MapRef
 		{
 			get
 			{
 				return Parent.Parent;
 			}
 		}
-
-        
-        public string RegionKey
-        {
-            get
-            {
-                return Parent.Id;
-            }
-            set { }
-        }
-
-        public string RegionName
-        {
-            get
-            {
-                return Parent.Name;
-            }
-            set { }
-        }
-
+      
         public IDictionary<int, int> Levels
 		{
 			get
@@ -69,17 +47,6 @@ namespace PowerGridEngine
                     .Where(m => m.Key.Contains(string.Format(Constants.Instance.CONST_CONNECTOR_CITY_TEMPLATE, Id)))
 			        .ToDictionary(n => n.Key, m => m.Value);
 			}
-		}
-
-        //why it's private??
-		//[DataMember(Name = "Levels")]
-		private int[] levels
-		{
-			get
-			{
-				return Levels.OrderBy(m => m.Key).Select(m => m.Value).ToArray();
-			}
-			set { }
 		}
 
 		private void BaseConstructor(Region region = null,

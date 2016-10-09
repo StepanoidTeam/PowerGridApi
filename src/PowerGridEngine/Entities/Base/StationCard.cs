@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PowerGridEngine
 {
     [Flags]
     public enum StationType
     {
-        None,
+        None,//for special cards purposes (like card of 3 Stage)
         Coal,
         Oil,
         Trash,//really???
