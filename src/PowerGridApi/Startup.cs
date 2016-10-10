@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Cors.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -48,6 +50,15 @@ namespace PowerGridApi
 				options.DescribeAllEnumsAsStrings();
 			});
 
+			//todo: maybe this is redundant when we enable all origins below
+			services.Configure<MvcOptions>(options =>
+			{
+				options.Filters.Add(new CorsAuthorizationFilterFactory("AllowSpecificOrigin"));
+
+			});
+
+
+
 		}
 
 		private string GetXmlCommentsPath()
@@ -61,6 +72,13 @@ namespace PowerGridApi
 		{
 			loggerFactory.AddConsole(Configuration.GetSection("Logging"));
 			loggerFactory.AddDebug();
+
+
+			app.UseCors(builder =>
+				builder.AllowAnyOrigin()
+				.AllowAnyHeader()
+			);
+
 
 			app.UseMvc();
 			app.UseSwagger();
