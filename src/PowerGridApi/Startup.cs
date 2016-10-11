@@ -35,6 +35,8 @@ namespace PowerGridApi
 
 			services.AddCors();
 
+
+
 			var xmlPath = GetXmlCommentsPath();
 			services.AddSwaggerGen();
 			services.ConfigureSwaggerGen(options =>
@@ -74,10 +76,7 @@ namespace PowerGridApi
 			loggerFactory.AddDebug();
 
 
-			app.UseCors(builder =>
-				builder.AllowAnyOrigin()
-				.AllowAnyHeader()
-			);
+			app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
 
 			app.UseMvc();
