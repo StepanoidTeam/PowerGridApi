@@ -30,10 +30,25 @@ namespace PowerGridApi
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+
+
+			// Add service and create Policy with options
+			services.AddCors(options =>
+			{
+				options.AddPolicy("CorsPolicy",
+					builder => builder.AllowAnyOrigin()
+					.AllowAnyMethod()
+					.AllowAnyHeader()
+					.AllowCredentials());
+			});
+
+			//services.AddCors();
+
+
 			// Add framework services.
 			services.AddMvc();
 
-			services.AddCors();
+			
 
 
 
@@ -75,11 +90,19 @@ namespace PowerGridApi
 			loggerFactory.AddConsole(Configuration.GetSection("Logging"));
 			loggerFactory.AddDebug();
 
+			app.UseCors("CorsPolicy");
+			//app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
-			app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
+			//app.UseMvc();
+			app.UseMvc(routes =>
+			{
+				routes.MapRoute(
+					name: "default",
+					template: "{controller=Common}/{action=GetVersion}/{id?}");
+			});
 
-			app.UseMvc();
+			
 			app.UseSwagger();
 
 			var ver = Controllers.CommonController.Version;
