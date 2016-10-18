@@ -21,7 +21,7 @@ namespace PowerGridEngine
         
         public PlayerModelViewOptions PlayerViewOptions { get; set; }
 
-        public RoomModelViewOptions(bool defaultValue = false)
+        private void Init(bool defaultValue = false)
         {
             Id = defaultValue;
             Name = defaultValue;
@@ -30,6 +30,16 @@ namespace PowerGridEngine
             PlayerHeaders = defaultValue;
             PlayerDetails = defaultValue;
             PlayerViewOptions = new PlayerModelViewOptions(defaultValue);
+        }
+
+        public RoomModelViewOptions()
+        {
+            Init();
+        }
+
+        public RoomModelViewOptions(bool defaultValue)
+        {
+            Init(defaultValue);
         }
     }
 }

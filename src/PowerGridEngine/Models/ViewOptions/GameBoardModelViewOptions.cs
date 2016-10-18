@@ -2,10 +2,20 @@
 namespace PowerGridEngine
 {
     public class GameBoardModelViewOptions : AbstractModelViewOptions
-    {    
-        public GameBoardModelViewOptions(bool defaultValue = false)
+    {
+        private void Init(bool defaultValue = false)
         {
 
+        }
+
+        public GameBoardModelViewOptions()
+        {
+            Init();
+        }
+
+        public GameBoardModelViewOptions(bool defaultValue)
+        {
+            Init(defaultValue);
         }
     }
 }

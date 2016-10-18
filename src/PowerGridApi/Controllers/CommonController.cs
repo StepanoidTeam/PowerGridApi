@@ -14,8 +14,6 @@ namespace PowerGridApi.Controllers
 	/// <summary>
 	/// Various additional methods
 	/// </summary>
-	/// 
-	[EnableCors("CorsPolicy")]
 	[Route("api/")]
 	public class CommonController : BaseController
     {

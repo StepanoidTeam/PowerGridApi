@@ -11,12 +11,22 @@ namespace PowerGridEngine
 
         public bool CityNames { get; set; }
 
-        public ConnectorModelViewOptions(bool defaultValue = false)
+        private void Init(bool defaultValue = false)
         {
             Id = defaultValue;
             Cost = defaultValue;
             CityKeys = defaultValue;
             CityNames = defaultValue;
+        }
+
+        public ConnectorModelViewOptions()
+        {
+            Init();
+        }
+
+        public ConnectorModelViewOptions(bool defaultValue)
+        {
+            Init(defaultValue);
         }
     }
 }

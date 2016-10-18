@@ -17,6 +17,12 @@ namespace PowerGridEngine
 
         public bool Name { get; set; }
 
+        public AbstractIdNameModelViewOptions()
+        {
+            Id = false;
+            Name = false;
+        }
+
         public AbstractIdNameModelViewOptions(bool defaultValue)
         {
             Id = defaultValue;

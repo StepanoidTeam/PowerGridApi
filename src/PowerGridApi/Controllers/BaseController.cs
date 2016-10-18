@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using PowerGridEngine;
 using System.Globalization;
+using Microsoft.AspNetCore.Cors;
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -13,6 +14,7 @@ namespace PowerGridApi.Controllers
     /// <summary>
     /// Base controller class for any controller in API
     /// </summary>
+    [EnableCors("CorsPolicy")]
     public abstract class BaseController : Controller
     {
         private static decimal _version = 0.01m;

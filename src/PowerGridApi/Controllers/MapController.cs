@@ -15,7 +15,6 @@ namespace PowerGridApi.Controllers
     /// Maps related actions
     /// </summary>
     [Route("api/[controller]")]
-    [EnableCors("CorsPolicy")]
     public class MapsController : BaseController
     {
         /// <summary>
