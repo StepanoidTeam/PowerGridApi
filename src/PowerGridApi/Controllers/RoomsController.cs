@@ -28,8 +28,9 @@ namespace PowerGridApi.Controllers
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
             var roomModels = rooms.Select(m => new GameRoomModel(m)).ToArray();
-            var info = roomModels.Select(m => m.GetInfo());
-            return await SuccessResponse(info);
+
+            var result = await Task.Run(() => { return roomModels.Select(m => m.GetInfo()); });
+            return await SuccessResponse(result);
         }
         
         [HttpPost("Create/{userId}/{name}")]
@@ -49,8 +50,9 @@ namespace PowerGridApi.Controllers
                 return await GenericResponse(errMsg);
 
             var roomModels = rooms.Select(m => new GameRoomModel(m)).ToArray();
-            var info = roomModels.Select(m => m.GetInfo(options));
-            return await SuccessResponse(info);
+            var result = await Task.Run(() => { return roomModels.Select(m => m.GetInfo(options)); });
+
+            return await SuccessResponse(result);
         }
 
         /// <summary>
@@ -69,7 +71,9 @@ namespace PowerGridApi.Controllers
             var gameRoom = EnergoServer.Current.LookupGameRoom(userId, gameRoomId, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
+
             gameRoom.Join(player, out errMsg);
+
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
             return await GenericResponse(errMsg, gameRoom.Id);
@@ -89,7 +93,9 @@ namespace PowerGridApi.Controllers
                 return await GenericResponse(errMsg);
             if (player.GameRoomRef == null)
                 return await GenericResponse(Constants.Instance.CONST_ERR_MSG_YOUARE_OUTSIDE_OF_GAME_ROOMS);
+
             player.GameRoomRef.Leave(userId);
+
             if (player.GameRoomRef != null)
                 return await GenericResponse(Constants.Instance.CONST_ERR_MSG_YOU_CANT_LEAVE_THIS_GAME_ROOM);
             return await GenericResponse(errMsg);
@@ -111,7 +117,9 @@ namespace PowerGridApi.Controllers
             if (leader.GameRoomRef == null)
                 return await GenericResponse(Constants.Instance.CONST_ERR_MSG_YOUARE_OUTSIDE_OF_GAME_ROOMS);
             var gameRoom = leader.GameRoomRef;
+
             var playerId = gameRoom.Kick(leader.Id, username, out errMsg);
+
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
             if (gameRoom.Players.ContainsKey(playerId))
@@ -134,10 +142,12 @@ namespace PowerGridApi.Controllers
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
             bool result = false;
+
             if (state.HasValue)
                 player.GameRoomRef.SetReadyMarkTo(player, state.Value, out errMsg);
             else
                 player.GameRoomRef.ToogleReadyMark(player, out errMsg);
+
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
             return await GenericResponse(null, result);

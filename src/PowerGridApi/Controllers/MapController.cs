@@ -43,8 +43,11 @@ namespace PowerGridApi.Controllers
             var map = EnergoServer.Current.LookupMap(mapId, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
+
             var mapModel = new MapModel(map);
-            return await SuccessResponse(mapModel.GetInfo());
+            var result = await Task.Run(() => { return mapModel.GetInfo(); });
+
+            return await SuccessResponse(result);
         }
 
         /// <summary>
@@ -63,8 +66,11 @@ namespace PowerGridApi.Controllers
             var map = EnergoServer.Current.LookupMap(mapId, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
+
             var mapModel = new MapModel(map);
-            return await SuccessResponse(mapModel.GetInfo(options));
+            var result = await Task.Run(() => { return mapModel.GetInfo(options); });
+
+            return await SuccessResponse(result);
         }
     }
 }

@@ -29,6 +29,7 @@ namespace PowerGridApi.Controllers
                 return await GenericResponse(errMsg);
             if (!player.IsInGame())
                 return await GenericResponse("Not in game");
+
             var lst = player.GameRoomRef.GameBoardRef.GetAllowedActions(userId, out errMsg);
             return await GenericResponse(errMsg, lst);
         }

@@ -56,8 +56,11 @@ namespace PowerGridApi.Controllers
 				return await GenericResponse(errMsg);
 			if (player.GameRoomRef == null || player.GameRoomRef.GameBoardRef == null)
 				return await GenericResponse("Not in game");
+
 			var gameBoardModel = new GameBoardModel(player.GameRoomRef.GameBoardRef);
-			return await SuccessResponse(gameBoardModel.GetInfo());
+            var result = await Task.Run(() => { return gameBoardModel.GetInfo(); });
+
+            return await SuccessResponse(result);
 		}
 
         /// <summary>
@@ -72,8 +75,11 @@ namespace PowerGridApi.Controllers
 			var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
 			if (!string.IsNullOrWhiteSpace(errMsg))
 				return await GenericResponse(errMsg);
+
 			var playerModel = new PlayerModel(player);
-			return await SuccessResponse(playerModel.GetInfo());
+            var result = await Task.Run(() => { return playerModel.GetInfo(); });
+
+            return await SuccessResponse(result);
 		}
 
 	}
