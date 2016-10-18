@@ -33,9 +33,12 @@ namespace PowerGridApi.Controllers
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        protected ApiResponseModel FormatSuccessReturn(object data)
+        protected async Task<ApiResponseModel> SuccessResponse(object data)
         {
-            return new ApiResponseModel(data);
+            return await Task.Run(() =>
+            {
+                return new ApiResponseModel(data);
+            });
         }
 
         /// <summary>
@@ -45,26 +48,14 @@ namespace PowerGridApi.Controllers
         /// <param name="errMsg"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        protected ApiResponseModel FormatReturn(string errMsg, object data = null)
+        protected async Task<ApiResponseModel> GenericResponse(string errMsg, object data = null)
         {
-            if (!string.IsNullOrWhiteSpace(errMsg))
-                return new ApiResponseModel(errMsg, false);
-            return FormatSuccessReturn(data);
-        }
-
-        protected GameRoomsModel FormatGRReturn(string errMsg, GameRoomModel[] rooms = null)
-        {
-            if (!string.IsNullOrWhiteSpace(errMsg))
-                return new GameRoomsModel()
-                {
-                    Message = errMsg,
-                    IsSuccess = false
-                };
-            return new GameRoomsModel()
+            if (string.IsNullOrWhiteSpace(errMsg))
+                return await SuccessResponse(data);
+            return await Task.Run(() =>
             {
-                GameRooms = rooms,
-                IsSuccess = true
-            };
+                return new ApiResponseModel(errMsg, false);
+            });        
         }
     }
 }

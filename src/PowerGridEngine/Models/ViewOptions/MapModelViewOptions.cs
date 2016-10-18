@@ -14,8 +14,8 @@ namespace PowerGridEngine
         public ConnectorModelViewOptions ConnectorViewOptions { get; set; }
 
         public RegionModelViewOptions RegionViewOptions { get; set; }
-        
-        public MapModelViewOptions(bool defaultValue = false)
+
+        private void Init(bool defaultValue = false)
         {
             Cities = defaultValue;
             Regions = defaultValue;
@@ -23,6 +23,16 @@ namespace PowerGridEngine
             CityViewOptions = new CityModelViewOptions(defaultValue);
             ConnectorViewOptions = new ConnectorModelViewOptions(defaultValue);
             RegionViewOptions = new RegionModelViewOptions(defaultValue);
+        }
+
+        public MapModelViewOptions()
+        {
+            Init();
+        }
+
+        public MapModelViewOptions(bool defaultValue)
+        {
+            Init(defaultValue);
         }
     }
 }

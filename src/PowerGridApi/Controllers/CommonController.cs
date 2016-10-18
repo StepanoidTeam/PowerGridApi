@@ -18,48 +18,63 @@ namespace PowerGridApi.Controllers
 	[EnableCors("CorsPolicy")]
 	[Route("api/")]
 	public class CommonController : BaseController
-	{
-		/// <summary>
-		/// Get API version
-		/// </summary>
-		[HttpGet("Version")]
-		public ApiResponseModel GetVersion()
+    {
+        /// <summary>
+        /// Get API version
+        /// </summary>
+        [HttpGet("Version")]
+		public async Task<ApiResponseModel> GetVersion()
 		{
-			return FormatSuccessReturn(Version);
+            return await SuccessResponse(Version);
 		}
 
+        /// <summary>
+        /// Login user
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
 		[HttpPost("Login/{username}")]
-		public ApiResponseModel Login(string username, string userId = null)
+        public async Task<ApiResponseModel> Login(string username, string userId = null)
 		{
 			var errMsg = string.Empty;
 			userId = EnergoServer.Current.Login(username, out errMsg, userId);
-			return FormatReturn(errMsg, userId);
+			return await GenericResponse(errMsg, userId);
 		}
 
+        /// <summary>
+        /// Get status of game if it's active for current user, otherwise it will return appopriate message
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
 		[HttpGet("Status/Game/{userId}")]
-		public ApiResponseModel GetGameStatus(string userId)
+		public async Task<ApiResponseModel> GetGameStatus(string userId)
 		{
 			var errMsg = string.Empty;
 			var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
 			if (!string.IsNullOrWhiteSpace(errMsg))
-				return FormatReturn(errMsg);
+				return await GenericResponse(errMsg);
 			if (player.GameRoomRef == null || player.GameRoomRef.GameBoardRef == null)
-				return FormatReturn("Not in game");
+				return await GenericResponse("Not in game");
 			var gameBoardModel = new GameBoardModel(player.GameRoomRef.GameBoardRef);
-			return FormatSuccessReturn(gameBoardModel.GetInfo());
+			return await SuccessResponse(gameBoardModel.GetInfo());
 		}
 
+        /// <summary>
+        /// Player info
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
 		[HttpGet("Status/Player/{userId}")]
-		public ApiResponseModel GetPlayerInfo(string userId)
+		public async Task<ApiResponseModel> GetPlayerInfo(string userId)
 		{
 			var errMsg = string.Empty;
 			var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
 			if (!string.IsNullOrWhiteSpace(errMsg))
-				return FormatReturn(errMsg);
+				return await GenericResponse(errMsg);
 			var playerModel = new PlayerModel(player);
-			return FormatSuccessReturn(playerModel.GetInfo());
+			return await SuccessResponse(playerModel.GetInfo());
 		}
-
 
 	}
 }

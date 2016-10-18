@@ -21,86 +21,103 @@ namespace PowerGridApi.Controllers
         /// <param name="userId"></param>
         /// <returns></returns>
         [HttpGet("{userId}")]
-        public ApiResponseModel GetGameRoomList(string userId)
+        public async Task<ApiResponseModel> GetGameRoomList(string userId)
         {
             var errMsg = string.Empty;
             var rooms = EnergoServer.Current.GetGameRoomList(userId, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
-                return FormatReturn(errMsg);
+                return await GenericResponse(errMsg);
             var roomModels = rooms.Select(m => new GameRoomModel(m)).ToArray();
             var info = roomModels.Select(m => m.GetInfo());
-            return FormatSuccessReturn(info);
+            return await SuccessResponse(info);
         }
         
         [HttpPost("Create/{userId}/{name}")]
-        public ApiResponseModel CreateGameRoom(string userId, string name)
+        public async Task<ApiResponseModel> CreateGameRoom(string userId, string name)
         {
             var errMsg = string.Empty;
             var gameRoomId = EnergoServer.Current.CreateGameRoom(userId, name, out errMsg);
-            return FormatReturn(errMsg, gameRoomId);
+            return await GenericResponse(errMsg, gameRoomId);
         }
        
         [HttpPost("List")]
-        public ApiResponseModel GetGameRoomList(string userId, RoomModelViewOptions options = null, RoomLookupSettings lookupSettings = null)
+        public async Task<ApiResponseModel> GetGameRoomList(string userId, RoomModelViewOptions options = null, RoomLookupSettings lookupSettings = null)
         {
             var errMsg = string.Empty;
             var rooms = EnergoServer.Current.GetGameRoomList(userId, out errMsg, lookupSettings);
             if (!string.IsNullOrWhiteSpace(errMsg))
-                return FormatReturn(errMsg);
+                return await GenericResponse(errMsg);
 
             var roomModels = rooms.Select(m => new GameRoomModel(m)).ToArray();
             var info = roomModels.Select(m => m.GetInfo(options));
-            return FormatSuccessReturn(info);
+            return await SuccessResponse(info);
         }
 
+        /// <summary>
+        /// Join player into specific room
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="gameRoomId"></param>
+        /// <returns></returns>
         [HttpPost("Join")]
-        public ApiResponseModel JoinGameRoom(string userId, string gameRoomId)
+        public async Task<ApiResponseModel> JoinGameRoom(string userId, string gameRoomId)
         {
             var errMsg = string.Empty;
             var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
-                return FormatReturn(errMsg);
+                return await GenericResponse(errMsg);
             var gameRoom = EnergoServer.Current.LookupGameRoom(userId, gameRoomId, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
-                return FormatReturn(errMsg);
+                return await GenericResponse(errMsg);
             gameRoom.Join(player, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
-                return FormatReturn(errMsg);
-            return FormatReturn(errMsg, gameRoom.Id);
+                return await GenericResponse(errMsg);
+            return await GenericResponse(errMsg, gameRoom.Id);
         }
 
+        /// <summary>
+        /// Leave from current room
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         [HttpPost("Leave")]
-        public ApiResponseModel LeaveGameRoom(string userId)
+        public async Task<ApiResponseModel> LeaveGameRoom(string userId)
         {
             var errMsg = string.Empty;
             var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
-                return FormatReturn(errMsg);
+                return await GenericResponse(errMsg);
             if (player.GameRoomRef == null)
-                return FormatReturn(Constants.Instance.CONST_ERR_MSG_YOUARE_OUTSIDE_OF_GAME_ROOMS);
+                return await GenericResponse(Constants.Instance.CONST_ERR_MSG_YOUARE_OUTSIDE_OF_GAME_ROOMS);
             player.GameRoomRef.Leave(userId);
             if (player.GameRoomRef != null)
-                return FormatReturn(Constants.Instance.CONST_ERR_MSG_YOU_CANT_LEAVE_THIS_GAME_ROOM);
-            return FormatReturn(errMsg);
+                return await GenericResponse(Constants.Instance.CONST_ERR_MSG_YOU_CANT_LEAVE_THIS_GAME_ROOM);
+            return await GenericResponse(errMsg);
         }
 
+        /// <summary>
+        /// Kick another player from the room if current user have enough permissions
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="username"></param>
+        /// <returns></returns>
         [HttpPost("Kick")]
-        public ApiResponseModel Kick(string userId, string username)
+        public async Task<ApiResponseModel> Kick(string userId, string username)
         {
             var errMsg = string.Empty;
             var leader = EnergoServer.Current.LookupPlayer(userId, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
-                return FormatReturn(errMsg);
+                return await GenericResponse(errMsg);
             if (leader.GameRoomRef == null)
-                return FormatReturn(Constants.Instance.CONST_ERR_MSG_YOUARE_OUTSIDE_OF_GAME_ROOMS);
+                return await GenericResponse(Constants.Instance.CONST_ERR_MSG_YOUARE_OUTSIDE_OF_GAME_ROOMS);
             var gameRoom = leader.GameRoomRef;
             var playerId = gameRoom.Kick(leader.Id, username, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
-                return FormatReturn(errMsg);
+                return await GenericResponse(errMsg);
             if (gameRoom.Players.ContainsKey(playerId))
                 errMsg = Constants.Instance.CONST_ERR_MSG_YOU_CANT_KICK_THIS_USER;
 
-            return FormatReturn(errMsg);
+            return await GenericResponse(errMsg);
         }
 
         /// <summary>
@@ -110,35 +127,40 @@ namespace PowerGridApi.Controllers
         /// <param name="state">in case it's not null - set ready mark to specified value, otherwise it will be toogled according to curent state</param>
         /// <returns></returns>
         [HttpPost("ToogleReady")]
-        public ApiResponseModel SetReadyMarkTo(string userId, bool? state = null)
+        public async Task<ApiResponseModel> SetReadyMarkTo(string userId, bool? state = null)
         {
             var errMsg = string.Empty;
             var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
-                return FormatReturn(errMsg);
+                return await GenericResponse(errMsg);
             bool result = false;
             if (state.HasValue)
                 player.GameRoomRef.SetReadyMarkTo(player, state.Value, out errMsg);
             else
                 player.GameRoomRef.ToogleReadyMark(player, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
-                return FormatReturn(errMsg);
-            return FormatReturn(null, result);
+                return await GenericResponse(errMsg);
+            return await GenericResponse(null, result);
         }
 
+        /// <summary>
+        /// Initiate game
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         [HttpGet("StartGame")]
-        public ApiResponseModel StartGame(string userId)
+        public async Task<ApiResponseModel> StartGame(string userId)
         {
             var errMsg = string.Empty;
             var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
-                return FormatReturn(errMsg);
+                return await GenericResponse(errMsg);
             if (player.GameRoomRef != null)
             {
                 player.GameRoomRef.Init(out errMsg);
                 player.GameRoomRef.GameBoardRef.Start();
             }
-            return FormatReturn(errMsg);
+            return await GenericResponse(errMsg);
         }
 
     }

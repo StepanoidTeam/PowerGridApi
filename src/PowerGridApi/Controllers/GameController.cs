@@ -21,16 +21,16 @@ namespace PowerGridApi.Controllers
         /// <param name="userId"></param>
         /// <returns></returns>
         [HttpGet("AllowedActions/{userId}")]
-        public ApiResponseModel GetAllowedActions(string userId)
+        public async Task<ApiResponseModel> GetAllowedActions(string userId)
         {
             var errMsg = string.Empty;
             var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
-                return FormatReturn(errMsg);
+                return await GenericResponse(errMsg);
             if (!player.IsInGame())
-                return FormatReturn("Not in game");
+                return await GenericResponse("Not in game");
             var lst = player.GameRoomRef.GameBoardRef.GetAllowedActions(userId, out errMsg);
-            return FormatReturn(errMsg, lst);
+            return await GenericResponse(errMsg, lst);
         }
 
         /// <summary>
@@ -40,23 +40,23 @@ namespace PowerGridApi.Controllers
         /// <param name="action"></param>
         /// <returns></returns>
         [HttpPost("DoAction/{userId}/{userAction}")]
-        public ApiResponseModel DoAction(string userId, GameActionEnum userAction)
+        public async Task<ApiResponseModel> DoAction(string userId, GameActionEnum action)
         {
             var errMsg = string.Empty;
             var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
-                return FormatReturn(errMsg);
+                return await GenericResponse(errMsg);
             if (!player.IsInGame())
-                return FormatReturn("Not in game");
+                return await GenericResponse("Not in game");
             var gbRef = player.GameRoomRef.GameBoardRef;
-            switch (userAction)
+            switch (action)
             {
                 case GameActionEnum.AuctionPass:
                     if (!gbRef.AuctionPass(userId, out errMsg))
-                        return FormatReturn(errMsg);
-                    return FormatReturn(null, true);
+                        return await GenericResponse(errMsg);
+                    return await GenericResponse(null, true);
             }
-            return FormatReturn("Incorrect action");
+            return await GenericResponse("Incorrect action");
         }
     }
 }
