@@ -74,7 +74,18 @@ namespace PowerGridEngine
 			return p.Id;
 		}
 
-		public Player CheckIfAuthorized(string playerId, out string errMsg)
+        public bool Logout(string userId, out string errMsg)
+        {
+            errMsg = string.Empty;
+            if (!Players.ContainsKey(userId))
+            {
+                errMsg = Constants.Instance.CONST_ERR_MSG_YOUARE_UNAUTHORIZED;
+                return false;
+            }
+            return Players.Remove(userId);
+        }
+
+        public Player CheckIfAuthorized(string playerId, out string errMsg)
 		{
             var userId = MakeId(playerId);
 

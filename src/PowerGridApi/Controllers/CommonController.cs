@@ -33,12 +33,25 @@ namespace PowerGridApi.Controllers
         /// <param name="userId"></param>
         /// <returns></returns>
 		[HttpPost("Login/{username}")]
-        public async Task<ApiResponseModel> Login(string username, string userId = null)
+        public async Task<ApiResponseModel> Login(string username)
 		{
 			var errMsg = string.Empty;
-			userId = EnergoServer.Current.Login(username, out errMsg, userId);
+			var userId = EnergoServer.Current.Login(username, out errMsg);
 			return await GenericResponse(errMsg, userId);
 		}
+
+        /// <summary>
+        /// Log out user
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        [HttpPost("Logout/{userId}")]
+        public async Task<ApiResponseModel> Logout(string userId)
+        {
+            var errMsg = string.Empty;
+            var result = EnergoServer.Current.Logout(userId, out errMsg);
+            return await GenericResponse(errMsg, result);
+        }
 
         /// <summary>
         /// Get status of game if it's active for current user, otherwise it will return appopriate message
