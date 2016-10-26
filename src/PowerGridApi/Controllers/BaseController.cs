@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using PowerGridEngine;
 using System.Globalization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -59,5 +61,17 @@ namespace PowerGridApi.Controllers
                 return new ApiResponseModel(errMsg, false);
             });        
         }
+
+        public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        {
+            var authHeaderKey = "CustomAuth";
+            if(context.HttpContext.Request.Headers.ContainsKey(authHeaderKey))
+            {
+                var authHeader = context.HttpContext.Request.Headers[authHeaderKey];
+            }
+
+            await base.OnActionExecutionAsync(context, next);
+        }
+
     }
 }

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using PowerGridEngine;
 using System.Globalization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -20,6 +21,7 @@ namespace PowerGridApi.Controllers
         /// <summary>
         /// Get API version
         /// </summary>
+        [AllowAnonymous]
         [HttpGet("Version")]
 		public async Task<ApiResponseModel> GetVersion()
 		{
@@ -32,13 +34,28 @@ namespace PowerGridApi.Controllers
         /// <param name="username"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-		[HttpPost("Login/{username}")]
+		[AllowAnonymous]
+        [HttpPost("Login/{username}")]
         public async Task<ApiResponseModel> Login(string username)
 		{
 			var errMsg = string.Empty;
 			var userId = EnergoServer.Current.Login(username, out errMsg);
 			return await GenericResponse(errMsg, userId);
 		}
+
+        /// <summary>
+        /// Check if authorization token (user id) is not expired yet
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpPost("CheckAuthorization/{userId}")]
+        public async Task<ApiResponseModel> CheckAuthorization(string userId)
+        {
+            var errMsg = string.Empty;
+            var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
+            return await GenericResponse(errMsg, player != null);
+        }
 
         /// <summary>
         /// Log out user

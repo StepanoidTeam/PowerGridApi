@@ -18,8 +18,7 @@
     "PowerGridEngine": "1.0.0-*",
     "Swashbuckle": "6.0.0-beta901",
     "System.Dynamic.Runtime": "4.0.11",
-    "Microsoft.CSharp": "4.0.1"
-  },
+    "Microsoft.CSharp": "4.0.1"},
 
   "tools": {
     "Microsoft.AspNetCore.Server.IISIntegration.Tools": "1.0.0-preview2-final"
