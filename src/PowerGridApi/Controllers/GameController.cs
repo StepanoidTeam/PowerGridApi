@@ -18,33 +18,31 @@ namespace PowerGridApi.Controllers
         /// <summary>
         /// Get all allowable actions for current user according to current game state
         /// </summary>
-        /// <param name="userId"></param>
         /// <returns></returns>
-        [HttpGet("AllowedActions/{userId}")]
-        public async Task<ApiResponseModel> GetAllowedActions(string userId)
+        [HttpGet("AllowedActions")]
+        public async Task<IActionResult> GetAllowedActions([FromHeader]string authToken)
         {
             var errMsg = string.Empty;
-            var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
+            var player = EnergoServer.Current.LookupPlayer(authToken, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
             if (!player.IsInGame())
                 return await GenericResponse("Not in game");
 
-            var lst = player.GameRoomRef.GameBoardRef.GetAllowedActions(userId, out errMsg);
+            var lst = player.GameRoomRef.GameBoardRef.GetAllowedActions(authToken, out errMsg);
             return await GenericResponse(errMsg, lst);
         }
 
         /// <summary>
         /// Do specific game action
         /// </summary>
-        /// <param name="userId"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        [HttpPost("DoAction/{userId}/{userAction}")]
-        public async Task<ApiResponseModel> DoAction(string userId, GameActionEnum action)
+        [HttpPost("DoAction/{userAction}")]
+        public async Task<IActionResult> DoAction([FromHeader]string authToken, GameActionEnum action)
         {
             var errMsg = string.Empty;
-            var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
+            var player = EnergoServer.Current.LookupPlayer(authToken, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
             if (!player.IsInGame())
@@ -53,7 +51,7 @@ namespace PowerGridApi.Controllers
             switch (action)
             {
                 case GameActionEnum.AuctionPass:
-                    if (!gbRef.AuctionPass(userId, out errMsg))
+                    if (!gbRef.AuctionPass(authToken, out errMsg))
                         return await GenericResponse(errMsg);
                     return await GenericResponse(null, true);
             }

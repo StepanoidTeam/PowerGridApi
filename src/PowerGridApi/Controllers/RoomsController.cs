@@ -19,13 +19,12 @@ namespace PowerGridApi.Controllers
         /// <summary>
         /// Rooms list
         /// </summary>
-        /// <param name="userId"></param>
         /// <returns></returns>
-        [HttpGet("{userId}")]
-        public async Task<ApiResponseModel> GetGameRoomList(string userId)
+        [HttpGet("")]
+        public async Task<IActionResult> GetGameRoomList([FromHeader]string authToken)
         {
             var errMsg = string.Empty;
-            var rooms = EnergoServer.Current.GetGameRoomList(userId, out errMsg);
+            var rooms = EnergoServer.Current.GetGameRoomList(authToken, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
             var roomModels = rooms.Select(m => new GameRoomModel(m)).ToArray();
@@ -34,19 +33,19 @@ namespace PowerGridApi.Controllers
             return await SuccessResponse(result);
         }
         
-        [HttpPost("Create/{userId}/{name}")]
-        public async Task<ApiResponseModel> CreateGameRoom(string userId, string name)
+        [HttpPost("Create/{name}")]
+        public async Task<IActionResult> CreateGameRoom([FromHeader]string authToken, string name)
         {
             var errMsg = string.Empty;
-            var gameRoomId = EnergoServer.Current.CreateGameRoom(userId, name, out errMsg);
+            var gameRoomId = EnergoServer.Current.CreateGameRoom(authToken, name, out errMsg);
             return await GenericResponse(errMsg, gameRoomId);
         }
        
         [HttpPost("List")]
-        public async Task<ApiResponseModel> GetGameRoomList(string userId, RoomModelViewOptions options = null, RoomLookupSettings lookupSettings = null)
+        public async Task<IActionResult> GetGameRoomList([FromHeader]string authToken, RoomModelViewOptions options = null, RoomLookupSettings lookupSettings = null)
         {
             var errMsg = string.Empty;
-            var rooms = EnergoServer.Current.GetGameRoomList(userId, out errMsg, lookupSettings);
+            var rooms = EnergoServer.Current.GetGameRoomList(authToken, out errMsg, lookupSettings);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
 
@@ -59,17 +58,16 @@ namespace PowerGridApi.Controllers
         /// <summary>
         /// Join player into specific room
         /// </summary>
-        /// <param name="userId"></param>
         /// <param name="gameRoomId"></param>
         /// <returns></returns>
         [HttpPost("Join")]
-        public async Task<ApiResponseModel> JoinGameRoom(string userId, string gameRoomId)
+        public async Task<IActionResult> JoinGameRoom([FromHeader]string authToken, string gameRoomId)
         {
             var errMsg = string.Empty;
-            var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
+            var player = EnergoServer.Current.LookupPlayer(authToken, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
-            var gameRoom = EnergoServer.Current.LookupGameRoom(userId, gameRoomId, out errMsg);
+            var gameRoom = EnergoServer.Current.LookupGameRoom(authToken, gameRoomId, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
 
@@ -83,19 +81,18 @@ namespace PowerGridApi.Controllers
         /// <summary>
         /// Leave from current room
         /// </summary>
-        /// <param name="userId"></param>
         /// <returns></returns>
         [HttpPost("Leave")]
-        public async Task<ApiResponseModel> LeaveGameRoom(string userId)
+        public async Task<IActionResult> LeaveGameRoom([FromHeader]string authToken)
         {
             var errMsg = string.Empty;
-            var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
+            var player = EnergoServer.Current.LookupPlayer(authToken, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
             if (player.GameRoomRef == null)
                 return await GenericResponse(Constants.Instance.CONST_ERR_MSG_YOUARE_OUTSIDE_OF_GAME_ROOMS);
 
-            player.GameRoomRef.Leave(userId);
+            player.GameRoomRef.Leave(authToken);
 
             if (player.GameRoomRef != null)
                 return await GenericResponse(Constants.Instance.CONST_ERR_MSG_YOU_CANT_LEAVE_THIS_GAME_ROOM);
@@ -105,14 +102,13 @@ namespace PowerGridApi.Controllers
         /// <summary>
         /// Kick another player from the room if current user have enough permissions
         /// </summary>
-        /// <param name="userId"></param>
         /// <param name="username"></param>
         /// <returns></returns>
         [HttpPost("Kick")]
-        public async Task<ApiResponseModel> Kick(string userId, string username)
+        public async Task<IActionResult> Kick([FromHeader]string authToken, string username)
         {
             var errMsg = string.Empty;
-            var leader = EnergoServer.Current.LookupPlayer(userId, out errMsg);
+            var leader = EnergoServer.Current.LookupPlayer(authToken, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
             if (leader.GameRoomRef == null)
@@ -132,14 +128,13 @@ namespace PowerGridApi.Controllers
         /// <summary>
         /// Set if player ready to start or not
         /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="state">in case it's not null - set ready mark to specified value, otherwise it will be toogled according to curent state</param>
+        /// <param name="state">in case it's not null - set ready mark to specified value, otherwise it will be toggled according to curent state</param>
         /// <returns></returns>
-        [HttpPost("ToogleReady")]
-        public async Task<ApiResponseModel> SetReadyMarkTo(string userId, bool? state = null)
+        [HttpPost("ToggleReady")]
+        public async Task<IActionResult> SetReadyMarkTo([FromHeader]string authToken, bool? state = null)
         {
             var errMsg = string.Empty;
-            var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
+            var player = EnergoServer.Current.LookupPlayer(authToken, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
             bool result = false;
@@ -157,13 +152,12 @@ namespace PowerGridApi.Controllers
         /// <summary>
         /// Initiate game
         /// </summary>
-        /// <param name="userId"></param>
         /// <returns></returns>
         [HttpGet("StartGame")]
-        public async Task<ApiResponseModel> StartGame(string userId)
+        public async Task<IActionResult> StartGame([FromHeader]string authToken)
         {
             var errMsg = string.Empty;
-            var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
+            var player = EnergoServer.Current.LookupPlayer(authToken, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
             if (player.GameRoomRef != null)

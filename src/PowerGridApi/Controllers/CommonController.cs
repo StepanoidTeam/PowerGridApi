@@ -23,63 +23,20 @@ namespace PowerGridApi.Controllers
         /// </summary>
         [AllowAnonymous]
         [HttpGet("Version")]
-		public async Task<ApiResponseModel> GetVersion()
+		public async Task<IActionResult> GetVersion()
 		{
             return await SuccessResponse(Version);
 		}
 
         /// <summary>
-        /// Login user
-        /// </summary>
-        /// <param name="username"></param>
-        /// <param name="userId"></param>
-        /// <returns></returns>
-		[AllowAnonymous]
-        [HttpPost("Login/{username}")]
-        public async Task<ApiResponseModel> Login(string username)
-		{
-			var errMsg = string.Empty;
-			var userId = EnergoServer.Current.Login(username, out errMsg);
-			return await GenericResponse(errMsg, userId);
-		}
-
-        /// <summary>
-        /// Check if authorization token (user id) is not expired yet
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <returns></returns>
-        [AllowAnonymous]
-        [HttpPost("CheckAuthorization/{userId}")]
-        public async Task<ApiResponseModel> CheckAuthorization(string userId)
-        {
-            var errMsg = string.Empty;
-            var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
-            return await GenericResponse(errMsg, player != null);
-        }
-
-        /// <summary>
-        /// Log out user
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <returns></returns>
-        [HttpPost("Logout/{userId}")]
-        public async Task<ApiResponseModel> Logout(string userId)
-        {
-            var errMsg = string.Empty;
-            var result = EnergoServer.Current.Logout(userId, out errMsg);
-            return await GenericResponse(errMsg, result);
-        }
-
-        /// <summary>
         /// Get status of game if it's active for current user, otherwise it will return appopriate message
         /// </summary>
-        /// <param name="userId"></param>
         /// <returns></returns>
-		[HttpGet("Status/Game/{userId}")]
-		public async Task<ApiResponseModel> GetGameStatus(string userId)
+		[HttpGet("Status/Game")]
+		public async Task<IActionResult> GetGameStatus([FromHeader]string authToken)
 		{
 			var errMsg = string.Empty;
-			var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
+			var player = EnergoServer.Current.LookupPlayer(authToken, out errMsg);
 			if (!string.IsNullOrWhiteSpace(errMsg))
 				return await GenericResponse(errMsg);
 			if (player.GameRoomRef == null || player.GameRoomRef.GameBoardRef == null)
@@ -94,13 +51,12 @@ namespace PowerGridApi.Controllers
         /// <summary>
         /// Player info
         /// </summary>
-        /// <param name="userId"></param>
         /// <returns></returns>
-		[HttpGet("Status/Player/{userId}")]
-		public async Task<ApiResponseModel> GetPlayerInfo(string userId)
+		[HttpGet("Status/Player")]
+		public async Task<IActionResult> GetPlayerInfo([FromHeader]string authToken)
 		{
 			var errMsg = string.Empty;
-			var player = EnergoServer.Current.LookupPlayer(userId, out errMsg);
+			var player = EnergoServer.Current.LookupPlayer(authToken, out errMsg);
 			if (!string.IsNullOrWhiteSpace(errMsg))
 				return await GenericResponse(errMsg);
 

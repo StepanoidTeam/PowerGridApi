@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using PowerGridEngine;
 using System.Globalization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -21,8 +22,9 @@ namespace PowerGridApi.Controllers
         /// Get list of registered maps
         /// </summary>
         /// <returns></returns>
+        [AllowAnonymous]
         [HttpGet]
-        public async Task<ApiResponseModel> GetAll()
+        public async Task<IActionResult> GetAll()
         {
             var maps = EnergoServer.Current.GetAllMapIds();
             return await SuccessResponse(maps);
@@ -33,8 +35,9 @@ namespace PowerGridApi.Controllers
         /// </summary>
         /// <param name="mapId">map id could by found in map list</param>
         /// <returns></returns>
+        [AllowAnonymous]
         [HttpGet("{mapId}")]
-        public async Task<ApiResponseModel> GetMap(string mapId)
+        public async Task<IActionResult> GetMap(string mapId)
         {
             if (string.IsNullOrWhiteSpace(mapId))
                 mapId = Constants.CONST_DEFAULT_MAP_ID;
@@ -54,8 +57,9 @@ namespace PowerGridApi.Controllers
         /// </summary>
         /// <param name="mapWithOptions">mapId and options to customize response</param>
         /// <returns></returns>
+        [AllowAnonymous]
         [HttpPost("WithOptions")]
-        public async Task<ApiResponseModel> GetMapWithOptions([FromBody]MapWithOptions mapWithOptions)
+        public async Task<IActionResult> GetMapWithOptions([FromBody]MapWithOptions mapWithOptions)
         {
             var mapId = mapWithOptions.MapId;
             var options = mapWithOptions.Options;

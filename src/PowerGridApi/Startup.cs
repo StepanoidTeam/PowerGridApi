@@ -48,7 +48,7 @@ namespace PowerGridApi
 			Configuration = builder.Build();
 
 			//init energo server
-			EnergoServer.Current.Settings.SimpleOrGuidPlayerId = true;
+			EnergoServer.Current.Settings.SimpleOrGuidPlayerId = false;
 			ServerContext.InitCurrentContext(EnergoServer.Current, new Logger());
 		}
 
@@ -134,7 +134,7 @@ namespace PowerGridApi
 
             //Configure Swagger - tool for UI Help about API
             app.UseSwagger();
-			app.UseSwaggerUi("api/help", string.Format("/swagger/{0}/swagger.json", Controllers.CommonController.Version));
+            app.UseSwaggerUi("api/help", string.Format("/swagger/{0}/swagger.json", Controllers.CommonController.Version));
             
 
         }
