@@ -41,7 +41,7 @@ namespace PowerGridEngine
 		{
 			errMsg = string.Empty;
 			if (this.Status != status)
-				errMsg = string.Format(Constants.Instance.CONST_ERR_MSG_ALREADY_IN_THE_GAME, status.ToString());
+				errMsg = string.Format(Constants.Instance.ErrorMessage.Already_In_The_Game, status.ToString());
 			return this.Status == status;
 		}
 
@@ -51,7 +51,7 @@ namespace PowerGridEngine
 			if (this.PlayersTurnOrder[this.CurrentTurnPlayer] == userId)
 				return true;
 			var p = context.PlayerBoards.FirstOrDefault(m => m.Key == userId);
-			errMsg = string.Format(Constants.Instance.CONST_ERR_MSG_IS_NOT_YOUR_TURN, p.Value.PlayerRef.Username);
+			errMsg = string.Format(Constants.Instance.ErrorMessage.Is_Not_Yout_Turn, p.Value.PlayerRef.Username);
 			return false;
 		}
 

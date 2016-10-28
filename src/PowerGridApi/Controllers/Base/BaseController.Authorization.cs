@@ -41,20 +41,21 @@ namespace PowerGridApi.Controllers
                 if (context.HttpContext.Request.Headers.ContainsKey(authHeaderKey))
                     authHeader = context.HttpContext.Request.Headers[authHeaderKey].ToString();
 
-                var userId = EnergoServer.Current.FindUserId(authHeader);
-                if (userId == null)
+                string errMsg = "";
+                var user = EnergoServer.Current.FindUserByAuthToken(authHeader, out errMsg);
+                if (user == null)
                 {
                     context.Result = Unauthorized();
                     return;
                 }
                 else
                 {
-                    var claims = new List<Claim> { new Claim(ClaimsIdentity.DefaultNameClaimType, userId) };
+                    var claims = new List<Claim> { new Claim(ClaimsIdentity.DefaultNameClaimType, user.Id) };
                     var id = new ClaimsIdentity(claims, "custom", ClaimsIdentity.DefaultNameClaimType,
                         ClaimsIdentity.DefaultRoleClaimType);
                     context.HttpContext.User.AddIdentity(id);
 
-                    CurrentUser = new UserContext(userId);
+                    CurrentUser = new UserContext(user);
                 }
             }
 

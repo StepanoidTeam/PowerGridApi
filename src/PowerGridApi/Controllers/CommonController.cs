@@ -36,7 +36,7 @@ namespace PowerGridApi.Controllers
 		public async Task<IActionResult> GetGameStatus([FromHeader]string authToken)
 		{
 			var errMsg = string.Empty;
-			var player = EnergoServer.Current.LookupPlayer(authToken, out errMsg);
+			var player = EnergoServer.Current.LookupUserByAuthToken(authToken, out errMsg);
 			if (!string.IsNullOrWhiteSpace(errMsg))
 				return await GenericResponse(errMsg);
 			if (player.GameRoomRef == null || player.GameRoomRef.GameBoardRef == null)
@@ -56,7 +56,7 @@ namespace PowerGridApi.Controllers
 		public async Task<IActionResult> GetPlayerInfo([FromHeader]string authToken)
 		{
 			var errMsg = string.Empty;
-			var player = EnergoServer.Current.LookupPlayer(authToken, out errMsg);
+			var player = EnergoServer.Current.LookupUserByAuthToken(authToken, out errMsg);
 			if (!string.IsNullOrWhiteSpace(errMsg))
 				return await GenericResponse(errMsg);
 

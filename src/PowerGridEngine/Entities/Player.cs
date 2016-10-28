@@ -4,12 +4,12 @@ namespace PowerGridEngine
 	public class User : BaseEnergoEntity
 	{
         /// <summary>
-        /// For use user by another user (like get other user info or invite another user into room)
+        ///  Authorization token of current user to check if he has permission for some action
         /// </summary>
-        public string PublicId { get; private set; }
+        public string AuthToken { get; private set; }
 
         /// <summary>
-        /// Authorization token of current user to check if he has permission for some action
+        /// For use user by another user (like get other user info or invite another user into room)
         /// </summary>
 		public string Id { get; private set; }
 
@@ -20,10 +20,10 @@ namespace PowerGridEngine
 		public User(string username, string id = null)
 		{
 			if (string.IsNullOrWhiteSpace(id))
-				Id = EnergoServer.MakeId(username);
+				Id = username.NormalizeId();
 			else
 				Id = id;
-            PublicId = EnergoServer.MakeId();
+            AuthToken = StringExtensions.GenerateId();
             Username = username.RemoveExtraSpaces();
 		}
 

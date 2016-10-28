@@ -50,7 +50,7 @@ namespace PowerGridApi
 			//init energo server
 			EnergoServer.Current.Settings.SimpleOrGuidPlayerId = false;
 			ServerContext.InitCurrentContext(EnergoServer.Current, new Logger());
-		}
+        }
 
 		public IConfigurationRoot Configuration { get; }
 

@@ -23,7 +23,7 @@ namespace PowerGridApi.Controllers
         public async Task<IActionResult> GetAllowedActions([FromHeader]string authToken)
         {
             var errMsg = string.Empty;
-            var player = EnergoServer.Current.LookupPlayer(authToken, out errMsg);
+            var player = EnergoServer.Current.LookupUserByAuthToken(authToken, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
             if (!player.IsInGame())
@@ -42,7 +42,7 @@ namespace PowerGridApi.Controllers
         public async Task<IActionResult> DoAction([FromHeader]string authToken, DoActionModel action)
         {
             var errMsg = string.Empty;
-            var player = EnergoServer.Current.LookupPlayer(authToken, out errMsg);
+            var player = EnergoServer.Current.LookupUserByAuthToken(authToken, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
             if (!player.IsInGame())

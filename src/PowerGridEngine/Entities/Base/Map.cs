@@ -78,7 +78,7 @@ namespace PowerGridEngine
 
 		public Region LookupRegion(string name)
 		{
-			var n = EnergoServer.MakeId(name);
+			var n = name.NormalizeId();
 			if (Regions.ContainsKey(n))
 				return Regions[n];
 			return null;
@@ -94,7 +94,7 @@ namespace PowerGridEngine
 
 		public City LookupCity(string name)
 		{
-			var n = EnergoServer.MakeId(name);
+			var n = name.NormalizeId();
 			if (Cities.ContainsKey(n))
 				return Cities[n];
 			return null;

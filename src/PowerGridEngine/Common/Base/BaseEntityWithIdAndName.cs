@@ -12,7 +12,7 @@ namespace PowerGridEngine
         {
             get
             {
-                return EnergoServer.MakeId(Name);
+                return Name.NormalizeId();
             }
             set { }
         }

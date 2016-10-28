@@ -75,7 +75,7 @@ namespace PowerGridApi.Controllers
         public async Task<IActionResult> JoinGameRoom([FromHeader]string authToken, string gameRoomId)
         {
             var errMsg = string.Empty;
-            var player = EnergoServer.Current.LookupPlayer(authToken, out errMsg);
+            var player = EnergoServer.Current.LookupUserByAuthToken(authToken, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
             var gameRoom = EnergoServer.Current.LookupGameRoom(authToken, gameRoomId, out errMsg);
@@ -97,16 +97,16 @@ namespace PowerGridApi.Controllers
         public async Task<IActionResult> LeaveGameRoom([FromHeader]string authToken)
         {
             var errMsg = string.Empty;
-            var player = EnergoServer.Current.LookupPlayer(authToken, out errMsg);
+            var player = EnergoServer.Current.LookupUserByAuthToken(authToken, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
             if (player.GameRoomRef == null)
-                return await GenericResponse(Constants.Instance.CONST_ERR_MSG_YOUARE_OUTSIDE_OF_GAME_ROOMS);
+                return await GenericResponse(Constants.Instance.ErrorMessage.YouAre_Outside_Of_Game_Rooms);
 
-            player.GameRoomRef.Leave(authToken);
+            player.GameRoomRef.Leave(player.Id);
 
             if (player.GameRoomRef != null)
-                return await GenericResponse(Constants.Instance.CONST_ERR_MSG_YOU_CANT_LEAVE_THIS_GAME_ROOM);
+                return await GenericResponse(Constants.Instance.ErrorMessage.You_Cant_Leave_This_Game_Room);
             return await GenericResponse(errMsg);
         }
 
@@ -119,11 +119,11 @@ namespace PowerGridApi.Controllers
         public async Task<IActionResult> Kick([FromHeader]string authToken, string username)
         {
             var errMsg = string.Empty;
-            var leader = EnergoServer.Current.LookupPlayer(authToken, out errMsg);
+            var leader = EnergoServer.Current.LookupUserByAuthToken(authToken, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
             if (leader.GameRoomRef == null)
-                return await GenericResponse(Constants.Instance.CONST_ERR_MSG_YOUARE_OUTSIDE_OF_GAME_ROOMS);
+                return await GenericResponse(Constants.Instance.ErrorMessage.YouAre_Outside_Of_Game_Rooms);
             var gameRoom = leader.GameRoomRef;
 
             var playerId = gameRoom.Kick(leader.Id, username, out errMsg);
@@ -131,7 +131,7 @@ namespace PowerGridApi.Controllers
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
             if (gameRoom.Players.ContainsKey(playerId))
-                errMsg = Constants.Instance.CONST_ERR_MSG_YOU_CANT_KICK_THIS_USER;
+                errMsg = Constants.Instance.ErrorMessage.You_Cant_Kick_This_User;
 
             return await GenericResponse(errMsg);
         }
@@ -145,15 +145,15 @@ namespace PowerGridApi.Controllers
         public async Task<IActionResult> SetReadyMarkTo([FromHeader]string authToken, bool? state = null)
         {
             var errMsg = string.Empty;
-            var player = EnergoServer.Current.LookupPlayer(authToken, out errMsg);
+            var player = EnergoServer.Current.LookupUserByAuthToken(authToken, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
             bool result = false;
 
             if (state.HasValue)
-                player.GameRoomRef.SetReadyMarkTo(player, state.Value, out errMsg);
+                result = player.GameRoomRef.SetReadyMarkTo(player, state.Value, out errMsg);
             else
-                player.GameRoomRef.ToogleReadyMark(player, out errMsg);
+                result = player.GameRoomRef.ToogleReadyMark(player, out errMsg);
 
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
@@ -168,10 +168,12 @@ namespace PowerGridApi.Controllers
         public async Task<IActionResult> StartGame([FromHeader]string authToken)
         {
             var errMsg = string.Empty;
-            var player = EnergoServer.Current.LookupPlayer(authToken, out errMsg);
+            var player = EnergoServer.Current.LookupUserByAuthToken(authToken, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(errMsg);
-            if (player.GameRoomRef != null)
+            if (player.GameRoomRef == null)
+                errMsg = "You are not in game room";
+            else
             {
                 player.GameRoomRef.Init(out errMsg);
                 player.GameRoomRef.GameBoardRef.Start();

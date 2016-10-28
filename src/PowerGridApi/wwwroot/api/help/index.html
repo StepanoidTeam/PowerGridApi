@@ -114,9 +114,9 @@
     {
         var respCode = $("#User_ApiUserLoginPost .response_code pre").text();
         if (respCode != undefined && respCode != "") {
-            var value = $("#User_ApiUserLoginPost .response_body .plain code").text();
+            var value = $("#User_ApiUserLoginPost .response_body .json code .string:first").text();
             if (respCode == "200") {
-                $("input[name='authToken']").val(value);
+                $("input[name='authToken']").val(eval(value));
             }
         }
         else

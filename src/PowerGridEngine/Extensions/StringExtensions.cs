@@ -26,5 +26,17 @@ namespace PowerGridEngine
             }
             return ret;
         }
+
+        public static string NormalizeId(this string str)
+        {
+            if (string.IsNullOrWhiteSpace(str))
+                return string.Empty;
+            return str.ToLowerInvariant().Trim().Replace(" ", "");
+        }
+
+        public static string GenerateId()
+        {
+            return Guid.NewGuid().ToString();
+        }
     }
 }

@@ -112,13 +112,13 @@ namespace PowerGridEngine
             errMsg = string.Empty;
             if (Leader.Id != leaderId)
             {
-                errMsg = Constants.Instance.CONST_ERR_MSG_ONLY_LEADER_CAN_KICK;
+                errMsg = Constants.Instance.ErrorMessage.Only_Leader_Can_Kick;
                 return null;
             }
-            var playerId = ServerRef.LookupPlayerId(playerUn);
+            var playerId = ServerRef.LookupUserId(playerUn);
             if (string.IsNullOrWhiteSpace(playerId) || !this.Players.ContainsKey(playerId))
             {
-                errMsg = Constants.Instance.CONST_ERR_MSG_THERE_NO_SUCH_USER;
+                errMsg = Constants.Instance.ErrorMessage.There_No_Such_User;
                 return null;
             }
             RemovePlayer(playerId);      
@@ -129,11 +129,11 @@ namespace PowerGridEngine
         {
             errMsg = string.Empty;
             if (player.GameRoomRef != null)
-                errMsg = Constants.Instance.CONST_ERR_MSG_ALREADY_IN_THE_GAME;
+                errMsg = Constants.Instance.ErrorMessage.Already_In_The_Game;
             else if (IsInGame)
-                errMsg = Constants.Instance.CONST_ERR_MSG_CANT_JOIN_TO_GAME_IN_PROC;
+                errMsg = Constants.Instance.ErrorMessage.Cant_Join_To_Game_In_Proc;
             else if (Players.ContainsKey(player.Id))
-                errMsg = Constants.Instance.CONST_ERR_MSG_ALREADY_IN_THIS_GAME;
+                errMsg = Constants.Instance.ErrorMessage.Already_In_This_Game;
             return string.IsNullOrWhiteSpace(errMsg);
         }
 
@@ -163,12 +163,12 @@ namespace PowerGridEngine
             errMsg = string.Empty;
 
             if (player == null)
-                return ReturnError(Constants.Instance.CONST_ERR_MSG_PLAYER_CANT_BE_NULL, out errMsg);
+                return ReturnError(Constants.Instance.ErrorMessage.User_Cant_Be_Null, out errMsg);
             if (player.GameRoomRef == null)
-                return ReturnError(Constants.Instance.CONST_ERR_MSG_YOUARE_OUTSIDE_OF_GAME_ROOMS, out errMsg);
+                return ReturnError(Constants.Instance.ErrorMessage.YouAre_Outside_Of_Game_Rooms, out errMsg);
             var players = player.GameRoomRef.Players;
             if (!players.ContainsKey(player.Id))
-                return ReturnError(Constants.Instance.CONST_ERR_MSG_YOU_ARE_NOT_IN_THIS_GAME, out errMsg);
+                return ReturnError(Constants.Instance.ErrorMessage.YouAre_Not_In_This_Game, out errMsg);
             players[player.Id].ReadyMark = !players[player.Id].ReadyMark;
             return players[player.Id].ReadyMark;
         }
@@ -178,12 +178,12 @@ namespace PowerGridEngine
             errMsg = string.Empty;
 
             if (player == null)
-                return ReturnError(Constants.Instance.CONST_ERR_MSG_PLAYER_CANT_BE_NULL, out errMsg);
+                return ReturnError(Constants.Instance.ErrorMessage.User_Cant_Be_Null, out errMsg);
             if (player.GameRoomRef == null)
-                return ReturnError(Constants.Instance.CONST_ERR_MSG_YOUARE_OUTSIDE_OF_GAME_ROOMS, out errMsg);
+                return ReturnError(Constants.Instance.ErrorMessage.YouAre_Outside_Of_Game_Rooms, out errMsg);
             var players = player.GameRoomRef.Players;
             if (!players.ContainsKey(player.Id))
-                return ReturnError(Constants.Instance.CONST_ERR_MSG_YOU_ARE_NOT_IN_THIS_GAME, out errMsg);
+                return ReturnError(Constants.Instance.ErrorMessage.YouAre_Not_In_This_Game, out errMsg);
             players[player.Id].ReadyMark = state;
             return players[player.Id].ReadyMark;
         }

@@ -1,14 +1,15 @@
-﻿using System;
+﻿using PowerGridEngine;
+using System;
 
 namespace PowerGridApi
 {
     public class UserContext
     {
-        public string AuthToken { get; private set; }
+        public User User { get; private set; }
 
-        public UserContext(string authToken)
+        public UserContext(User user)
         {
-            AuthToken = authToken;
+            User = user;
         }
     }
 }
