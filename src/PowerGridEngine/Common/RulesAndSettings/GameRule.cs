@@ -6,7 +6,7 @@ namespace PowerGridEngine
 {
     public static class GameRule
     {
-        public static bool PaymentTransaction(Player player, int value)
+        public static bool PaymentTransaction(User player, int value)
         {
             var context = GameContext.GetContextByPlayer(player);
             if (context == null)

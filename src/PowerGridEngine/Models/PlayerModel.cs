@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace PowerGridEngine
 {
-    public class PlayerModel : BaseEnergoModel<Player, PlayerModelViewOptions>
+    public class UserModel : BaseEnergoModel<User, UserModelViewOptions>
     {
         public string UserId { get { return Entity.Id; } }
 
@@ -15,14 +15,14 @@ namespace PowerGridEngine
         //to other entities, for example ready mark for sure could be in Player, because player could be (ready) only in ONE room
         public bool? ReadyMark { get { return Entity.GameRoomRef == null ? (bool?)null : Entity.GameRoomRef.Players[UserId].ReadyMark; } }
 
-        public PlayerModel(Player entity) : base(entity)
+        public UserModel(User entity) : base(entity)
         {
         }
 
-        public override Dictionary<string, object> GetInfo(PlayerModelViewOptions options = null)
+        public override Dictionary<string, object> GetInfo(UserModelViewOptions options = null)
         {
             if (options == null)
-                options = new PlayerModelViewOptions(true);
+                options = new UserModelViewOptions(true);
 
             var result = new Dictionary<string, object>();
             if (options.Id)

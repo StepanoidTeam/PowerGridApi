@@ -15,9 +15,9 @@ namespace PowerGridEngine
 
         public IdNameModel[] PlayerHeaders { get { return Entity.Players == null ? new IdNameModel[0] : Entity.Players.Select(m => new IdNameModel(m.Value.Player.Id, m.Value.Player.Username)).ToArray(); } }
 
-        public object[] GetPlayerDetails(PlayerModelViewOptions viewOptions)
+        public object[] GetPlayerDetails(UserModelViewOptions viewOptions)
         {
-            return Entity.Players == null ? new object[0] : Entity.Players.Select(m => new PlayerModel(m.Value.Player).GetInfo(viewOptions)).ToArray();
+            return Entity.Players == null ? new object[0] : Entity.Players.Select(m => new UserModel(m.Value.Player).GetInfo(viewOptions)).ToArray();
         }
 
         public GameRoomModel(GameRoom entity) : base(entity)

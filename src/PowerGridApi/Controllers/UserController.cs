@@ -42,7 +42,8 @@ namespace PowerGridApi.Controllers
         [HttpPost("CheckAuthorization")]
         public async Task<IActionResult> CheckAuthorization([FromHeader]string authToken)
         {
-            return await GenericResponse(string.IsNullOrWhiteSpace(UserId) ? ResponseType.Unauthorized : ResponseType.Ok);
+            var userId = CurrentUser.AuthToken;
+            return await GenericResponse(string.IsNullOrWhiteSpace(userId) ? ResponseType.Unauthorized : ResponseType.Ok);
         }
 
         /// <summary>

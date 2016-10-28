@@ -14,7 +14,7 @@ namespace PowerGridEngine
 
         public IDictionary<string, PlayerInRoom> Players { get; private set; }
 
-        public Player Leader { get; private set; }
+        public User Leader { get; private set; }
 
         public bool IsInGame { get; private set; }
 
@@ -22,10 +22,10 @@ namespace PowerGridEngine
 
         public GameBoard GameBoardRef { get; private set; }
 
-        public GameRoom(string name, Player leader, EnergoServer server = null)
+        public GameRoom(string name, User leader, EnergoServer server = null)
         {
             if (string.IsNullOrWhiteSpace(name))
-                name = GenerateMatchName(leader);
+                name = GenerateGameRoomName(leader);
             Name = name;
             Id = Guid.NewGuid().ToString();
             Players = new Dictionary<string, PlayerInRoom>();
@@ -38,7 +38,7 @@ namespace PowerGridEngine
             }
         }
 
-        private string GenerateMatchName(Player leader)
+        private string GenerateGameRoomName(User leader)
         {
             return string.Format("{0}'s Room", leader.Username);
         }
@@ -125,7 +125,7 @@ namespace PowerGridEngine
             return playerId;
         }
 
-        public bool CanJoin(Player player, out string errMsg)
+        public bool CanJoin(User player, out string errMsg)
         {
             errMsg = string.Empty;
             if (player.GameRoomRef != null)
@@ -142,7 +142,7 @@ namespace PowerGridEngine
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public void Join(Player player, out string errMsg)
+        public void Join(User player, out string errMsg)
         {
             errMsg = string.Empty;
             if (CanJoin(player, out errMsg))
@@ -158,7 +158,7 @@ namespace PowerGridEngine
             return false;
         }
 
-        public bool ToogleReadyMark(Player player, out string errMsg)
+        public bool ToogleReadyMark(User player, out string errMsg)
         {
             errMsg = string.Empty;
 
@@ -173,7 +173,7 @@ namespace PowerGridEngine
             return players[player.Id].ReadyMark;
         }
         
-        public bool SetReadyMarkTo(Player player, bool state, out string errMsg)
+        public bool SetReadyMarkTo(User player, bool state, out string errMsg)
         {
             errMsg = string.Empty;
 

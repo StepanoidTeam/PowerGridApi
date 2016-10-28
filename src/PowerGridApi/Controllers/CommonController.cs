@@ -60,7 +60,7 @@ namespace PowerGridApi.Controllers
 			if (!string.IsNullOrWhiteSpace(errMsg))
 				return await GenericResponse(errMsg);
 
-			var playerModel = new PlayerModel(player);
+			var playerModel = new UserModel(player);
             var result = await Task.Run(() => { return playerModel.GetInfo(); });
 
             return await SuccessResponse(result);

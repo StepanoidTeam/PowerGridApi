@@ -33,14 +33,25 @@ namespace PowerGridApi.Controllers
             return await SuccessResponse(result);
         }
         
-        [HttpPost("Create/{name}")]
-        public async Task<IActionResult> CreateGameRoom([FromHeader]string authToken, string name)
+        /// <summary>
+        /// Create Game Room 
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("Create")]
+        public async Task<IActionResult> CreateGameRoom([FromHeader]string authToken, [FromBody]CreateRoomModel room)
         {
             var errMsg = string.Empty;
-            var gameRoomId = EnergoServer.Current.CreateGameRoom(authToken, name, out errMsg);
+            var gameRoomId = EnergoServer.Current.CreateGameRoom(authToken, room.Name, out errMsg);
             return await GenericResponse(errMsg, gameRoomId);
         }
-       
+
+        /// <summary>
+        /// Rooms list with filter and view options
+        /// </summary>
+        /// <param name="authToken"></param>
+        /// <param name="options"></param>
+        /// <param name="lookupSettings"></param>
+        /// <returns></returns>
         [HttpPost("List")]
         public async Task<IActionResult> GetGameRoomList([FromHeader]string authToken, RoomModelViewOptions options = null, RoomLookupSettings lookupSettings = null)
         {

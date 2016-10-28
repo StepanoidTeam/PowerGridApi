@@ -3,10 +3,10 @@ namespace PowerGridEngine
 {
     public class PlayerInRoom
     {
-        public Player Player { get; set; }
+        public User Player { get; set; }
         public bool ReadyMark { get; set; }
 
-        public PlayerInRoom(Player player)
+        public PlayerInRoom(User player)
         {
             Player = player;
         }

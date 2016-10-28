@@ -8,9 +8,9 @@ namespace PowerGridEngine
 
         public int Money { get; private set; }
         
-        public Player PlayerRef { get; private set; }
+        public User PlayerRef { get; private set; }
 
-        public PlayerBoard(GameContext context, Player player)
+        public PlayerBoard(GameContext context, User player)
         {
             this.context = context;
             PlayerRef = player;

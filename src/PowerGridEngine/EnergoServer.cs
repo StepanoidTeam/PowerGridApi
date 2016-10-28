@@ -36,7 +36,7 @@ namespace PowerGridEngine
 			return Guid.NewGuid().ToString();
 		}
 
-		private IDictionary<string, Player> Players { get; set; }
+		private IDictionary<string, User> Players { get; set; }
 		private IDictionary<string, Map> Maps { get; set; }
 		private IDictionary<string, GameRoom> GameRooms { get; set; }
 		public ServerSettings Settings { get; set; }
@@ -46,7 +46,7 @@ namespace PowerGridEngine
 			Settings = new ServerSettings();
 			if (settings != null)
 				Settings = settings;
-			Players = new Dictionary<string, Player>();
+			Players = new Dictionary<string, User>();
 			Maps = new Dictionary<string, Map>();
 			GameRooms = new Dictionary<string, GameRoom>();
             var mapCreator = new DefaultMapCreator();
@@ -69,7 +69,7 @@ namespace PowerGridEngine
 				errMsg = Constants.Instance.CONST_ERR_MSG_SIMILAR_USER_DETECTED;
 				return null;
 			}
-			var p = new Player(username, id);
+			var p = new User(username, id);
 			Players.Add(p.Id, p);
 			return p.Id;
 		}
@@ -85,12 +85,34 @@ namespace PowerGridEngine
             return Players.Remove(userId);
         }
 
-        public Player CheckIfAuthorized(string playerId, out string errMsg)
-		{
+        /// <summary>
+        /// If player is authorized in system returns userId
+        /// </summary>
+        /// <param name="playerId"></param>
+        /// <returns>User Id or null if not authorized</returns>
+        public string FindUserId(string playerId)
+        {
             var userId = MakeId(playerId);
+            if (Players.ContainsKey(userId))
+                return userId;
+            return null;
+        }
 
+        /// <summary>
+        /// Check if player is authorized in system
+        /// </summary>
+        /// <param name="playerId"></param>
+        /// <returns></returns>
+        public bool CheckIfAuthorized(string playerId)
+        {
+            return FindUserId(playerId) != null;
+        }
+
+        public User FindPlayer(string playerId, out string errMsg)
+		{
             errMsg = string.Empty;
-			if (string.IsNullOrWhiteSpace(playerId) || !Players.ContainsKey(userId))
+            var userId = FindUserId(playerId);
+            if (userId == null)
 			{
 				errMsg = Constants.Instance.CONST_ERR_MSG_YOUARE_UNAUTHORIZED;
 				return null;
@@ -128,7 +150,7 @@ namespace PowerGridEngine
 
         //GAME ROOMS:
 
-        public void CreateGameRoom(Player player, GameRoom gameRoom)
+        public void CreateGameRoom(User player, GameRoom gameRoom)
 		{
 			if (player == null || gameRoom == null)
 				return;
@@ -137,7 +159,7 @@ namespace PowerGridEngine
 			gameRoom.ServerRef = this;
 		}
 
-		public void RemoveGameRoom(Player leader, GameRoom gameRoom)
+		public void RemoveGameRoom(User leader, GameRoom gameRoom)
 		{
 			if (leader == null || gameRoom == null)
 				return;
@@ -149,7 +171,7 @@ namespace PowerGridEngine
 			}
 		}
 
-		public string CreateGameRoom(Player player, string name, out string errMsg)
+		public string CreateGameRoom(User player, string name, out string errMsg)
 		{
 			errMsg = string.Empty;
 			if (player.GameRoomRef != null)
@@ -178,7 +200,7 @@ namespace PowerGridEngine
 				lookupSettings = new RoomLookupSettings();
 			errMsg = string.Empty;
 
-            var player = CheckIfAuthorized(playerId, out errMsg);
+            var player = FindPlayer(playerId, out errMsg);
             if (player == null)
                 return new GameRoom[0];
 
@@ -214,10 +236,10 @@ namespace PowerGridEngine
 		/// <param name="itsYou">true if lookup for current user, if trying to find another user - set to false. It depends what message you will get if can't find</param>
 		/// <param name="errMsg"></param>
 		/// <returns></returns>
-		public Player LookupPlayer(string playerId, out string errMsg, bool itsYou = true)
+		public User LookupPlayer(string playerId, out string errMsg, bool itsYou = true)
 		{
 			errMsg = string.Empty;
-            var player = CheckIfAuthorized(playerId, out errMsg);
+            var player = FindPlayer(playerId, out errMsg);
             if (player == null)
 			{
 				if (!itsYou)
@@ -230,7 +252,7 @@ namespace PowerGridEngine
         public GameRoom LookupGameRoom(string playerId, string gameRoomId, out string errMsg)
         {
             errMsg = string.Empty;
-            var player = CheckIfAuthorized(playerId, out errMsg);
+            var player = FindPlayer(playerId, out errMsg);
             if (player == null)
                 return null;
             if (!GameRooms.ContainsKey(gameRoomId ?? ""))

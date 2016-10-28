@@ -24,35 +24,10 @@ namespace PowerGridApi.Controllers
     }
 
     /// <summary>
-    /// Base controller class for any controller in API
+    /// Generic Responses hadling part of Base controller class for any controller in API
     /// </summary>
-    [EnableCors("CorsPolicy")]
-    public abstract class BaseController : Controller
+    public abstract partial class BaseController : Controller
     {
-        private static decimal _version = 0.02m;
-
-        /// <summary>
-        /// Version of current API
-        /// </summary>
-        public static string Version
-        {
-            get
-            {
-                return string.Format("v{0}", _version.ToString(CultureInfo.InvariantCulture));
-            }
-        }
-
-        public string UserId
-        {
-            get
-            {
-                var identity = HttpContext.User.Identities.FirstOrDefault(m => m.AuthenticationType == "custom");
-                if (identity == null || !identity.IsAuthenticated)
-                    return "";
-                return identity.Name;
-            }
-        }
-
         /// <summary>
         /// If response is for sure successfull
         /// </summary>
@@ -62,10 +37,15 @@ namespace PowerGridApi.Controllers
         {
             return await Task.Run(() =>
             {
-                return Ok(data);
+                return data == null ? (IActionResult)Ok() : Ok(data);
             });
         }
 
+        /// <summary>
+        /// If response is for sure error
+        /// </summary>
+        /// <param name="errMsg"></param>
+        /// <returns></returns>
         protected async Task<IActionResult> ErrorResponse(string errMsg)
         {
             return await Task.Run(() =>
@@ -88,6 +68,13 @@ namespace PowerGridApi.Controllers
             return await ErrorResponse(errMsg);
         }
 
+        /// <summary>
+        /// Use this method if you know type of response as generic end-point for any response
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="errMsg"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
         protected async Task<IActionResult> GenericResponse(ResponseType type, string errMsg = null, object data = null)
         {
             switch(type)
@@ -101,35 +88,6 @@ namespace PowerGridApi.Controllers
                 default:
                     return NotFound();
             }
-        }
-
-        public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
-        {
-            var allowAnonym = ((ControllerActionDescriptor)context.ActionDescriptor).MethodInfo.GetCustomAttribute<AllowAnonymousAttribute>();
-            if (allowAnonym == null)
-            {
-                var authHeaderKey = "authToken";
-                var authHeader = "";
-                if (context.HttpContext.Request.Headers.ContainsKey(authHeaderKey))
-                    authHeader = context.HttpContext.Request.Headers[authHeaderKey].ToString();
-
-                var errMsg = "";
-                var player = EnergoServer.Current.LookupPlayer(authHeader, out errMsg);
-                if (player == null)
-                {
-                    context.Result = Unauthorized();
-                    return;
-                }
-                else
-                {
-                    var claims = new List<Claim> { new Claim(ClaimsIdentity.DefaultNameClaimType, player.Id) };
-                    var id = new ClaimsIdentity(claims, "custom", ClaimsIdentity.DefaultNameClaimType,
-                        ClaimsIdentity.DefaultRoleClaimType);
-                    context.HttpContext.User.AddIdentity(id);
-                }              
-            }
-
-            await base.OnActionExecutionAsync(context, next);
         }
 
     }

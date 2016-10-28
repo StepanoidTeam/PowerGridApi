@@ -38,8 +38,8 @@ namespace PowerGridApi.Controllers
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        [HttpPost("DoAction/{userAction}")]
-        public async Task<IActionResult> DoAction([FromHeader]string authToken, GameActionEnum action)
+        [HttpPost("DoAction")]
+        public async Task<IActionResult> DoAction([FromHeader]string authToken, DoActionModel action)
         {
             var errMsg = string.Empty;
             var player = EnergoServer.Current.LookupPlayer(authToken, out errMsg);
@@ -48,7 +48,7 @@ namespace PowerGridApi.Controllers
             if (!player.IsInGame())
                 return await GenericResponse("Not in game");
             var gbRef = player.GameRoomRef.GameBoardRef;
-            switch (action)
+            switch (action.Action)
             {
                 case GameActionEnum.AuctionPass:
                     if (!gbRef.AuctionPass(authToken, out errMsg))

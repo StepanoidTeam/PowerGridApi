@@ -44,7 +44,7 @@ namespace PowerGridEngine
             Contexts.Add(this);
         }
         
-        public static GameContext GetContextByPlayer(Player player)
+        public static GameContext GetContextByPlayer(User player)
         {
             return Contexts.FirstOrDefault(m => m.PlayerBoards.Any(n => n.Key == player.Id));
         }
