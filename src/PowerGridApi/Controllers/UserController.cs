@@ -53,8 +53,8 @@ namespace PowerGridApi.Controllers
         public async Task<IActionResult> Logout([FromHeader]string authToken)
         {
             var errMsg = string.Empty;
-            var result = EnergoServer.Current.Logout(authToken, out errMsg);
-            return await GenericResponse(errMsg, result);
+            EnergoServer.Current.Logout(authToken, out errMsg);
+            return await GenericResponse(errMsg);
         }
 
 	}

@@ -45,7 +45,7 @@ namespace PowerGridApi.Controllers
                 var user = EnergoServer.Current.FindUserByAuthToken(authHeader, out errMsg);
                 if (user == null)
                 {
-                    context.Result = Unauthorized();
+                    context.Result = await GenericResponse(ResponseType.Unauthorized);
                     return;
                 }
                 else

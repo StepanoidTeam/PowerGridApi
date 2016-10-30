@@ -37,7 +37,7 @@ namespace PowerGridApi.Controllers
         {
             return await Task.Run(() =>
             {
-                return data == null ? (IActionResult)Ok() : Ok(data);
+                return Ok(new ApiResponseModel(data));
             });
         }
 
@@ -50,7 +50,7 @@ namespace PowerGridApi.Controllers
         {
             return await Task.Run(() =>
             {
-                return base.Json(new ApiResponseModel(errMsg, false));
+                return BadRequest(new ApiResponseModel(errMsg, false));
             });
         }
 
@@ -84,7 +84,11 @@ namespace PowerGridApi.Controllers
                 case ResponseType.Error:
                     return await ErrorResponse(errMsg ?? "Unexpected error");
                 case ResponseType.Unauthorized:
-                    return Unauthorized();
+                    {
+                        var result = new JsonResult(new ApiResponseModel(Constants.Instance.ErrorMessage.YouAre_Unauthorized, false));
+                        result.StatusCode = (int)System.Net.HttpStatusCode.Unauthorized;
+                        return result;
+                    }
                 default:
                     return NotFound();
             }
