@@ -105,10 +105,10 @@ namespace PowerGridEngine
         /// 
         /// </summary>
         /// <param name="leaderId"></param>
-        /// <param name="playerUn"></param>
+        /// <param name="user"></param>
         /// <param name="errMsg"></param>
         /// <returns>kicked user id</returns>
-        public string Kick(User leader, string playerUn, out string errMsg)
+        public string Kick(User leader, User user, out string errMsg)
         {
             errMsg = string.Empty;
             if (leader == null || Leader.Id != leader.Id)
@@ -116,13 +116,7 @@ namespace PowerGridEngine
                 errMsg = Constants.Instance.ErrorMessage.Only_Leader_Can_Kick;
                 return null;
             }
-            var userId = ServerRef.LookupUserId(playerUn);
-            if (string.IsNullOrWhiteSpace(userId) || !this.Players.ContainsKey(userId))
-            {
-                errMsg = Constants.Instance.ErrorMessage.There_No_Such_User;
-                return null;
-            }
-            var user = ServerRef.LookupUser(userId, out errMsg, false);
+            var userId = user.Id;
             RemoveUser(user);
             return userId;
         }

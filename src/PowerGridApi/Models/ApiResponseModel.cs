@@ -1,13 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Runtime.Serialization;
-using Microsoft.AspNetCore.Mvc;
 
 namespace PowerGridEngine
 {
+    public enum ResponseType
+    {
+        Ok,
+        UnexpectedError,
+        Unauthorized,
+        NotInRoom,
+        NotInGame,
+        NotYourTurn,
+        NotFound,
+        InvalidModel,
+        /// <summary>
+        /// (Means not unauthorized but by some another reason) and reason in message
+        /// </summary>
+        NotAllowed, 
+        NotAllowActionInThisPhase
+    }
+
     /// <summary>
     /// Generic response. Use it for format ANY response in ANY Api method
     /// </summary>
@@ -15,7 +26,7 @@ namespace PowerGridEngine
     {
         public string Message { get; set;}
         
-        public bool IsSuccess { get; set; }
+        public ResponseType Status { get; set; }
         
         public object Data { get; set; }
 
@@ -23,18 +34,18 @@ namespace PowerGridEngine
         {
             Data = null;
             Message = string.Empty;
-            IsSuccess = false;
+            Status = ResponseType.UnexpectedError;
         }
 
-        public ApiResponseModel(string msg, bool isSuccess)
+        public ApiResponseModel(string msg, ResponseType status)
         {
-            IsSuccess = IsSuccess;
+            Status = status;
             Message = msg;
         }
 
         public ApiResponseModel(object data)
         {
-            IsSuccess = true;
+            Status = ResponseType.Ok;
             Data = data;
         }
 

@@ -93,12 +93,17 @@ namespace PowerGridEngine
             return Users.Values.FirstOrDefault(m => _authToken == m.AuthToken);
         }
 
-        public string LookupUserId(string username)
+        public User LookupUserByName(string username)
         {
             if (string.IsNullOrWhiteSpace(username))
                 return null;
             var keyword = username.RemoveExtraSpaces().ToLowerInvariant();
-            var p = Users.Values.FirstOrDefault(m => m.Username.ToLowerInvariant() == keyword);
+            return Users.Values.FirstOrDefault(m => m.Username.ToLowerInvariant() == keyword);
+        }
+
+        public string LookupUserId(string username)
+        {
+            var p = LookupUserByName(username);
             if (p != null)
                 return p.Id;
             return null;

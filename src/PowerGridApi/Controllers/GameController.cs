@@ -26,7 +26,7 @@ namespace PowerGridApi.Controllers
             var errMsg = string.Empty;
             //todo wtf UserContext.User....(AuthToken???...)
             var lst = UserContext.User.GameRoomRef.GameBoardRef.GetAllowedActions(UserContext.User.AuthToken, out errMsg);
-            return await GenericResponse(errMsg, lst);
+            return await GenericResponse(errMsg, lst, ResponseType.NotYourTurn);
         }
 
         /// <summary>
@@ -37,15 +37,16 @@ namespace PowerGridApi.Controllers
         [HttpPost("DoAction")]
         public async Task<IActionResult> DoAction([FromHeader]string authToken, DoActionModel action)
         {
-            var errMsg = string.Empty;
-            var gbRef = UserContext.User.GameRoomRef.GameBoardRef;
-            switch (action.Action)
-            {
-                case GameActionEnum.AuctionPass:
-                    if (!gbRef.AuctionPass(UserContext.User.AuthToken, out errMsg))
-                        return await GenericResponse(errMsg);
-                    return await GenericResponse(null, true);
-            }
+            //todo Refactor in completely
+            //var errMsg = string.Empty;
+            //var gbRef = UserContext.User.GameRoomRef.GameBoardRef;
+            //switch (action.Action)
+            //{
+            //    case GameActionEnum.AuctionPass:
+            //        if (!gbRef.AuctionPass(UserContext.User.AuthToken, out errMsg))
+            //            return await GenericResponse(errMsg);
+            //        return await GenericResponse(null, true);
+            //}
             return await GenericResponse("Incorrect action");
         }
     }

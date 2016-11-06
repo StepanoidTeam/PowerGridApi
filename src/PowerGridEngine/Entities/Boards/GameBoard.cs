@@ -55,8 +55,17 @@ namespace PowerGridEngine
 			return false;
 		}
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="errMsg">Only error could be if is not user turn now</param>
+        /// <returns></returns>
 		public IEnumerable<GameActionEnum> GetAllowedActions(string userId, out string errMsg)
-		{
+        {
+            //todo: think it's bad idea to return such error for case Delete Station card in
+            //case you bought more cards and need to make decision which one to remove
+            //while Action in progress yet and other users are buying stations yet.
 			errMsg = string.Empty;
 			if (!CheckInUserTurn(userId, out errMsg))
 				return null;

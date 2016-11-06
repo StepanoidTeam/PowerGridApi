@@ -65,7 +65,7 @@ namespace PowerGridApi.Controllers
                 return new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions { Id = true, Name = true });
             });
 
-            return await GenericResponse(errMsg, result);
+            return await GenericResponse(errMsg, result, ResponseType.NotAllowed);
         }
 
         /// <summary>
@@ -79,12 +79,12 @@ namespace PowerGridApi.Controllers
             var errMsg = string.Empty;
             var gameRoom = EnergoServer.Current.LookupGameRoom(UserContext.User, joinModel.RoomId, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
-                return await GenericResponse(errMsg);
+                return await GenericResponse(ResponseType.NotFound, errMsg);
 
             gameRoom.Join(UserContext.User, out errMsg);
 
             if (!string.IsNullOrWhiteSpace(errMsg))
-                return await GenericResponse(errMsg);
+                return await GenericResponse(ResponseType.NotAllowed, errMsg);
 
             var result = await Task.Run(() =>
             {
@@ -96,7 +96,7 @@ namespace PowerGridApi.Controllers
                     });
             });
 
-            return await GenericResponse(errMsg, result);
+            return await SuccessResponse(result);
         }
 
         /// <summary>
@@ -115,7 +115,8 @@ namespace PowerGridApi.Controllers
 
             if (user.GameRoomRef != null)
                 return await GenericResponse(Constants.Instance.ErrorMessage.You_Cant_Leave_This_Game_Room);
-            return await GenericResponse(errMsg);
+            //todo why it is possible you couldn't leave room? Need to determine corrent status code here
+            return await GenericResponse(ResponseType.UnexpectedError, errMsg);
         }
 
         /// <summary>
@@ -132,14 +133,22 @@ namespace PowerGridApi.Controllers
            
             var gameRoom = leader.GameRoomRef;
 
-            var userId = gameRoom.Kick(leader, username, out errMsg);
+            var user = ServerContext.Current.Server.LookupUserByName(username);
+            //Allow to kick player even In Game.. Possible todo don't kick instantly, but only in case All players will agree 
+            //with this or He will agree himself or even leave
+            if (user == null || user.GameRoomRef == null || leader.GameRoomRef == null || user.GameRoomRef.Id != leader.GameRoomRef.Id)
+                return await ErrorResponse(Constants.Instance.ErrorMessage.There_No_Such_User, ResponseType.NotFound);
+
+            var userId = gameRoom.Kick(leader, user, out errMsg);
 
             if (!string.IsNullOrWhiteSpace(errMsg))
-                return await GenericResponse(errMsg);
+                //todo find what is reason for error
+                return await GenericResponse(ResponseType.NotAllowed, errMsg);
+
             if (gameRoom.Players.ContainsKey(userId))
                 errMsg = Constants.Instance.ErrorMessage.You_Cant_Kick_This_User;
 
-            return await GenericResponse(errMsg);
+            return await GenericResponse(ResponseType.UnexpectedError, errMsg);
         }
 
         /// <summary>
@@ -160,9 +169,11 @@ namespace PowerGridApi.Controllers
             else
                 result = user.GameRoomRef.ToogleReadyMark(user, out errMsg);
 
+            //there are couldn't be actually errors, because current method is expecting you are in game and we user
+            //YOUR (user) game for sure. So only possible is Unexpected error
             if (!string.IsNullOrWhiteSpace(errMsg))
-                return await GenericResponse(errMsg);
-            return await GenericResponse(null, result);
+                return await GenericResponse(ResponseType.UnexpectedError, errMsg);
+            return await SuccessResponse(result);
         }
 
         /// <summary>
@@ -179,7 +190,8 @@ namespace PowerGridApi.Controllers
             user.GameRoomRef.Init(out errMsg);
             user.GameRoomRef.GameBoardRef.Start();
             
-            return await GenericResponse(errMsg);
+            //only possible error - couldn't find map
+            return await GenericResponse(ResponseType.NotFound, errMsg);
         }
 
     }

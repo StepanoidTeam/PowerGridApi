@@ -22,7 +22,7 @@ namespace PowerGridApi.Controllers
     [EnableCors("CorsPolicy")]
     public abstract partial class BaseController : Controller
     {
-        private static decimal _version = 0.03m;
+        private static decimal _version = 0.04m;
 
         /// <summary>
         /// Version of current API

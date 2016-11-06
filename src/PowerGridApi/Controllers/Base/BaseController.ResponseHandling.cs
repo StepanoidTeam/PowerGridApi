@@ -16,13 +16,6 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 
 namespace PowerGridApi.Controllers
 {
-    public enum ResponseType
-    {
-        Ok,
-        Error,
-        Unauthorized
-    }
-
     /// <summary>
     /// Generic Responses hadling part of Base controller class for any controller in API
     /// </summary>
@@ -41,56 +34,67 @@ namespace PowerGridApi.Controllers
             });
         }
 
+        //protected async Task<IActionResult> SuccessResponse(object data)
+        //{
+        //    return await Task.Run(() =>
+        //    {
+        //        return Ok(new ApiResponseModel(data));
+        //    });
+        //}
+
         /// <summary>
         /// If response is for sure error
         /// </summary>
         /// <param name="errMsg"></param>
+        /// <param name="status"></param>
         /// <returns></returns>
-        protected async Task<IActionResult> ErrorResponse(string errMsg)
+        protected async Task<IActionResult> ErrorResponse(string errMsg, ResponseType status = ResponseType.UnexpectedError)
         {
             return await Task.Run(() =>
             {
-                return BadRequest(new ApiResponseModel(errMsg, false));
+                return BadRequest(new ApiResponseModel(errMsg, status));
             });
         }
 
         /// <summary>
         /// Use this type of reponse in case you need to check if it's ok (errMsg is empty) and return data,
-        /// or errMsg is not empty and need to return it as an Error response
+        /// or errMsg is not empty and need to return it as an Error response (only in this case will be used last 
+        /// parameter - response status; for success request it will be ignored and used always Ok)
         /// </summary>
         /// <param name="errMsg"></param>
         /// <param name="data"></param>
+        /// <param name="ifErrorStatus"></param>
         /// <returns></returns>
-        protected async Task<IActionResult> GenericResponse(string errMsg, object data = null)
+        protected async Task<IActionResult> GenericResponse(string errMsg, object data = null, ResponseType ifErrorStatus = ResponseType.UnexpectedError)
         {
             if (string.IsNullOrWhiteSpace(errMsg))
                 return await SuccessResponse(data);
-            return await ErrorResponse(errMsg);
+            return await ErrorResponse(errMsg, ifErrorStatus);
         }
 
         /// <summary>
         /// Use this method if you know type of response as generic end-point for any response
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="status"></param>
         /// <param name="errMsg"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        protected async Task<IActionResult> GenericResponse(ResponseType type, string errMsg = null, object data = null)
+        protected async Task<IActionResult> GenericResponse(ResponseType status, string errMsg = null, object data = null)
         {
-            switch(type)
+            switch(status)
             {
                 case ResponseType.Ok:
                     return await SuccessResponse(data);
-                case ResponseType.Error:
+                case ResponseType.UnexpectedError:
                     return await ErrorResponse(errMsg ?? "Unexpected error");
                 case ResponseType.Unauthorized:
                     {
-                        var result = new JsonResult(new ApiResponseModel(Constants.Instance.ErrorMessage.YouAre_Unauthorized, false));
+                        var result = new JsonResult(new ApiResponseModel(Constants.Instance.ErrorMessage.YouAre_Unauthorized, ResponseType.Unauthorized));
                         result.StatusCode = (int)System.Net.HttpStatusCode.Unauthorized;
                         return result;
                     }
                 default:
-                    return NotFound();
+                    return await ErrorResponse(errMsg, status);
             }
         }
 

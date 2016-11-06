@@ -37,7 +37,7 @@ namespace PowerGridApi.Controllers
                     case UserState.InGame:
                         if (!UserContext.User.IsInGame())
                         {
-                            context.Result = await GenericResponse(Constants.Instance.ErrorMessage.YouAre_Not_In_Game);
+                            context.Result = await GenericResponse(ResponseType.NotInGame, Constants.Instance.ErrorMessage.YouAre_Not_In_Game);
                             return false;
                         }
                         break;
@@ -45,7 +45,7 @@ namespace PowerGridApi.Controllers
                     case UserState.InRoom:
                         if (!UserContext.User.IsInRoom())
                         {
-                            context.Result = await GenericResponse(Constants.Instance.ErrorMessage.YouAre_Outside_Of_Game_Rooms);
+                            context.Result = await GenericResponse(ResponseType.NotInRoom, Constants.Instance.ErrorMessage.YouAre_Outside_Of_Game_Rooms);
                             return false;
                         }
                         break;

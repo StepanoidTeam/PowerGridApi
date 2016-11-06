@@ -28,11 +28,11 @@ namespace PowerGridApi.Controllers
         public async Task<IActionResult> Login([FromBody] LoginModel loginInfo)
 		{
             if(string.IsNullOrWhiteSpace(loginInfo.Username))
-                return await GenericResponse("Username is required");
+                return await GenericResponse(ResponseType.InvalidModel, "Username is required");
 
             var errMsg = string.Empty;
 			var user = EnergoServer.Current.Login(loginInfo.Username, out errMsg);
-
+            
             var result = await Task.Run(() =>
             {
                 var obj = new UserModel(user).GetInfo(new UserModelViewOptions() { Id = true, Name = true });
@@ -40,7 +40,7 @@ namespace PowerGridApi.Controllers
                 return obj;
             });
 
-            return await GenericResponse(errMsg, result);
+            return await GenericResponse(errMsg, result, ResponseType.InvalidModel);
 		}
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace PowerGridApi.Controllers
         public async Task<IActionResult> Logout([FromHeader]string authToken)
         {
             var result = EnergoServer.Current.Logout(UserContext.User);
-            return await GenericResponse(result ? ResponseType.Ok : ResponseType.Error);
+            return await GenericResponse(result ? ResponseType.Ok : ResponseType.UnexpectedError);
         }
 
 	}
