@@ -7,7 +7,6 @@ namespace PowerGridEngine
     
     public class GameRoom : BaseEnergoEntity
     {
-       
         public string Id { get; private set; }
 
         public string Name { get; private set; }
@@ -21,6 +20,8 @@ namespace PowerGridEngine
         public EnergoServer ServerRef { get; set; }
 
         public GameBoard GameBoardRef { get; private set; }
+
+        public Round Round { get; private set; }
 
         public GameRoom(string name, User leader, EnergoServer server = null)
         {
@@ -73,21 +74,21 @@ namespace PowerGridEngine
             }
         }
 
-        private void RemovePlayer(string playerId)
+        private void RemoveUser(User user)
         {
-            if (string.IsNullOrWhiteSpace(playerId))
+            if (user == null)
                 return;
-            if (Players.ContainsKey(playerId))
+            if (Players.ContainsKey(user.Id))
             {
                 if (IsInGame)
-                    FinishGame(playerId);
+                    FinishGame(user.Id);
                 else
                 {
-                    Players[playerId].Player.GameRoomRef = null;
-                    Players.Remove(playerId);
+                    Players[user.Id].Player.GameRoomRef = null;
+                    Players.Remove(user.Id);
                     if (Players.Count < 1)
                         Close(Leader.Id);
-                    else if (playerId == Leader.Id)
+                    else if (user.Id == Leader.Id)
                     {
                         Leader = Players.Values.First().Player;
                     }
@@ -95,9 +96,9 @@ namespace PowerGridEngine
             }
         }
 
-        public void Leave(string playerId)
+        public void Leave(User user)
         {
-            RemovePlayer(playerId);
+            RemoveUser(user);
         }
 
         /// <summary>
@@ -107,22 +108,23 @@ namespace PowerGridEngine
         /// <param name="playerUn"></param>
         /// <param name="errMsg"></param>
         /// <returns>kicked user id</returns>
-        public string Kick(string leaderId, string playerUn, out string errMsg)
+        public string Kick(User leader, string playerUn, out string errMsg)
         {
             errMsg = string.Empty;
-            if (Leader.Id != leaderId)
+            if (leader == null || Leader.Id != leader.Id)
             {
                 errMsg = Constants.Instance.ErrorMessage.Only_Leader_Can_Kick;
                 return null;
             }
-            var playerId = ServerRef.LookupUserId(playerUn);
-            if (string.IsNullOrWhiteSpace(playerId) || !this.Players.ContainsKey(playerId))
+            var userId = ServerRef.LookupUserId(playerUn);
+            if (string.IsNullOrWhiteSpace(userId) || !this.Players.ContainsKey(userId))
             {
                 errMsg = Constants.Instance.ErrorMessage.There_No_Such_User;
                 return null;
             }
-            RemovePlayer(playerId);      
-            return playerId;
+            var user = ServerRef.LookupUser(userId, out errMsg, false);
+            RemoveUser(user);
+            return userId;
         }
 
         public bool CanJoin(User player, out string errMsg)
@@ -202,6 +204,8 @@ namespace PowerGridEngine
             //todo we really need it?
             GameBoardRef = gameContext.GameBoard;
             IsInGame = true;
+            Round = new Round(this);
+            Round.Add(new BuildPhase());
         }
 
     }

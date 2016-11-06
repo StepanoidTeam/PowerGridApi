@@ -29,20 +29,17 @@ namespace PowerGridApi.Controllers
 		}
 
         /// <summary>
-        /// Get status of game if it's active for current user, otherwise it will return appopriate message
+        /// Get status of active for current user game
         /// </summary>
         /// <returns></returns>
-		[HttpGet("Status/Game")]
+        [RestrictByState(UserState.InGame)]
+		[HttpGet("Game/Status")]
 		public async Task<IActionResult> GetGameStatus([FromHeader]string authToken)
 		{
-			var errMsg = string.Empty;
-			var player = EnergoServer.Current.LookupUserByAuthToken(authToken, out errMsg);
-			if (!string.IsNullOrWhiteSpace(errMsg))
-				return await GenericResponse(errMsg);
-			if (player.GameRoomRef == null || player.GameRoomRef.GameBoardRef == null)
-				return await GenericResponse("Not in game");
-
-			var gameBoardModel = new GameBoardModel(player.GameRoomRef.GameBoardRef);
+            var user = UserContext.User;
+			
+            //to do view model
+            var gameBoardModel = new GameBoardModel(user.GameRoomRef.GameBoardRef);
             var result = await Task.Run(() => { return gameBoardModel.GetInfo(); });
 
             return await SuccessResponse(result);
@@ -52,16 +49,11 @@ namespace PowerGridApi.Controllers
         /// Player info
         /// </summary>
         /// <returns></returns>
-		[HttpGet("Status/Player")]
-		public async Task<IActionResult> GetPlayerInfo([FromHeader]string authToken)
+		[HttpPost("User/Status")]
+		public async Task<IActionResult> GetUserInfo([FromHeader]string authToken, [FromBody]UserModelViewOptions viewOptions)
 		{
-			var errMsg = string.Empty;
-			var player = EnergoServer.Current.LookupUserByAuthToken(authToken, out errMsg);
-			if (!string.IsNullOrWhiteSpace(errMsg))
-				return await GenericResponse(errMsg);
-
-			var playerModel = new UserModel(player);
-            var result = await Task.Run(() => { return playerModel.GetInfo(); });
+			var userModel = new UserModel(UserContext.User);
+            var result = await Task.Run(() => { return userModel.GetInfo(viewOptions); });
 
             return await SuccessResponse(result);
 		}

@@ -11,11 +11,9 @@ namespace PowerGridEngine
 
         public bool IsInGame { get { return Entity.IsInGame; } }
 
-        public int PlayerCount { get { return Entity.Players == null ? 0 : Entity.Players.Count(); } }
-
-        public IdNameModel[] PlayerHeaders { get { return Entity.Players == null ? new IdNameModel[0] : Entity.Players.Select(m => new IdNameModel(m.Value.Player.Id, m.Value.Player.Username)).ToArray(); } }
-
-        public object[] GetPlayerDetails(UserModelViewOptions viewOptions)
+        public int UserCount { get { return Entity.Players == null ? 0 : Entity.Players.Count(); } }
+        
+        public object[] GetUsersDetails(UserModelViewOptions viewOptions)
         {
             return Entity.Players == null ? new object[0] : Entity.Players.Select(m => new UserModel(m.Value.Player).GetInfo(viewOptions)).ToArray();
         }
@@ -36,12 +34,10 @@ namespace PowerGridEngine
                 result.Add("Name", this.Name);
             if (options.IsInGame)
                 result.Add("IsInGame", this.IsInGame);
-            if (options.PlayerCount)
-                result.Add("PlayerCount", this.PlayerCount);
-            if (options.PlayerHeaders)
-                result.Add("PlayerHeaders", this.PlayerHeaders);
-            if (options.PlayerDetails)
-                result.Add("PlayerDetails", this.GetPlayerDetails(options.PlayerViewOptions));
+            if (options.UserCount)
+                result.Add("UserCount", this.UserCount);
+            if (options.UserDetails)
+                result.Add("UserDetails", this.GetUsersDetails(options.UserViewOptions));
 
             return result;
         }

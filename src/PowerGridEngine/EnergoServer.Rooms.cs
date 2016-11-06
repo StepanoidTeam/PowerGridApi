@@ -31,7 +31,7 @@ namespace PowerGridEngine
             }
         }
 
-        public string CreateGameRoom(User player, string name, out string errMsg)
+        public GameRoom CreateGameRoom(User player, string name, out string errMsg)
         {
             errMsg = string.Empty;
             if (player.GameRoomRef != null)
@@ -40,33 +40,20 @@ namespace PowerGridEngine
                 return null;
             }
             var gameRoom = new GameRoom(name, player, this);
-            return gameRoom.Id;
+            return gameRoom;
         }
 
-        public string CreateGameRoom(string authToken, string name, out string errMsg)
-        {
-            errMsg = string.Empty;
-            var user = LookupUserByAuthToken(authToken, out errMsg);
-            if (!string.IsNullOrWhiteSpace(errMsg))
-            {
-                return null;
-            }
-            return CreateGameRoom(user, name, out errMsg);
-        }
-
-        public GameRoom[] GetGameRoomList(string authToken, out string errMsg, RoomLookupSettings lookupSettings = null)
+        public GameRoom[] GetGameRoomList(User user, RoomLookupSettings lookupSettings = null)
         {
             if (lookupSettings == null)
                 lookupSettings = new RoomLookupSettings();
-            errMsg = string.Empty;
-
-            var player = FindUserByAuthToken(authToken, out errMsg);
-            if (player == null)
+  
+            if (user == null)
                 return new GameRoom[0];
 
             if (lookupSettings.CurrentPlayerInside)
             {
-                var gr = player.GameRoomRef;
+                var gr = user.GameRoomRef;
                 if (gr != null)
                     return new GameRoom[] { gr };
                 return new GameRoom[0];
@@ -77,11 +64,10 @@ namespace PowerGridEngine
             return query.ToArray();
         }
 
-        public GameRoom LookupGameRoom(string authToken, string gameRoomId, out string errMsg)
+        public GameRoom LookupGameRoom(User user, string gameRoomId, out string errMsg)
         {
             errMsg = string.Empty;
-            var player = FindUserByAuthToken(authToken, out errMsg);
-            if (player == null)
+            if (user == null)
                 return null;
             if (!GameRooms.ContainsKey(gameRoomId ?? ""))
             {

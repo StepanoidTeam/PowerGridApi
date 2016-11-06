@@ -51,11 +51,9 @@ namespace PowerGridEngine
             return p;
         }
 
-        public bool Logout(string authToken, out string errMsg)
+        public bool Logout(User user)
         {
-            errMsg = string.Empty;
-            var user = FindUserByAuthToken(authToken, out errMsg);
-            if (!string.IsNullOrWhiteSpace(errMsg))
+            if (!Users.ContainsKey(user.Id))
                 return false;
             return Users.Remove(user.Id);
         }

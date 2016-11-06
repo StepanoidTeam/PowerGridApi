@@ -9,7 +9,7 @@ namespace PowerGridEngine
 
         public string Username { get { return Entity.Username; } }
 
-        public string GameRoomId { get { return Entity.GameRoomRef == null ? string.Empty : Entity.GameRoomRef.Id; } }
+        public string GameRoomId { get { return Entity.GameRoomRef == null ? null : Entity.GameRoomRef.Id; } }
 
         //weird logic to get ready mark... Why we actially need this PlayerInRoom entity, maybe we could move everything from it
         //to other entities, for example ready mark for sure could be in Player, because player could be (ready) only in ONE room
@@ -29,10 +29,11 @@ namespace PowerGridEngine
                 result.Add("Id", this.UserId);
             if (options.Name)
                 result.Add("Name", this.Username);
-            if (options.Name)
+            if (options.GameRoomId)
                 result.Add("GameRoomId", this.GameRoomId);
-            if (options.Name)
+            if (options.ReadyMark)
                 result.Add("ReadyMark", this.ReadyMark);
+
             return result;
         }
     }

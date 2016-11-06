@@ -31,12 +31,20 @@ namespace PowerGridApi.Controllers
                 return await GenericResponse("Username is required");
 
             var errMsg = string.Empty;
-			var authToken = EnergoServer.Current.Login(loginInfo.Username, out errMsg);
-			return await GenericResponse(errMsg, authToken);
+			var user = EnergoServer.Current.Login(loginInfo.Username, out errMsg);
+
+            var result = await Task.Run(() =>
+            {
+                var obj = new UserModel(user).GetInfo(new UserModelViewOptions() { Id = true, Name = true });
+                obj.Add("AuthToken", user.AuthToken);
+                return obj;
+            });
+
+            return await GenericResponse(errMsg, result);
 		}
 
         /// <summary>
-        /// Check if authorization token (user id) is not expired yet
+        /// Check if authorization token is not expired yet
         /// </summary>
         /// <returns></returns>
         [HttpPost("CheckAuthorization")]
@@ -52,9 +60,8 @@ namespace PowerGridApi.Controllers
         [HttpPost("Logout")]
         public async Task<IActionResult> Logout([FromHeader]string authToken)
         {
-            var errMsg = string.Empty;
-            EnergoServer.Current.Logout(authToken, out errMsg);
-            return await GenericResponse(errMsg);
+            var result = EnergoServer.Current.Logout(UserContext.User);
+            return await GenericResponse(result ? ResponseType.Ok : ResponseType.Error);
         }
 
 	}

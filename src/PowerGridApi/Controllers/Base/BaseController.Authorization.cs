@@ -21,8 +21,8 @@ namespace PowerGridApi.Controllers
     /// </summary>
     public abstract partial class BaseController : Controller
     {
-        public UserContext CurrentUser { get; private set; }
-        
+        public UserContext UserContext { get; private set; }
+
         /// <summary>
         /// Doing manual custom authorization for EACH method WITHOUT AllowAnonymousAttribute.
         /// Authorization is ok in case header with key 'authToken' contains user authorization token previously returned by
@@ -31,7 +31,7 @@ namespace PowerGridApi.Controllers
         /// <param name="context"></param>
         /// <param name="next"></param>
         /// <returns></returns>
-        public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        private async Task<bool> IfAuthorized(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             var allowAnonym = ((ControllerActionDescriptor)context.ActionDescriptor).MethodInfo.GetCustomAttribute<AllowAnonymousAttribute>();
             if (allowAnonym == null)
@@ -46,20 +46,19 @@ namespace PowerGridApi.Controllers
                 if (user == null)
                 {
                     context.Result = await GenericResponse(ResponseType.Unauthorized);
-                    return;
+                    return false;
                 }
                 else
                 {
-                    var claims = new List<Claim> { new Claim(ClaimsIdentity.DefaultNameClaimType, user.Id) };
-                    var id = new ClaimsIdentity(claims, "custom", ClaimsIdentity.DefaultNameClaimType,
-                        ClaimsIdentity.DefaultRoleClaimType);
-                    context.HttpContext.User.AddIdentity(id);
+                    //var claims = new List<Claim> { new Claim(ClaimsIdentity.DefaultNameClaimType, user.Id) };
+                    //var id = new ClaimsIdentity(claims, "custom", ClaimsIdentity.DefaultNameClaimType,
+                    //    ClaimsIdentity.DefaultRoleClaimType);
+                    //context.HttpContext.User.AddIdentity(id);
 
-                    CurrentUser = new UserContext(user);
+                    UserContext = new UserContext(user);
                 }
             }
-
-            await base.OnActionExecutionAsync(context, next);
+            return true;
         }
 
     }

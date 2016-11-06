@@ -9,27 +9,20 @@ namespace PowerGridEngine
       
         public bool IsInGame { get; set; }
        
-        public bool PlayerCount { get; set; }
-
-        /// <summary>
-        /// Id + Name
-        /// </summary>
+        public bool UserCount { get; set; }
         
-        public bool PlayerHeaders { get; set; }
-              
-        public bool PlayerDetails { get; set; }
+        public bool UserDetails { get; set; }
         
-        public UserModelViewOptions PlayerViewOptions { get; set; }
+        public UserModelViewOptions UserViewOptions { get; set; }
 
-        private void Init(bool defaultValue = false)
+        private void Init(bool defaultValue = false, UserModelViewOptions userViewOptions = null)
         {
             Id = defaultValue;
             Name = defaultValue;
             IsInGame = defaultValue;
-            PlayerCount = defaultValue;
-            PlayerHeaders = defaultValue;
-            PlayerDetails = defaultValue;
-            PlayerViewOptions = new UserModelViewOptions(defaultValue);
+            UserCount = defaultValue;
+            UserDetails = defaultValue;
+            UserViewOptions = userViewOptions ?? new UserModelViewOptions(defaultValue);
         }
 
         public RoomModelViewOptions()
@@ -40,6 +33,11 @@ namespace PowerGridEngine
         public RoomModelViewOptions(bool defaultValue)
         {
             Init(defaultValue);
+        }
+
+        public RoomModelViewOptions(UserModelViewOptions userViewOptions)
+        {
+            Init(userViewOptions: userViewOptions);
         }
     }
 }

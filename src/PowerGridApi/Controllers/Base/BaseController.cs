@@ -40,5 +40,13 @@ namespace PowerGridApi.Controllers
         {
         }
 
+        public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        {
+            if (await IfAuthorized(context, next))
+            {
+                if (await IfNotRestricted(context, next))
+                    await base.OnActionExecutionAsync(context, next);
+            }
+        }
     }
 }

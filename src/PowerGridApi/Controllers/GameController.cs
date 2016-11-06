@@ -20,16 +20,12 @@ namespace PowerGridApi.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("AllowedActions")]
+        [RestrictByState(UserState.InGame)]
         public async Task<IActionResult> GetAllowedActions([FromHeader]string authToken)
         {
             var errMsg = string.Empty;
-            var player = EnergoServer.Current.LookupUserByAuthToken(authToken, out errMsg);
-            if (!string.IsNullOrWhiteSpace(errMsg))
-                return await GenericResponse(errMsg);
-            if (!player.IsInGame())
-                return await GenericResponse("Not in game");
-
-            var lst = player.GameRoomRef.GameBoardRef.GetAllowedActions(authToken, out errMsg);
+            //todo wtf UserContext.User....(AuthToken???...)
+            var lst = UserContext.User.GameRoomRef.GameBoardRef.GetAllowedActions(UserContext.User.AuthToken, out errMsg);
             return await GenericResponse(errMsg, lst);
         }
 
@@ -42,16 +38,11 @@ namespace PowerGridApi.Controllers
         public async Task<IActionResult> DoAction([FromHeader]string authToken, DoActionModel action)
         {
             var errMsg = string.Empty;
-            var player = EnergoServer.Current.LookupUserByAuthToken(authToken, out errMsg);
-            if (!string.IsNullOrWhiteSpace(errMsg))
-                return await GenericResponse(errMsg);
-            if (!player.IsInGame())
-                return await GenericResponse("Not in game");
-            var gbRef = player.GameRoomRef.GameBoardRef;
+            var gbRef = UserContext.User.GameRoomRef.GameBoardRef;
             switch (action.Action)
             {
                 case GameActionEnum.AuctionPass:
-                    if (!gbRef.AuctionPass(authToken, out errMsg))
+                    if (!gbRef.AuctionPass(UserContext.User.AuthToken, out errMsg))
                         return await GenericResponse(errMsg);
                     return await GenericResponse(null, true);
             }

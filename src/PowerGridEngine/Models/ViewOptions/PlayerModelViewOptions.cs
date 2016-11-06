@@ -7,6 +7,7 @@ namespace PowerGridEngine
        
         public bool ReadyMark { get; set; }
 
+
         public UserModelViewOptions(bool defaultValue = false) : base(defaultValue)
         {
             GameRoomId = defaultValue;
