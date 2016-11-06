@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 
 namespace PowerGridEngine
 {
@@ -26,8 +27,12 @@ namespace PowerGridEngine
     {
         public string Message { get; set;}
         
+        [JsonIgnore]
         public ResponseType Status { get; set; }
-        
+
+        [JsonProperty(PropertyName = "Status")]
+        public string StatusText { get { return Status.ToString(); } }
+
         public object Data { get; set; }
 
         public ApiResponseModel()

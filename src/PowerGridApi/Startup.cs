@@ -6,7 +6,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PowerGridEngine;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PowerGridApi
 {
@@ -74,7 +76,8 @@ namespace PowerGridApi
 			services.AddMvc();
 
 
-
+            var responseStatusesLst = (IEnumerable<ResponseType>)Enum.GetValues(typeof(ResponseType));
+            var responseStatuses = string.Join(", ", responseStatusesLst.Select(m => m.ToString()));
 
             //Configure Swagger - tool for UI Help about API
             var xmlPath = GetXmlCommentsPath();
@@ -85,7 +88,7 @@ namespace PowerGridApi
                 {
                     Version = Controllers.CommonController.Version,
                     Title = "Power Grid API",
-                    Description = "API for Power Grid Game developed by AgeStone Team",
+                    Description = string.Format("API for Power Grid Game developed by AgeStone Team.<br/> All Possible response statuses: {0}", responseStatuses),
                     TermsOfService = "None"
 				});
 				options.IncludeXmlComments(xmlPath);

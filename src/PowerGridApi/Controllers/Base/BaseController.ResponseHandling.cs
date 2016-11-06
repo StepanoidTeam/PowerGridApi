@@ -24,8 +24,16 @@ namespace PowerGridApi.Controllers
         /// <summary>
         /// If response is for sure successfull
         /// </summary>
-        /// <param name="data"></param>
+        /// <param name="dataFunc">function to asynchroniusly get data</param>
         /// <returns></returns>
+        protected Func<Task<IActionResult>> SuccessResponse(Func<object> dataFunc)
+        {
+            return () =>
+            {
+                return Task.Run( () => (IActionResult)Ok(new ApiResponseModel(dataFunc())));
+            };
+        }
+
         protected async Task<IActionResult> SuccessResponse(object data)
         {
             return await Task.Run(() =>
@@ -34,25 +42,19 @@ namespace PowerGridApi.Controllers
             });
         }
 
-        //protected async Task<IActionResult> SuccessResponse(object data)
-        //{
-        //    return await Task.Run(() =>
-        //    {
-        //        return Ok(new ApiResponseModel(data));
-        //    });
-        //}
-
         /// <summary>
         /// If response is for sure error
         /// </summary>
         /// <param name="errMsg"></param>
         /// <param name="status"></param>
+        /// <param name="httpCodeIsBadRequestOrNotFound">true - BadRequest, otherwise NotFound</param>
         /// <returns></returns>
-        protected async Task<IActionResult> ErrorResponse(string errMsg, ResponseType status = ResponseType.UnexpectedError)
+        protected async Task<IActionResult> ErrorResponse(string errMsg, ResponseType status = ResponseType.UnexpectedError, bool httpCodeIsBadRequestOrNotFound = true)
         {
             return await Task.Run(() =>
             {
-                return BadRequest(new ApiResponseModel(errMsg, status));
+                var result = new ApiResponseModel(errMsg, status);
+                return httpCodeIsBadRequestOrNotFound ? (IActionResult) BadRequest(result) : NotFound(result);
             });
         }
 
@@ -70,6 +72,16 @@ namespace PowerGridApi.Controllers
             if (string.IsNullOrWhiteSpace(errMsg))
                 return await SuccessResponse(data);
             return await ErrorResponse(errMsg, ifErrorStatus);
+        }
+
+        protected Func<Task<IActionResult>> GenericResponse(string errMsg, Func<object> dataFunc = null, ResponseType ifErrorStatus = ResponseType.UnexpectedError)
+        {
+            return () =>
+            {
+                if (string.IsNullOrWhiteSpace(errMsg))
+                    return Task.Run(() => (IActionResult)Ok(new ApiResponseModel(dataFunc())));
+                return ErrorResponse(errMsg, ifErrorStatus);
+            };
         }
 
         /// <summary>
@@ -93,6 +105,8 @@ namespace PowerGridApi.Controllers
                         result.StatusCode = (int)System.Net.HttpStatusCode.Unauthorized;
                         return result;
                     }
+                case ResponseType.NotFound:
+                    return await ErrorResponse(errMsg, status, false);
                 default:
                     return await ErrorResponse(errMsg, status);
             }

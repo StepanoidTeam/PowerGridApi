@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using PowerGridEngine;
 using Microsoft.AspNetCore.Cors;
+using Swashbuckle.SwaggerGen.Annotations;
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -19,7 +20,9 @@ namespace PowerGridApi.Controllers
         /// <summary>
         /// Rooms list
         /// </summary>
-        /// <returns></returns>
+        /// <returns></returns>       
+        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
         [HttpGet]
         public async Task<IActionResult> GetGameRoomList([FromHeader]string authToken)
         {
@@ -40,6 +43,8 @@ namespace PowerGridApi.Controllers
         /// </summary>
         /// <param name="lwo">Lookup settings and view options</param>
         /// <returns></returns>
+        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
         [HttpPost("List")]
         public async Task<IActionResult> GetGameRoomList([FromHeader]string authToken, [FromBody]RoomsLookupWithOptions lwo)
         {
@@ -54,25 +59,31 @@ namespace PowerGridApi.Controllers
         /// <summary>
         /// Create Game Room 
         /// </summary>
+        /// <param name="room"></param>
         /// <returns></returns>
+        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
+        [SwaggerResponse(System.Net.HttpStatusCode.BadRequest, "NotAllowed")]
         [HttpPost("Create")]
         public async Task<IActionResult> CreateGameRoom([FromHeader]string authToken, [FromBody]CreateRoomModel room)
         {
             var errMsg = string.Empty;
             var gameRoom = EnergoServer.Current.CreateGameRoom(UserContext.User, room.Name, out errMsg);
-            var result = await Task.Run(() =>
+            return await GenericResponse(errMsg, () =>
             {
                 return new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions { Id = true, Name = true });
-            });
-
-            return await GenericResponse(errMsg, result, ResponseType.NotAllowed);
+            }, ResponseType.NotAllowed).Invoke();
         }
 
         /// <summary>
         /// Join player into specific room
         /// </summary>
         /// <param name="joinModel"></param>
-        /// <returns></returns>
+        /// <returns></returns> 
+        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
+        [SwaggerResponse(System.Net.HttpStatusCode.BadRequest, "NotAllowed")]
+        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, "NotFound")]
         [HttpPost("Join")]
         public async Task<IActionResult> JoinGameRoom([FromHeader]string authToken, JoinRoomModel joinModel)
         {
@@ -103,6 +114,8 @@ namespace PowerGridApi.Controllers
         /// Leave from current room
         /// </summary>
         /// <returns></returns>
+        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
         [RestrictByState(UserState.InRoom)]
         [HttpPost("Leave")]
         public async Task<IActionResult> LeaveGameRoom([FromHeader]string authToken)
@@ -114,7 +127,7 @@ namespace PowerGridApi.Controllers
             user.GameRoomRef.Leave(user);
 
             if (user.GameRoomRef != null)
-                return await GenericResponse(Constants.Instance.ErrorMessage.You_Cant_Leave_This_Game_Room);
+                return await GenericResponse(ResponseType.UnexpectedError, Constants.Instance.ErrorMessage.You_Cant_Leave_This_Game_Room);
             //todo why it is possible you couldn't leave room? Need to determine corrent status code here
             return await GenericResponse(ResponseType.UnexpectedError, errMsg);
         }
@@ -124,6 +137,10 @@ namespace PowerGridApi.Controllers
         /// </summary>
         /// <param name="username"></param>
         /// <returns></returns>
+        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
+        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, "NotFound")]
+        [SwaggerResponse(System.Net.HttpStatusCode.BadRequest, "NotInRoom, NotAllowed")]
         [RestrictByState(UserState.InRoom)]
         [HttpPost("Kick")]
         public async Task<IActionResult> Kick([FromHeader]string authToken, string username)
@@ -156,6 +173,9 @@ namespace PowerGridApi.Controllers
         /// </summary>
         /// <param name="state">in case it's not null - set ready mark to specified value, otherwise it will be toggled according to curent state</param>
         /// <returns></returns>
+        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
+        [SwaggerResponse(System.Net.HttpStatusCode.BadRequest, "NotInRoom")]
         [RestrictByState(UserState.InRoom)]
         [HttpPost("ToggleReady")]
         public async Task<IActionResult> SetReadyMarkTo([FromHeader]string authToken, bool? state = null)
@@ -180,6 +200,9 @@ namespace PowerGridApi.Controllers
         /// Initiate game
         /// </summary>
         /// <returns></returns>
+        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
+        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, "NotFound")]
         [RestrictByState(UserState.InRoom)]
         [HttpGet("StartGame")]
         public async Task<IActionResult> StartGame([FromHeader]string authToken)

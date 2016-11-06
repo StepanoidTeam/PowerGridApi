@@ -7,6 +7,7 @@ using PowerGridEngine;
 using System.Globalization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Authorization;
+using Swashbuckle.SwaggerGen.Annotations;
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -22,6 +23,7 @@ namespace PowerGridApi.Controllers
         /// Get list of registered maps
         /// </summary>
         /// <returns></returns>
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
         [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -36,6 +38,8 @@ namespace PowerGridApi.Controllers
         /// <param name="mapWithOptions">mapId and options to customize response</param>
         /// <returns></returns>
         [AllowAnonymous]
+        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, "NotFound")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
         [HttpPost("Map")]
         public async Task<IActionResult> GetMapWithOptions([FromBody]MapWithOptions mapWithOptions)
         {

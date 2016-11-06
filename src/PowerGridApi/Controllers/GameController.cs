@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using PowerGridEngine;
+using Swashbuckle.SwaggerGen.Annotations;
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -19,6 +20,9 @@ namespace PowerGridApi.Controllers
         /// Get all allowable actions for current user according to current game state
         /// </summary>
         /// <returns></returns>
+        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
+        [SwaggerResponse(System.Net.HttpStatusCode.BadRequest, "NotYourTurn")]
         [HttpGet("AllowedActions")]
         [RestrictByState(UserState.InGame)]
         public async Task<IActionResult> GetAllowedActions([FromHeader]string authToken)
@@ -47,7 +51,7 @@ namespace PowerGridApi.Controllers
             //            return await GenericResponse(errMsg);
             //        return await GenericResponse(null, true);
             //}
-            return await GenericResponse("Incorrect action");
+            return await GenericResponse(ResponseType.UnexpectedError, "Incorrect action");
         }
     }
 }

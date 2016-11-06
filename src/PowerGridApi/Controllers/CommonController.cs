@@ -7,6 +7,7 @@ using PowerGridEngine;
 using System.Globalization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Authorization;
+using Swashbuckle.SwaggerGen.Annotations;
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -33,7 +34,10 @@ namespace PowerGridApi.Controllers
         /// </summary>
         /// <returns></returns>
         [RestrictByState(UserState.InGame)]
-		[HttpGet("Game/Status")]
+        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
+        [SwaggerResponse(System.Net.HttpStatusCode.BadRequest, "NotInGame")]
+        [HttpGet("Game/Status")]
 		public async Task<IActionResult> GetGameStatus([FromHeader]string authToken)
 		{
             var user = UserContext.User;
@@ -48,15 +52,21 @@ namespace PowerGridApi.Controllers
         /// <summary>
         /// Player info
         /// </summary>
-        /// <returns></returns>
-		[HttpPost("User/Status")]
-		public async Task<IActionResult> GetUserInfo([FromHeader]string authToken, [FromBody]UserModelViewOptions viewOptions)
-		{
-			var userModel = new UserModel(UserContext.User);
-            var result = await Task.Run(() => { return userModel.GetInfo(viewOptions); });
+        /// <returns></returns>        
+        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
+        [HttpPost("User/Status")]
+        public async Task<IActionResult> GetUserInfo([FromHeader]string authToken, [FromBody]UserModelViewOptions viewOptions)
+        {
+            var userModel = new UserModel(UserContext.User);
 
-            return await SuccessResponse(result);
-		}
+            var responseGetter = SuccessResponse(() =>
+            {
+                return userModel.GetInfo(viewOptions);
+            });
+
+            return await responseGetter();
+        }
 
 	}
 }

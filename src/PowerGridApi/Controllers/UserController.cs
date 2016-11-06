@@ -7,6 +7,7 @@ using PowerGridEngine;
 using System.Globalization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Authorization;
+using Swashbuckle.SwaggerGen.Annotations;
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -24,6 +25,8 @@ namespace PowerGridApi.Controllers
         /// <param name="loginInfo"></param>
         /// <returns></returns>
 		[AllowAnonymous]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
+        [SwaggerResponse(System.Net.HttpStatusCode.BadRequest, "InvalidModel")]
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginModel loginInfo)
 		{
@@ -46,7 +49,9 @@ namespace PowerGridApi.Controllers
         /// <summary>
         /// Check if authorization token is not expired yet
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Possible statuses: Unauthorized, Ok</returns>
+        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
         [HttpPost("CheckAuthorization")]
         public async Task<IActionResult> CheckAuthorization([FromHeader]string authToken)
         {
@@ -56,7 +61,9 @@ namespace PowerGridApi.Controllers
         /// <summary>
         /// Log out user
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Possible statuses: Unauthorized, Ok</returns>
+        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
         [HttpPost("Logout")]
         public async Task<IActionResult> Logout([FromHeader]string authToken)
         {
