@@ -15,15 +15,17 @@ namespace PowerGridEngine
 
 		public int CurrentTurnPlayer { get; set; }
         
-		public GameBoard(GameContext context, out string errMsg, string mapId = Constants.CONST_DEFAULT_MAP_ID)
+		public GameBoard(GameContext context, string mapId = Constants.CONST_DEFAULT_MAP_ID)
 		{
             this.context = context;
 
-			errMsg = string.Empty;
-			
-			Map = ServerContext.Current.Server.LookupMap(mapId, out errMsg);
-            
-			if (Map != null)
+			var errMsg = string.Empty;
+			Map = EnergoServer.Current.LookupMap(mapId, out errMsg);
+            if(string.IsNullOrWhiteSpace(errMsg))
+                //use default map
+                Map = EnergoServer.Current.LookupMap(Constants.CONST_DEFAULT_MAP_ID, out errMsg);
+
+            if (Map != null)
 			{
                 Status = GameStatusEnum.Auction;
 			}

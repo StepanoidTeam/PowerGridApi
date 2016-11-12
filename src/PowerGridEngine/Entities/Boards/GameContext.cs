@@ -17,16 +17,22 @@ namespace PowerGridEngine
 
         public StationBoard StationBoard { get; private set; }
 
+        public List<User> Players
+        {
+            get
+            {
+                return PlayerBoards.Values.Select(m => m.PlayerRef).ToList();
+            }
+        }
+
         /// <summary>
         /// todo удалять контексты при необходимости (игра закончена, игра заброшена, разрыв связи...)
         /// </summary>
         private static List<GameContext> Contexts { get; set; }
 
-        public GameContext(GameRoom room, out string errMsg, string mapId = null)
+        public GameContext(GameRoom room, string mapId = null)
         {
-            GameBoard = new GameBoard(this, out errMsg, mapId);
-            if (!string.IsNullOrWhiteSpace(errMsg))
-                return;
+            GameBoard = new GameBoard(this, mapId);
 
             PlayerBoards = new Dictionary<string, PlayerBoard>();
             foreach (var p in room.Players)

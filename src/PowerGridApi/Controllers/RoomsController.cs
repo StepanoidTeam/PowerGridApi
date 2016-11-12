@@ -129,7 +129,7 @@ namespace PowerGridApi.Controllers
             if (user.GameRoomRef != null)
                 return await GenericResponse(ResponseType.UnexpectedError, Constants.Instance.ErrorMessage.You_Cant_Leave_This_Game_Room);
             //todo why it is possible you couldn't leave room? Need to determine corrent status code here
-            return await GenericResponse(ResponseType.UnexpectedError, errMsg);
+            return await SuccessResponse(true);
         }
 
         /// <summary>
@@ -178,22 +178,17 @@ namespace PowerGridApi.Controllers
         [SwaggerResponse(System.Net.HttpStatusCode.BadRequest, "NotInRoom")]
         [RestrictByState(UserState.InRoom)]
         [HttpPost("ToggleReady")]
-        public async Task<IActionResult> SetReadyMarkTo([FromHeader]string authToken, bool? state = null)
+        public async Task<IActionResult> SetReadyMarkTo([FromHeader]string authToken, [FromBody]ToggleReadyModel toggleModel)
         {
-            var errMsg = string.Empty;
             var user = UserContext.User;
-            bool result = false;
-
-            if (state.HasValue)
-                result = user.GameRoomRef.SetReadyMarkTo(user, state.Value, out errMsg);
-            else
-                result = user.GameRoomRef.ToogleReadyMark(user, out errMsg);
+            
+            var toggleResponse = EnergoServer.Current.RouteAction<ToggleReadyResponse>(new ToggleReadyAction(user, toggleModel.State));
 
             //there are couldn't be actually errors, because current method is expecting you are in game and we user
             //YOUR (user) game for sure. So only possible is Unexpected error
-            if (!string.IsNullOrWhiteSpace(errMsg))
-                return await GenericResponse(ResponseType.UnexpectedError, errMsg);
-            return await SuccessResponse(result);
+            if (!toggleResponse.IsSuccess)
+                return await GenericResponse(ResponseType.UnexpectedError, toggleResponse.ErrorMsg);
+            return await SuccessResponse(toggleResponse.CurrentState);
         }
 
         /// <summary>
@@ -210,7 +205,7 @@ namespace PowerGridApi.Controllers
             var errMsg = string.Empty;
             var user = UserContext.User;
 
-            user.GameRoomRef.Init(out errMsg);
+            user.GameRoomRef.Init();
             user.GameRoomRef.GameBoardRef.Start();
             
             //only possible error - couldn't find map

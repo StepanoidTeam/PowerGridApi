@@ -10,10 +10,20 @@ namespace PowerGridEngine
         public string Username { get { return Entity.Username; } }
 
         public string GameRoomId { get { return Entity.GameRoomRef == null ? null : Entity.GameRoomRef.Id; } }
-
-        //weird logic to get ready mark... Why we actially need this PlayerInRoom entity, maybe we could move everything from it
-        //to other entities, for example ready mark for sure could be in Player, because player could be (ready) only in ONE room
-        public bool? ReadyMark { get { return Entity.GameRoomRef == null ? (bool?)null : Entity.GameRoomRef.Players[UserId].ReadyMark; } }
+        
+        /// <summary>
+        /// Need move it to model like CurrentStageModel (state of active stage)
+        /// </summary>
+        public bool? ReadyMark
+        {
+            get
+            {
+                if (Entity.GameRoomRef == null || !(Entity.GameRoomRef.CurrentStage is CreateGameStage))
+                    return null;
+                var curStage = Entity.GameRoomRef.CurrentStage as CreateGameStage;
+                return curStage.GetReadyMark(UserId);
+            }
+        }
 
         public UserModel(User entity) : base(entity)
         {

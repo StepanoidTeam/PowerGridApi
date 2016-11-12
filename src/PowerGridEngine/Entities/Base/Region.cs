@@ -37,9 +37,9 @@ namespace PowerGridEngine
                 return this;
 
             if (string.IsNullOrWhiteSpace(city.Id))
-                ServerContext.Current.Logger.Log("Region->AddCity->Trying to add city without name");
+                ;// ServerContext.Current.Logger.Log("Region->AddCity->Trying to add city without name");
             else if (Parent.Cities.ContainsKey(city.Id))
-                ServerContext.Current.Logger.Log("Region->AddCity->Trying to add duplicate city (in Map context): {0}", city.Name);
+                ;// ServerContext.Current.Logger.Log("Region->AddCity->Trying to add duplicate city (in Map context): {0}", city.Name);
             else
             {
                 Cities.Add(city.Id, city);

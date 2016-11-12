@@ -17,14 +17,28 @@ namespace PowerGridEngine
 
         public bool IsInGame { get; private set; }
 
-        public EnergoServer ServerRef { get; set; }
-
         public GameBoard GameBoardRef { get; private set; }
 
-        public Round Round { get; private set; }
+        public Queue<Stage> Stages { get; private set; }
 
-        public GameRoom(string name, User leader, EnergoServer server = null)
+        private Stage currentStage;
+
+        public Stage CurrentStage
         {
+            get
+            {
+                if (currentStage == null || currentStage.IsFinished)
+                    currentStage = Stages.Dequeue();
+                return currentStage;
+            }
+        }
+
+        //public Round Round { get; private set; }
+
+        public GameRoom(string name, User leader)
+        {
+            if (leader.GameRoomRef != null)
+                throw new Exception(Constants.Instance.ErrorMessage.Is_In_Game_Room);
             if (string.IsNullOrWhiteSpace(name))
                 name = GenerateGameRoomName(leader);
             Name = name;
@@ -33,10 +47,15 @@ namespace PowerGridEngine
             Players.Add(leader.Id, new PlayerInRoom(leader));
             Leader = leader;
             IsInGame = false;
-            if (server != null)
-            {
-                server.CreateGameRoom(leader, this);
-            }
+
+            //todo push mapId here
+            var mapId = string.Empty;
+            var gameContext = new GameContext(this, mapId);
+
+            EnergoServer.Current.CreateGameRoom(leader, this);
+
+            var _gameContext = GameContext.GetContextByPlayer(leader);
+            Stages = new Queue<Stage>().PushItem(new CreateGameStage(_gameContext));
         }
 
         private string GenerateGameRoomName(User leader)
@@ -48,7 +67,7 @@ namespace PowerGridEngine
         {
             if (leaderId == Leader.Id)
             {
-                ServerRef.RemoveGameRoom(Leader, this);
+                EnergoServer.Current.RemoveGameRoom(Leader, this);
             }
         }
 
@@ -148,58 +167,19 @@ namespace PowerGridEngine
             }
         }
 
-        private bool ReturnError(string err, out string errMsg)
-        {
-            errMsg = err;
-            return false;
-        }
-
-        public bool ToogleReadyMark(User player, out string errMsg)
-        {
-            errMsg = string.Empty;
-
-            if (player == null)
-                return ReturnError(Constants.Instance.ErrorMessage.User_Cant_Be_Null, out errMsg);
-            if (player.GameRoomRef == null)
-                return ReturnError(Constants.Instance.ErrorMessage.YouAre_Outside_Of_Game_Rooms, out errMsg);
-            var players = player.GameRoomRef.Players;
-            if (!players.ContainsKey(player.Id))
-                return ReturnError(Constants.Instance.ErrorMessage.YouAre_Not_In_This_Game, out errMsg);
-            players[player.Id].ReadyMark = !players[player.Id].ReadyMark;
-            return players[player.Id].ReadyMark;
-        }
-        
-        public bool SetReadyMarkTo(User player, bool state, out string errMsg)
-        {
-            errMsg = string.Empty;
-
-            if (player == null)
-                return ReturnError(Constants.Instance.ErrorMessage.User_Cant_Be_Null, out errMsg);
-            if (player.GameRoomRef == null)
-                return ReturnError(Constants.Instance.ErrorMessage.YouAre_Outside_Of_Game_Rooms, out errMsg);
-            var players = player.GameRoomRef.Players;
-            if (!players.ContainsKey(player.Id))
-                return ReturnError(Constants.Instance.ErrorMessage.YouAre_Not_In_This_Game, out errMsg);
-            players[player.Id].ReadyMark = state;
-            return players[player.Id].ReadyMark;
-        }
-
         /// <summary>
         /// 
         /// </summary>
         /// <param name="errMsg"></param>
         /// <param name="mapId">default if not set</param>
-        public void Init(out string errMsg, string mapId = null)
+        public void Init(string mapId = null)
         {
-            errMsg = string.Empty;
-            if (string.IsNullOrWhiteSpace(mapId))
-                mapId = Constants.CONST_DEFAULT_MAP_ID;
-            var gameContext = new GameContext(this, out errMsg, mapId);
+            var _gameContext = GameContext.GetContextByPlayer(Leader);
             //todo we really need it?
-            GameBoardRef = gameContext.GameBoard;
+            GameBoardRef = _gameContext.GameBoard;
             IsInGame = true;
-            Round = new Round(this);
-            Round.Add(new BuildPhase());
+            //Round = new Round(this);
+            //Round.Add(new BuildPhase());
         }
 
     }

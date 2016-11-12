@@ -27,8 +27,7 @@ namespace PowerGridEngine
 				Settings = new MapSettings();
 			//Regions = new Dictionary<string, Region>();
 			Connectors = new Dictionary<string, Connector>();
-			if (ServerContext.Current != null && ServerContext.Current.Server != null)
-				ServerContext.Current.Server.RegisterMap(this);
+			EnergoServer.Current.RegisterMap(this);
 		}
 
 		public Map AddRegion(Region region)
