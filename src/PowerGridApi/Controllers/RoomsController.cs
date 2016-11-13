@@ -85,7 +85,7 @@ namespace PowerGridApi.Controllers
         [SwaggerResponse(System.Net.HttpStatusCode.BadRequest, "NotAllowed")]
         [SwaggerResponse(System.Net.HttpStatusCode.NotFound, "NotFound")]
         [HttpPost("Join")]
-        public async Task<IActionResult> JoinGameRoom([FromHeader]string authToken, JoinRoomModel joinModel)
+        public async Task<IActionResult> JoinGameRoom([FromHeader]string authToken, [FromBody]JoinRoomModel joinModel)
         {
             var errMsg = string.Empty;
             var gameRoom = EnergoServer.Current.LookupGameRoom(UserContext.User, joinModel.RoomId, out errMsg);
