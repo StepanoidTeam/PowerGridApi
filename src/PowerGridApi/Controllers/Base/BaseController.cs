@@ -15,6 +15,7 @@ using System.IO;
 using System.Text;
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+[assembly: AssemblyVersion("0.0.*")]
 
 namespace PowerGridApi.Controllers
 {
@@ -28,7 +29,15 @@ namespace PowerGridApi.Controllers
 
         private static bool _enableLogging = true;
 
-        private static decimal _version = 0.05m;
+        private static decimal _version = 0.01m;
+
+        public static string SwaggerVersion
+        {
+            get
+            {
+                return string.Format("v{0}", _version.ToString(CultureInfo.InvariantCulture));
+            }
+        }
 
         /// <summary>
         /// Version of current API
@@ -37,7 +46,11 @@ namespace PowerGridApi.Controllers
         {
             get
             {
-                return string.Format("v{0}", _version.ToString(CultureInfo.InvariantCulture));
+                var vers  = System.Reflection.Assembly.GetEntryAssembly()
+                                           .GetName()
+                                           .Version
+                                           .ToString();
+                return vers;
             }
         }
 
