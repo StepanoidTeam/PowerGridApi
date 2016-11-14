@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using System.Security.Claims;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc.Controllers;
+using System.IO;
+using System.Text;
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -22,6 +24,10 @@ namespace PowerGridApi.Controllers
     [EnableCors("CorsPolicy")]
     public abstract partial class BaseController : Controller
     {
+        private static string _logFilePath = "Log_{0}.txt";
+
+        private static bool _enableLogging = true;
+
         private static decimal _version = 0.05m;
 
         /// <summary>
@@ -47,6 +53,32 @@ namespace PowerGridApi.Controllers
                 if (await IfNotRestricted(context, next))
                     await base.OnActionExecutionAsync(context, next);
             }
+        }
+
+        public override async void OnActionExecuted(ActionExecutedContext context)
+        {
+            if (!_enableLogging)
+                return;
+
+            var sb = new StringBuilder();
+            var inputStream = Request.Body;
+            var curDt = DateTime.UtcNow;
+            sb.AppendLine(string.Format("Request at {0}:", curDt.ToString("yyyy-MM-ddTHH:mm:ss")));
+            sb.AppendLine(string.Format("Path: {0}", Request.Path));
+            sb.AppendLine(string.Format("User: {0}", UserContext == null ? "<none>" : UserContext.User.AuthToken));
+            using (var reader = new StreamReader(inputStream))
+            {
+                if (Request.Method == "POST")
+                    sb.AppendLine(reader.ReadToEnd());
+                else
+                    sb.AppendLine(Request.QueryString.ToString());
+
+            }
+            sb.AppendLine(string.Format("Response: {0}", Newtonsoft.Json.JsonConvert.SerializeObject(context.Result)));
+            sb.AppendLine("-----------------------------------------------");
+            var path = string.Format(_logFilePath, curDt.ToString("yyyy-MM-dd"));
+            using (var file = new StreamWriter(System.IO.File.Open(path, FileMode.Append)))
+                await file.WriteAsync(sb.ToString());
         }
     }
 }
