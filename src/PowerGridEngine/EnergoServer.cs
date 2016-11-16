@@ -40,6 +40,8 @@ namespace PowerGridEngine
         /// <param name="settings"></param>
 		public EnergoServer(ServerSettings settings = null)
 		{
+            MaxPlayersInRoom = 6;
+            _uniqueIds = new Dictionary<string, object>();
             _current = this;
 
             Settings = settings == null ? new ServerSettings() : settings;
@@ -54,5 +56,23 @@ namespace PowerGridEngine
         {
             return (T)action.User.GameRoomRef.CurrentStage.RouteAction<ActionResponse>(action);
         }
-	}
+
+        public static string GenerateId()
+        {
+            return Guid.NewGuid().ToString();
+        }
+
+        private static Dictionary<string, object> _uniqueIds;
+
+        public static string GenerateSmallUniqueId()
+        {
+            var newId = string.Empty;
+            do
+            {
+                newId = GenerateId().Substring(0, 8);
+            } while (_uniqueIds.ContainsKey(newId));
+            _uniqueIds.Add(newId, null);
+            return newId;
+        }
+    }
 }

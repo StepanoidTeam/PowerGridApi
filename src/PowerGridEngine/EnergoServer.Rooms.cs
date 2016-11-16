@@ -9,6 +9,8 @@ namespace PowerGridEngine
 {
     public partial class EnergoServer
     {
+        public static int MaxPlayersInRoom { get; private set; }
+
         public void CreateGameRoom(User player, GameRoom gameRoom)
         {
             if (player == null || gameRoom == null)
@@ -25,6 +27,11 @@ namespace PowerGridEngine
                 errMsg = Constants.Instance.ErrorMessage.Is_In_Game_Room;
                 return null;
             }
+            if (!name.CheckIfNameIsOk())
+            {
+                errMsg = Constants.Instance.ErrorMessage.Wrong_Name;
+                return null;
+            }
             var gameRoom = new GameRoom(name, player);
             return gameRoom;
         }
@@ -38,6 +45,11 @@ namespace PowerGridEngine
                 gameRoom.ClearPlayers(leader.Id);
                 GameRooms.Remove(gameRoom.Id);
             }
+        }
+
+        public int GetRoomsQty()
+        {
+            return GameRooms.Count();
         }
 
         public GameRoom[] GetGameRoomList(User user, RoomLookupSettings lookupSettings = null)

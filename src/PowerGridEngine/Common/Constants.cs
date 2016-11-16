@@ -29,6 +29,7 @@ namespace PowerGridEngine
 
         public class ErrorMessages
         {
+            public readonly string Wrong_Name = "Wrong name.";
             public readonly string YouAre_Unauthorized = "You are unauthorized.";
             public readonly string Similar_User_Detected = "Similar user in the system, please change your name.";
             public readonly string Too_Short_Username = "Empty or too short username (should be at least 3 symbols).";

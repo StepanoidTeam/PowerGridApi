@@ -19,6 +19,11 @@ namespace PowerGridEngine
                 errMsg = Constants.Instance.ErrorMessage.Too_Short_Username;
                 return null;
             }
+            else if(!username.CheckIfNameIsOk())
+            {
+                errMsg = Constants.Instance.ErrorMessage.Wrong_Name;
+                return null;
+            }
 
             string id = null;
             
@@ -41,7 +46,7 @@ namespace PowerGridEngine
                     if (Settings.SimpleOrGuidPlayerId && id == null)
                         id = username.NormalizeId();
                     else //try to generate new unique Id
-                        id = StringExtensions.GenerateId();
+                        id = GenerateSmallUniqueId();
                 }
                 while (Users.ContainsKey(id));
             }

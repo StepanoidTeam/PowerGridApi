@@ -68,11 +68,27 @@ namespace PowerGridApi.Controllers
         public async Task<IActionResult> CreateGameRoom([FromHeader]string authToken, [FromBody]CreateRoomModel room)
         {
             var errMsg = string.Empty;
+            if (UserContext.User.IsInRoom())
+                return await GenericResponse(ResponseType.NotAllowed, Constants.Instance.ErrorMessage.Is_In_Game_Room);
+
             var gameRoom = EnergoServer.Current.CreateGameRoom(UserContext.User, room.Name, out errMsg);
-            return await GenericResponse(errMsg, () =>
+            if (!string.IsNullOrWhiteSpace(errMsg))
+                return await GenericResponse(ResponseType.InvalidModel, errMsg);
+
+            ToggleReadyResponse response = null;
+            if (room.SetReadyMark)
+                response = EnergoServer.Current.RouteAction<ToggleReadyResponse>(new ToggleReadyAction(UserContext.User));
+
+            return await SuccessResponse(() =>
             {
-                return new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions { Id = true, Name = true });
-            }, ResponseType.NotAllowed).Invoke();
+                return new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions
+                {
+                    Id = true,
+                    Name = true,
+                    UserDetails = true,
+                    UserViewOptions = new UserModelViewOptions { ReadyMark = true }
+                });
+            }).Invoke();
         }
 
         /// <summary>

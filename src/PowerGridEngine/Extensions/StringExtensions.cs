@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace PowerGridEngine
@@ -34,9 +35,15 @@ namespace PowerGridEngine
             return str.ToLowerInvariant().Trim().Replace(" ", "");
         }
 
-        public static string GenerateId()
+        /// <summary>
+        /// check if string contains spec symbols (not a-z, а-я, 0-9)
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static bool CheckIfNameIsOk(this string str)
         {
-            return Guid.NewGuid().ToString();
+            var regexp = new Regex(@"^\w+( {0,1}[\w'])*$", RegexOptions.Compiled);
+            return regexp.IsMatch(str ?? "");
         }
     }
 }

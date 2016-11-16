@@ -29,33 +29,19 @@ namespace PowerGridApi.Controllers
         [SwaggerResponse(System.Net.HttpStatusCode.BadRequest, "InvalidModel")]
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginModel loginInfo)
-		{
-            if(string.IsNullOrWhiteSpace(loginInfo.Username))
+        {
+            if (string.IsNullOrWhiteSpace(loginInfo.Username))
                 return await GenericResponse(ResponseType.InvalidModel, "Username is required");
 
             var errMsg = string.Empty;
-			var user = EnergoServer.Current.Login(loginInfo.Username, out errMsg);
-            
-            var result = await Task.Run(() =>
+            var user = EnergoServer.Current.Login(loginInfo.Username, out errMsg);
+
+            return await GenericResponse(() =>
             {
                 var obj = new UserModel(user).GetInfo(new UserModelViewOptions() { Id = true, Name = true });
                 obj.Add("AuthToken", user.AuthToken);
                 return obj;
-            });
-
-            return await GenericResponse(errMsg, result, ResponseType.InvalidModel);
-		}
-
-        /// <summary>
-        /// Check if authorization token is not expired yet
-        /// </summary>
-        /// <returns>Possible statuses: Unauthorized, Ok</returns>
-        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
-        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
-        [HttpPost("CheckAuthorization")]
-        public async Task<IActionResult> CheckAuthorization([FromHeader]string authToken)
-        {
-            return await GenericResponse(ResponseType.Ok);
+            }, errMsg, ResponseType.InvalidModel).Invoke();
         }
 
         /// <summary>

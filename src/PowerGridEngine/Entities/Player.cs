@@ -23,7 +23,7 @@ namespace PowerGridEngine
 				Id = username.NormalizeId();
 			else
 				Id = id;
-            AuthToken = StringExtensions.GenerateId();
+            AuthToken = EnergoServer.GenerateId();
             Username = username.RemoveExtraSpaces();
 		}
 

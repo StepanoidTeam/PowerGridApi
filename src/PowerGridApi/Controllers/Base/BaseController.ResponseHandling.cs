@@ -74,7 +74,7 @@ namespace PowerGridApi.Controllers
             return await ErrorResponse(errMsg, ifErrorStatus);
         }
 
-        protected Func<Task<IActionResult>> GenericResponse(string errMsg, Func<object> dataFunc = null, ResponseType ifErrorStatus = ResponseType.UnexpectedError)
+        protected Func<Task<IActionResult>> GenericResponse(Func<object> dataFunc, string errMsg, ResponseType ifErrorStatus = ResponseType.UnexpectedError)
         {
             return () =>
             {

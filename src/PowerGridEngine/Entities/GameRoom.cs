@@ -7,6 +7,8 @@ namespace PowerGridEngine
     
     public class GameRoom : BaseEnergoEntity
     {
+        public int MaxPlayers { get; private set; }
+
         public string Id { get; private set; }
 
         public string Name { get; private set; }
@@ -42,7 +44,12 @@ namespace PowerGridEngine
             if (string.IsNullOrWhiteSpace(name))
                 name = GenerateGameRoomName(leader);
             Name = name;
-            Id = Guid.NewGuid().ToString();
+
+            //be sure game room id is unique
+            Id = EnergoServer.GenerateSmallUniqueId();
+            //todo setup it according to map settings and also allow to set it in room settings
+            MaxPlayers = EnergoServer.MaxPlayersInRoom;
+
             Players = new Dictionary<string, PlayerInRoom>();
             Players.Add(leader.Id, new PlayerInRoom(leader));
             Leader = leader;
@@ -60,7 +67,10 @@ namespace PowerGridEngine
 
         private string GenerateGameRoomName(User leader)
         {
-            return string.Format("{0}'s Room", leader.Username);
+            var name = string.Format("{0}'s Room", leader.Username);
+            if (!name.CheckIfNameIsOk())
+                name = string.Format("New Room {0}", EnergoServer.Current.GetRoomsQty() + 1);
+            return name;
         }
 
         public void Close(string leaderId)
