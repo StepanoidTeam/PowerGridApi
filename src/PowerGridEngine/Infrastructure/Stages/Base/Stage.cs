@@ -8,15 +8,15 @@ namespace PowerGridEngine
     /// Base stage description. Stage is specific game state, while it active only some specific for stage actions are allowable or
     /// if it's some game stage (not generic) - it will change some game rules.
     /// </summary>
-    public abstract class Stage: IUserActionHandler
+    public abstract class Stage : IUserActionHandler
     {
-        protected GameContext gameContext;
+        protected GameStages container;
 
         protected List<User> Players
         {
             get
             {
-                return gameContext.Players;
+                return container.GameContext.Players;
             }
         }
 
@@ -28,22 +28,21 @@ namespace PowerGridEngine
 
         public bool IsFinished { get; private set; }
 
-        public Stage(GameContext _gameContext)
+        public Stage(GameStages container)
         {
-            gameContext = _gameContext;
-        }
-
-        protected bool Done()
-        {
-            IsFinished = true;
-            return IsFinished;
+            this.container = container;
         }
 
         /// <summary>
-        /// According to Stage logic this method should check if Stage is done and if yes - change IsFinished to true
+        /// According to Stage logic this method should check if Stage is done 
         /// </summary>
-        protected abstract bool CheckIfDone();
+        protected virtual bool TryToResolve()
+        {
+            IsFinished = true;
+            container.Next();
+            return IsFinished;
+        }
 
-        public abstract T RouteAction<T>(UserAction action) where T : ActionResponse;
+        public abstract T RouteAction<T>(UserAction<T> action) where T : ActionResponse;
     }
 }

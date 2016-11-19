@@ -15,6 +15,11 @@ namespace PowerGridEngine
             IsSuccess = true;
         }
 
+        /// <summary>
+        /// Any class should inherit this constructor
+        /// </summary>
+        /// <param name="isSuccess"></param>
+        /// <param name="errorMsg"></param>
         public ActionResponse(bool isSuccess, string errorMsg)
         {
             IsSuccess = isSuccess;

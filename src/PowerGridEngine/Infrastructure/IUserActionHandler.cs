@@ -9,6 +9,6 @@ namespace PowerGridEngine
     /// </summary>
     public interface IUserActionHandler
     {
-        T RouteAction<T>(UserAction action) where T : ActionResponse;
+        T RouteAction<T>(UserAction<T> action) where T : ActionResponse;
     }
 }

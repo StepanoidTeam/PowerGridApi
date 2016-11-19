@@ -28,8 +28,8 @@ namespace PowerGridApi.Controllers
         public async Task<IActionResult> GetAllowedActions([FromHeader]string authToken)
         {
             var errMsg = string.Empty;
-            //todo wtf UserContext.User....(AuthToken???...)
-            var lst = UserContext.User.GameRoomRef.GameBoardRef.GetAllowedActions(UserContext.User.AuthToken, out errMsg);
+            //todo it's shit to get allowed actions from GAME BOARD
+            var lst = GameContext.GetContextByPlayer(UserContext.User).GameBoard.GetAllowedActions(UserContext.User.AuthToken, out errMsg);
             return await GenericResponse(errMsg, lst, ResponseType.NotYourTurn);
         }
 
@@ -53,5 +53,28 @@ namespace PowerGridApi.Controllers
             //}
             return await GenericResponse(ResponseType.UnexpectedError, "Incorrect action");
         }
+
+        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
+        [SwaggerResponse(System.Net.HttpStatusCode.BadRequest, "NotInGame")]
+        [RestrictByState(UserState.InGame)]
+        [HttpPost("BuildCity")]
+        public async Task<IActionResult> BuildCity([FromHeader]string authToken, [FromBody]BuildCityModel buildCityModel)
+        {
+            var user = UserContext.User;
+
+            var context = GameContext.GetContextByPlayer(user);
+            var citites = context.GameBoard.MapRef.Cities;
+            if (!citites.ContainsKey(buildCityModel.CityId))
+                return await ErrorResponse("No such city", ResponseType.InvalidModel);
+
+            var city = context.GameBoard.MapRef.Cities[buildCityModel.CityId];
+            var response = EnergoServer.Current.RouteAction(new BuildCityAction(user, city));
+
+            if (!response.IsSuccess)
+                return await ErrorResponse(response.ErrorMsg, ResponseType.InvalidModel);
+            return await SuccessResponse(response);
+        }
+
     }
 }

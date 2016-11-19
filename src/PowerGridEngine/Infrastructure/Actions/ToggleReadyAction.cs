@@ -4,10 +4,7 @@ using System.Linq;
 
 namespace PowerGridEngine
 {
-    /// <summary>
-    /// Contains data required for specific user action in game and actually is a route to specific action
-    /// </summary>
-    public class ToggleReadyAction : UserAction
+    public class ToggleReadyAction : UserAction<ToggleReadyResponse>
     {
         public bool? State { get; private set; }
 

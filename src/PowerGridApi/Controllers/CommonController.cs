@@ -41,9 +41,10 @@ namespace PowerGridApi.Controllers
 		public async Task<IActionResult> GetGameStatus([FromHeader]string authToken)
 		{
             var user = UserContext.User;
-			
+
+            var gameBoard = GameContext.GetContextByPlayer(user).GameBoard;
             //to do view model
-            var gameBoardModel = new GameBoardModel(user.GameRoomRef.GameBoardRef);
+            var gameBoardModel = new GameBoardModel(gameBoard);
             var result = await Task.Run(() => { return gameBoardModel.GetInfo(); });
 
             return await SuccessResponse(result);

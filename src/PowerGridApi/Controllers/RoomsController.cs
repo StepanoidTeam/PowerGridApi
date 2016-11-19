@@ -77,16 +77,15 @@ namespace PowerGridApi.Controllers
 
             ToggleReadyResponse response = null;
             if (room.SetReadyMark)
-                response = EnergoServer.Current.RouteAction<ToggleReadyResponse>(new ToggleReadyAction(UserContext.User));
+                response = EnergoServer.Current.RouteAction(new ToggleReadyAction(UserContext.User));
 
             return await SuccessResponse(() =>
             {
-                return new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions
+                return new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions(true)
                 {
-                    Id = true,
-                    Name = true,
-                    UserDetails = true,
-                    UserViewOptions = new UserModelViewOptions { ReadyMark = true }
+                    IsInGame = false,
+                    UserCount = false,
+                    UserViewOptions = new UserModelViewOptions(false) { ReadyMark = true }
                 });
             }).Invoke();
         }
@@ -198,7 +197,7 @@ namespace PowerGridApi.Controllers
         {
             var user = UserContext.User;
             
-            var toggleResponse = EnergoServer.Current.RouteAction<ToggleReadyResponse>(new ToggleReadyAction(user, toggleModel.State));
+            var toggleResponse = EnergoServer.Current.RouteAction(new ToggleReadyAction(user, toggleModel.State));
 
             //there are couldn't be actually errors, because current method is expecting you are in game and we user
             //YOUR (user) game for sure. So only possible is Unexpected error
@@ -218,14 +217,11 @@ namespace PowerGridApi.Controllers
         [HttpGet("StartGame")]
         public async Task<IActionResult> StartGame([FromHeader]string authToken)
         {
-            var errMsg = string.Empty;
             var user = UserContext.User;
 
-            user.GameRoomRef.Init();
-            user.GameRoomRef.GameBoardRef.Start();
-            
-            //only possible error - couldn't find map
-            return await GenericResponse(ResponseType.NotFound, errMsg);
+            var startResponse = EnergoServer.Current.RouteAction(new StartGameAction(user));
+
+            return await GenericResponse(ResponseType.Ok, data: startResponse);
         }
 
     }

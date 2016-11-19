@@ -17,6 +17,7 @@ namespace PowerGridEngine
             {
                 if (map == null)
                     map = Create();
+                
                 return map;
             }
         }

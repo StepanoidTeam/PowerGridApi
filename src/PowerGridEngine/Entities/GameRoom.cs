@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace PowerGridEngine
 {
-    
+
     public class GameRoom : BaseEnergoEntity
     {
         public int MaxPlayers { get; private set; }
@@ -17,23 +17,18 @@ namespace PowerGridEngine
 
         public User Leader { get; private set; }
 
-        public bool IsInGame { get; private set; }
+        private static Type[] notInGameStages = new[] { typeof(CreateGameStage)/* todo , typeof(FinishGameStage)*/ };
 
-        public GameBoard GameBoardRef { get; private set; }
-
-        public Queue<Stage> Stages { get; private set; }
-
-        private Stage currentStage;
-
-        public Stage CurrentStage
+        //todo really, do we need it here?
+        public bool IsInGame
         {
             get
             {
-                if (currentStage == null || currentStage.IsFinished)
-                    currentStage = Stages.Dequeue();
-                return currentStage;
+                return !notInGameStages.Contains(Stages.CurrentStage.GetType());
             }
         }
+
+        public GameStages Stages { get; private set; }
 
         //public Round Round { get; private set; }
 
@@ -53,16 +48,19 @@ namespace PowerGridEngine
             Players = new Dictionary<string, PlayerInRoom>();
             Players.Add(leader.Id, new PlayerInRoom(leader));
             Leader = leader;
-            IsInGame = false;
 
             //todo push mapId here
+            //maybe allow to change map (it means and max players too) when room already created?
             var mapId = string.Empty;
+            //todo generate context somewhere else
             var gameContext = new GameContext(this, mapId);
 
             EnergoServer.Current.CreateGameRoom(leader, this);
 
-            var _gameContext = GameContext.GetContextByPlayer(leader);
-            Stages = new Queue<Stage>().PushItem(new CreateGameStage(_gameContext));
+            Stages = new GameStages(gameContext)
+                .AddStage<CreateGameStage>()
+                .AddStage<FirstStage>()
+                .Start();
         }
 
         private string GenerateGameRoomName(User leader)
@@ -73,33 +71,11 @@ namespace PowerGridEngine
             return name;
         }
 
-        public void Close(string leaderId)
+        private void Close(string leaderId)
         {
             if (leaderId == Leader.Id)
             {
                 EnergoServer.Current.RemoveGameRoom(Leader, this);
-            }
-        }
-
-        public void ClearPlayers(string leaderId)
-        {
-            if (leaderId == Leader.Id)
-            {
-                foreach (var p in Players)
-                    p.Value.Player.GameRoomRef = null;
-                Leader = null;
-                Players = null;
-            }
-        }
-
-        public void FinishGame(string playerId)
-        {
-            if (IsInGame && Players.ContainsKey(playerId)
-                && Players[playerId].Player.GameRoomRef != null && Players[playerId].Player.GameRoomRef.Id == this.Id)
-            {
-                IsInGame = false;
-                //todo
-                Close(playerId);
             }
         }
 
@@ -122,6 +98,28 @@ namespace PowerGridEngine
                         Leader = Players.Values.First().Player;
                     }
                 }
+            }
+        }
+
+        public void ClearPlayers(string leaderId)
+        {
+            if (leaderId == Leader.Id)
+            {
+                foreach (var p in Players)
+                    p.Value.Player.GameRoomRef = null;
+                Leader = null;
+                Players = null;
+            }
+        }
+
+        public void FinishGame(string playerId)
+        {
+            if (IsInGame && Players.ContainsKey(playerId)
+                && Players[playerId].Player.GameRoomRef != null && Players[playerId].Player.GameRoomRef.Id == this.Id)
+            {
+                //IsInGame = false;
+                //todo
+                Close(playerId);
             }
         }
 
@@ -176,21 +174,5 @@ namespace PowerGridEngine
                 player.GameRoomRef = this;
             }
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="errMsg"></param>
-        /// <param name="mapId">default if not set</param>
-        public void Init(string mapId = null)
-        {
-            var _gameContext = GameContext.GetContextByPlayer(Leader);
-            //todo we really need it?
-            GameBoardRef = _gameContext.GameBoard;
-            IsInGame = true;
-            //Round = new Round(this);
-            //Round.Add(new BuildPhase());
-        }
-
     }
 }

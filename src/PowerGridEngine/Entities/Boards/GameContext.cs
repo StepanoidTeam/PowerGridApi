@@ -9,8 +9,6 @@ namespace PowerGridEngine
     /// </summary>
 	public class GameContext
 	{
-        public bool IsInited { get; private set; }
-        
         public IDictionary<string, PlayerBoard> PlayerBoards { get; private set; }
 
         public GameBoard GameBoard { get; private set; }
@@ -26,7 +24,7 @@ namespace PowerGridEngine
         }
 
         /// <summary>
-        /// todo удалять контексты при необходимости (игра закончена, игра заброшена, разрыв связи...)
+        /// todo удалять контексты при необходимости (игра закончена, игра заброшена, разрыв связи?...)
         /// </summary>
         private static List<GameContext> Contexts { get; set; }
 
@@ -42,8 +40,6 @@ namespace PowerGridEngine
 
             var deck = GameRule.CreateDeck();
             StationBoard = new StationBoard(this, deck);
-
-            IsInited = true;
 
             if (Contexts == null)
                 Contexts = new List<GameContext>();

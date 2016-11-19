@@ -9,7 +9,9 @@ namespace PowerGridEngine
     /// </summary>
     public class Round
     {
-        private GameRoom _gameRoomRef { get; set; }
+        public int RoundNumber { get; private set; }
+
+        public GameContext GameContext { get; private set; }
 
         private List<Phase> Phases { get; set; }
 
@@ -26,23 +28,29 @@ namespace PowerGridEngine
             }
         }
 
-        public Round(GameRoom gameRoomRef)
+        public Round(GameContext gameContext)
         {
-            _gameRoomRef = gameRoomRef;
+            GameContext = gameContext;
         }
 
         private void NextRound()
         {
             foreach (var phase in Phases)
                 phase.StartNewRound();
+            RoundNumber++;
         }
 
-        public void Add(Phase phase)
+        public Round Add<T>() where T: Phase
         {
-            phase.Init(_gameRoomRef.Players.Values.Select(m => m.Player));
+            var phase = (T)Activator.CreateInstance(typeof(T), this);
             Phases.Add(phase);
+            return this;
+        }
 
+        public Round Start()
+        {
             NextRound();
+            return this;
         }
 
     }

@@ -5,9 +5,14 @@ namespace PowerGridEngine
 {	
 	public class GameBoard : BaseEnergoEntity
 	{
+        /// <summary>
+        /// key is player Id
+        /// </summary>
+        public Dictionary<string, PlayerBuiltCities> BuildPlayersCities { get; private set; }
+
         private GameContext context { get; set; }
 
-		public Map Map { get; private set; }
+		public Map MapRef { get; private set; }
         
 		public GameStatusEnum Status { get; set; }
 
@@ -20,23 +25,17 @@ namespace PowerGridEngine
             this.context = context;
 
 			var errMsg = string.Empty;
-			Map = EnergoServer.Current.LookupMap(mapId, out errMsg);
+			MapRef = EnergoServer.Current.LookupMap(mapId, out errMsg);
             if(string.IsNullOrWhiteSpace(errMsg))
                 //use default map
-                Map = EnergoServer.Current.LookupMap(Constants.CONST_DEFAULT_MAP_ID, out errMsg);
+                MapRef = EnergoServer.Current.LookupMap(Constants.CONST_DEFAULT_MAP_ID, out errMsg);
 
-            if (Map != null)
+            if (MapRef != null)
 			{
                 Status = GameStatusEnum.Auction;
 			}
-		}
-		
-        public void Start()
-        {
-            //todo move this out
-            foreach (var p in context.PlayerBoards)
-                GameRule.PaymentTransaction(p.Value.PlayerRef, 50);
-            GameRule.ChangeTurnOrder(context);
+
+            BuildPlayersCities = new Dictionary<string, PlayerBuiltCities>();
         }
 
         public bool CheckInStatus(GameStatusEnum status, out string errMsg)

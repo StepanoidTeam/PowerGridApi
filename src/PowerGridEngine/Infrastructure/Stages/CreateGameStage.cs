@@ -11,23 +11,21 @@ namespace PowerGridEngine
     {
         private IDictionary<string, bool> readyMarks { get; set; }
 
-        private int userCount { get { return gameContext.PlayerBoards.Count; } }
-
         /// <summary>
         /// Stage will finished when there will be <userCount> users and every one will check their ready mark
         /// </summary>
         /// <param name="gameContext"></param>
         /// <param name="userCount"></param>
-        public CreateGameStage(GameContext _gameContext) : base(_gameContext)
+        public CreateGameStage(GameStages container) : base(container)
         {
             readyMarks = new Dictionary<string, bool>();
         }
 
-        protected override bool CheckIfDone()
+        protected override bool TryToResolve()
         {
-            if (readyMarks.Count() == userCount && readyMarks.Values.All(m => true))
+            if (readyMarks.Count() == Players.Count && readyMarks.Values.All(m => true))
             {
-                return base.Done();
+                return base.TryToResolve();
             }
             return false;
         }
@@ -48,18 +46,18 @@ namespace PowerGridEngine
             return false;
         }
 
-        public override T RouteAction<T>(UserAction action)
+        public override T RouteAction<T>(UserAction<T> action)
         {
             if (action is ToggleReadyAction)
                 return (T)ToogleReadyMark(action as ToggleReadyAction);
+            if (action is StartGameAction)
+                return (T)StartGame(action as StartGameAction);
 
             return (T)new ActionResponse(false, "Unallowable action");
         }
 
         public ActionResponse ToogleReadyMark(ToggleReadyAction action)
         {
-            if (action == null || action.User == null || action.User.GameRoomRef == null)
-                return new ActionResponse(false, "Unexpected error");
             var userId = action.User.Id;
             //if (player == null)
             //    return ReturnError(Constants.Instance.ErrorMessage.User_Cant_Be_Null, out errMsg);
@@ -77,6 +75,21 @@ namespace PowerGridEngine
             else
                 result = setReadyMark(userId, !GetReadyMark(userId));
             return new ToggleReadyResponse(result);
+        }
+
+        public ActionResponse StartGame(StartGameAction action)
+        {
+            var result = TryToResolve();
+
+            if (result)
+            {
+                //todo move this out
+                foreach (var p in container.GameContext.PlayerBoards)
+                    GameRule.PaymentTransaction(p.Value.PlayerRef, 50);
+                GameRule.ChangeTurnOrder(container.GameContext);
+            }
+
+            return new StartGameResponse(result);
         }
 
     }

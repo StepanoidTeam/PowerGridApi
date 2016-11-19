@@ -42,7 +42,7 @@ namespace PowerGridEngine
 		/// <returns></returns>
 		public bool IsInGame()
 		{
-			return GameRoomRef != null && GameRoomRef.GameBoardRef != null;
+            return GameRoomRef != null && GameRoomRef.IsInGame;
 		}
 	}
 }

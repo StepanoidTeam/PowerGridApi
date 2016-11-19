@@ -18,9 +18,9 @@ namespace PowerGridEngine
         {
             get
             {
-                if (Entity.GameRoomRef == null || !(Entity.GameRoomRef.CurrentStage is CreateGameStage))
+                if (Entity.GameRoomRef == null || !(Entity.GameRoomRef.Stages.CurrentStage is CreateGameStage))
                     return null;
-                var curStage = Entity.GameRoomRef.CurrentStage as CreateGameStage;
+                var curStage = Entity.GameRoomRef.Stages.CurrentStage as CreateGameStage;
                 return curStage.GetReadyMark(UserId);
             }
         }

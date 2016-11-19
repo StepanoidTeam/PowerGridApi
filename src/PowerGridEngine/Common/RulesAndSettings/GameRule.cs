@@ -6,6 +6,14 @@ namespace PowerGridEngine
 {
     public static class GameRule
     {
+        public static bool CanPay(User player, int value)
+        {
+            var context = GameContext.GetContextByPlayer(player);
+            if (context == null)
+                return false;
+            return context.PlayerBoards[player.Id].Money >= value;
+        }
+
         public static bool PaymentTransaction(User player, int value)
         {
             var context = GameContext.GetContextByPlayer(player);
