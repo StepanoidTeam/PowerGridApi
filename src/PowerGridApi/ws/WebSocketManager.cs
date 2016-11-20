@@ -9,33 +9,21 @@ using Microsoft.AspNetCore.Http;
 
 namespace PowerGridApi.ws
 {
+	//todo: make it singletone or IoC/DI
 	public static class WebSocketManager
 	{
-
 		static ConcurrentBag<WebSocket> _sockets = new ConcurrentBag<WebSocket>();
 
-		static ArraySegment<Byte> GetBytes(string str)
-		{
-			byte[] bytes = new byte[str.Length * sizeof(char)];
-			System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
-			return new ArraySegment<Byte>(bytes);
-		}
 
+
+		//todo: specify sender/receivers? not for all
 		public static async void Broadcast(string message)
 		{
-			//await Task.WhenAll(_sockets.Where(s.State == WebSocketState.Open).Select(s => s.Send());
-
-			var webSocket = _sockets.First();
-
 			await Task.WhenAll(
 				_sockets
 				.Where(s => s.State == WebSocketState.Open)
-				.Select(s => s.SendAsync(GetBytes(message), WebSocketMessageType.Text, true, CancellationToken.None)));
-
-			//await webSocket.SendAsync(GetBytes(message), WebSocketMessageType.Text, true, CancellationToken.None);
+				.Select(s => s.SendAsync(message.GetByteSegment(), WebSocketMessageType.Text, true, CancellationToken.None)));
 		}
-
-
 
 
 		public static async Task Listen(HttpContext http, Func<Task> next)
@@ -49,24 +37,29 @@ namespace PowerGridApi.ws
 				if (webSocket != null && webSocket.State == WebSocketState.Open)
 				{
 					_sockets.Add(webSocket);
-					//todo: somehow delete closed sockets
 
+
+					//todo: move this block to the separate method
 					while (webSocket.State == WebSocketState.Open)
 					{
-						var error = String.Empty;
 						try
 						{
-							var buffer = new ArraySegment<Byte>(new Byte[4096]);
+							var buffer = new ArraySegment<byte>(new byte[4096]);
 							var received = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
 
+
+							//todo: handle only text?
 							switch (received.MessageType)
 							{
 								case WebSocketMessageType.Close:
-									OnClose(received.CloseStatus, received.CloseStatusDescription);
 									//todo: somehow delete closed sockets
+									OnClose(received.CloseStatus, received.CloseStatusDescription);
 									break;
 								case WebSocketMessageType.Text:
 									var message = Encoding.UTF8.GetString(buffer.Array, buffer.Offset, buffer.Count).Trim('\0');
+
+									//todo: somehow parse json to model?
+									//todo: route the requests to proper methods?
 									OnMessage(message);
 									Broadcast(message);
 									break;
@@ -81,6 +74,7 @@ namespace PowerGridApi.ws
 							break;
 						}
 					}
+					//todo: handle closed socket - remove?
 				}
 				else
 				{
@@ -93,11 +87,14 @@ namespace PowerGridApi.ws
 
 		static void OnClose(WebSocketCloseStatus? status, string desc)
 		{
+			//todo: somehow delete closed sockets
 			Console.WriteLine(desc);
 		}
 
 		static void OnMessage(string data)
 		{
+			//todo: somehow parse json to model?
+			//todo: route the requests to proper methods?
 			Console.WriteLine(data);
 		}
 
