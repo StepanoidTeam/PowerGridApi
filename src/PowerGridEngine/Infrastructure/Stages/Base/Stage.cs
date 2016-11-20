@@ -12,7 +12,7 @@ namespace PowerGridEngine
     {
         protected GameStages container;
 
-        protected List<User> Players
+        protected IEnumerable<User> Players
         {
             get
             {
@@ -41,6 +41,10 @@ namespace PowerGridEngine
             IsFinished = true;
             container.Next();
             return IsFinished;
+        }
+
+        public virtual void Begin()
+        {
         }
 
         public abstract T RouteAction<T>(UserAction<T> action) where T : ActionResponse;

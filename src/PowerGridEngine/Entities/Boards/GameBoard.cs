@@ -26,7 +26,7 @@ namespace PowerGridEngine
 
 			var errMsg = string.Empty;
 			MapRef = EnergoServer.Current.LookupMap(mapId, out errMsg);
-            if(string.IsNullOrWhiteSpace(errMsg))
+            if(!string.IsNullOrWhiteSpace(errMsg))
                 //use default map
                 MapRef = EnergoServer.Current.LookupMap(Constants.CONST_DEFAULT_MAP_ID, out errMsg);
 

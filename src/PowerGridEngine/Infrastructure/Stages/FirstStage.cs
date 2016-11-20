@@ -20,18 +20,14 @@ namespace PowerGridEngine
         {
             Round = new Round(container.GameContext)
                 .Add<BuildPhase>()
-                .Add<ProduceEnergyPhase>()
-                .Start();
+                .Add<ProduceEnergyPhase>();
         }
 
-        //protected override bool TryToResolve()
-        //{
-        //    if (readyMarks.Count() == Players.Count && readyMarks.Values.All(m => true))
-        //    {
-        //        return base.TryToResolve();
-        //    }
-        //    return false;
-        //}
+        public override void Begin()
+        {
+            base.Begin();
+            Round.Start();
+        }
 
         public override T RouteAction<T>(UserAction<T> action)
         {

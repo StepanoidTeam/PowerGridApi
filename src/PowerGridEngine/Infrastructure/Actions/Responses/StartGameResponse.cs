@@ -6,11 +6,12 @@ namespace PowerGridEngine
 {
     public class StartGameResponse: ActionResponse
     {
-        public bool IsStarted { get; private set; }
-
-        public StartGameResponse(bool isStarted)
+        public StartGameResponse()
         {
-            IsStarted = isStarted;
+        }
+
+        public StartGameResponse(string errMsg): base(false, errMsg)
+        {
         }
     }
 }
