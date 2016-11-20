@@ -31,6 +31,7 @@ namespace PowerGridEngine
         public Round(GameContext gameContext)
         {
             GameContext = gameContext;
+            Phases = new List<Phase>(); 
         }
 
         private void NextRound()

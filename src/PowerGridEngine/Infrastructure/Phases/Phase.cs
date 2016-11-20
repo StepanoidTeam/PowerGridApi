@@ -18,12 +18,7 @@ namespace PowerGridEngine
         public Phase(Round container)
         {
             Container = container;
-            Init();
-        }
-
-        public void Init()
-        {
-            _userStates = Container.GameContext.Players.ToDictionary(k => k.Id, v => false);
+            StartNewRound();
         }
 
         public virtual void Done(User user)
@@ -36,8 +31,7 @@ namespace PowerGridEngine
 
         public void StartNewRound()
         {
-            foreach (var key in _userStates.Keys)
-                _userStates[key] = false;
+            _userStates = Container.GameContext.Players.ToDictionary(k => k.Id, v => false);
             //todo need to override it when need to do some specific New Round logic for some phase?
         }
 

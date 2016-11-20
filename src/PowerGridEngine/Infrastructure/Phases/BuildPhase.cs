@@ -31,12 +31,19 @@ namespace PowerGridEngine
         {
             var board = Container.GameContext.GameBoard;
             var wasMoney = Container.GameContext.PlayerBoards[action.User.Id].Money;
-            var result = board.BuildPlayersCities[action.User.Id].Build(action.City);
+
+            var playerCities = new PlayerBuiltCities(action.User);
+            if (board.BuildPlayersCities.ContainsKey(action.User.Id))
+                playerCities = board.BuildPlayersCities[action.User.Id];
+            else
+                board.BuildPlayersCities.Add(action.User.Id, playerCities);
+
+            var result = playerCities.Build(action.City);
             if (result)
             {
                 var nowMoney = Container.GameContext.PlayerBoards[action.User.Id].Money;
                 Done(action.User);
-                return new BuildCityResponse(nowMoney - wasMoney);
+                return new BuildCityResponse(wasMoney - nowMoney);
             }
             return new BuildCityResponse("Can't build here");
         }

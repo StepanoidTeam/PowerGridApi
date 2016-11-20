@@ -29,6 +29,7 @@ namespace PowerGridEngine
 
         public class ErrorMessages
         {
+            public readonly string Not_Everybody_Checked_ReadyMark = "Not everybody checked their ready marks.";
             public readonly string Wrong_Name = "Wrong name.";
             public readonly string YouAre_Unauthorized = "You are unauthorized.";
             public readonly string Similar_User_Detected = "Similar user in the system, please change your name.";

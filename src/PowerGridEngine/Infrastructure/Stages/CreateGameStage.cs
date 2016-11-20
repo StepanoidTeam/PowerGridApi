@@ -23,7 +23,7 @@ namespace PowerGridEngine
 
         protected override bool TryToResolve()
         {
-            if (readyMarks.Count() == Players.Count && readyMarks.Values.All(m => true))
+            if (readyMarks.Count() == Players.Count() && readyMarks.Values.All(m => true))
             {
                 return base.TryToResolve();
             }
@@ -84,12 +84,13 @@ namespace PowerGridEngine
             if (result)
             {
                 //todo move this out
-                foreach (var p in container.GameContext.PlayerBoards)
-                    GameRule.PaymentTransaction(p.Value.PlayerRef, 50);
+                foreach (var p in Players)
+                    GameRule.PaymentTransaction(p, 50);
                 GameRule.ChangeTurnOrder(container.GameContext);
+                return new StartGameResponse();
             }
 
-            return new StartGameResponse(result);
+            return new StartGameResponse(Constants.Instance.ErrorMessage.Not_Everybody_Checked_ReadyMark);
         }
 
     }

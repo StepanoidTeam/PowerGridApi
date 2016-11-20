@@ -32,7 +32,10 @@ namespace PowerGridEngine
             if (CurrentStage == null || CurrentStage.IsFinished)
             {
                 if (List.Any())
+                {
                     CurrentStage = List.Dequeue();
+                    CurrentStage.Begin();
+                }
                 else
                     IsFinished = true;
             }

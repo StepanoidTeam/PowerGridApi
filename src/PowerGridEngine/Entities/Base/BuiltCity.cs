@@ -9,14 +9,14 @@ namespace PowerGridEngine
         /// <summary>
         /// key is city Id
         /// </summary>
-        public Dictionary<string, BuiltCity> Cities  { get; private set; }
+        public List<BuiltCity> Cities  { get; private set; }
 
         public User Player { get; private set; }
 
         public PlayerBuiltCities(User player)
         {
             Player = player;
-            Cities = new Dictionary<string, BuiltCity>();
+            Cities = new List<BuiltCity>();
         }
 
         //todo need to move it outside
@@ -24,15 +24,17 @@ namespace PowerGridEngine
         {
             var context = GameContext.GetContextByPlayer(Player);
             var builts = context.GameBoard.BuildPlayersCities.Values.SelectMany(m => m.Cities)
-                .Where(m => m.Key == city.Id);
-            var level = builts.Max(m => m.Value.Level);
-            if ((level++) < city.Levels.Max(m => m.Key))
+                .Where(m => m.City.Id == city.Id);
+            var level = builts.Any() ? builts.Max(m => m.Level) : -1;
+            level++;
+            if (level <= city.Levels.Max(m => m.Key))
             {
-                var cost = city.Levels[level - 1];
+                var cost = city.Levels[level];
                 if (GameRule.CanPay(Player, cost))
                 {
-                    Cities.Add(city.Id, new BuiltCity(city, level));
-                    GameRule.PaymentTransaction(Player, cost);
+                    Cities.Add(new BuiltCity(city, level));
+                    GameRule.PaymentTransaction(Player, -cost);
+                    return true;
                 }
             }
             return false;
