@@ -59,8 +59,14 @@ namespace PowerGridApi.Controllers
         {
         }
 
+        protected string RawRequest { get; set; }
+
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
+            //todo bad code, need to investigate how to collect logs in correct way
+            foreach (var model in context.ActionArguments)
+                RawRequest = string.Format("{0} = {1}{2}", model.Key, model.Value.ToJson(), Environment.NewLine);
+
             if (await IfAuthorized(context, next))
             {
                 if (await IfNotRestricted(context, next))
@@ -72,21 +78,20 @@ namespace PowerGridApi.Controllers
         {
             if (!_enableLogging)
                 return;
-
+            
             var sb = new StringBuilder();
-            var inputStream = Request.Body;
+            var inputStream = context.HttpContext.Request.Body;
             var curDt = DateTime.UtcNow;
             sb.AppendLine(string.Format("Request at {0}:", curDt.ToString("yyyy-MM-ddTHH:mm:ss")));
             sb.AppendLine(string.Format("Path: {0}", Request.Path));
-            sb.AppendLine(string.Format("User: {0}", UserContext == null ? "<none>" : UserContext.User.AuthToken));
-            using (var reader = new StreamReader(inputStream))
+            //sb.AppendLine(string.Format("User: {0}", UserContext == null ? "<none>" : UserContext.User.AuthToken));
+            if (context.Exception != null)
             {
-                if (Request.Method == "POST")
-                    sb.AppendLine(reader.ReadToEnd());
-                else
-                    sb.AppendLine(Request.QueryString.ToString());
-
+                sb.AppendLine(string.Format("Exception: {0}", context.Exception.Message));
+                sb.AppendLine(string.Format("Stack trace: {0}", context.Exception.StackTrace));
             }
+            else
+                sb.AppendLine(string.Format("Body: {0}", RawRequest));
             sb.AppendLine(string.Format("Response: {0}", Newtonsoft.Json.JsonConvert.SerializeObject(context.Result)));
             sb.AppendLine("-----------------------------------------------");
             var path = string.Format(_logFilePath, curDt.ToString("yyyy-MM-dd"));
