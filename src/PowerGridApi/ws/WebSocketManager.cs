@@ -9,11 +9,16 @@ using Microsoft.AspNetCore.Http;
 
 namespace PowerGridApi.ws
 {
+	public delegate void WsDelegate(string message);
+
 	//todo: make it singletone or IoC/DI
 	public static class WebSocketManager
 	{
 		static ConcurrentBag<WebSocket> _sockets = new ConcurrentBag<WebSocket>();
 
+		//Событие OnCount c типом делегата MethodContainer.
+		public static event WsDelegate OnClose;
+		public static event WsDelegate OnMessage;
 
 
 		//todo: specify sender/receivers? not for all
@@ -33,11 +38,9 @@ namespace PowerGridApi.ws
 			{
 				var webSocket = await http.WebSockets.AcceptWebSocketAsync();
 
-
 				if (webSocket != null && webSocket.State == WebSocketState.Open)
 				{
 					_sockets.Add(webSocket);
-
 
 					//todo: move this block to the separate method
 					while (webSocket.State == WebSocketState.Open)
@@ -47,24 +50,24 @@ namespace PowerGridApi.ws
 							var buffer = new ArraySegment<byte>(new byte[4096]);
 							var received = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
 
-
 							//todo: handle only text?
 							switch (received.MessageType)
 							{
 								case WebSocketMessageType.Close:
 									//todo: somehow delete closed sockets
-									OnClose(received.CloseStatus, received.CloseStatusDescription);
+									//received.CloseStatus, 
+									OnClose(received.CloseStatusDescription);
 									break;
 								case WebSocketMessageType.Text:
 									var message = Encoding.UTF8.GetString(buffer.Array, buffer.Offset, buffer.Count).Trim('\0');
-
 									//todo: somehow parse json to model?
 									//todo: route the requests to proper methods?
 									OnMessage(message);
-									Broadcast(message);
 									break;
 								case WebSocketMessageType.Binary:
-									OnMessage(buffer.Array);
+									//todo: not impl yet for binary - do we need this case?
+									Console.WriteLine("binary:");
+									Console.WriteLine(buffer.Array);
 									break;
 							}
 						}
@@ -85,22 +88,26 @@ namespace PowerGridApi.ws
 		}
 
 
-		static void OnClose(WebSocketCloseStatus? status, string desc)
+
+		static WebSocketManager()
 		{
-			//todo: somehow delete closed sockets
-			Console.WriteLine(desc);
+			OnClose += WebSocketManager_onClose;
+			OnMessage += WebSocketManager_onMessage;
 		}
 
-		static void OnMessage(string data)
+		private static void WebSocketManager_onClose(string message)
 		{
+			Console.WriteLine("onClose:");
+			Console.WriteLine(message);
+		}
+
+		private static void WebSocketManager_onMessage(string message)
+		{
+			Broadcast(message);
 			//todo: somehow parse json to model?
 			//todo: route the requests to proper methods?
-			Console.WriteLine(data);
-		}
-
-		static void OnMessage(byte[] data)
-		{
-			Console.WriteLine(data);
+			Console.WriteLine("onMessage:");
+			Console.WriteLine(message);
 		}
 
 	}
