@@ -31,10 +31,10 @@ namespace PowerGridEngine
 		/// is in not started game room
 		/// </summary>
 		/// <returns></returns>
-		public bool IsInRoom()
+		public bool IsInRoom(string id = null)
 		{
-			return GameRoomRef != null;
-		}
+            return GameRoomRef != null && (id == null || id == GameRoomRef.Id);
+        }
 
 		/// <summary>
 		/// is in started game

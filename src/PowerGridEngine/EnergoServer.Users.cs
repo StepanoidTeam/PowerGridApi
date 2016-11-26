@@ -147,5 +147,10 @@ namespace PowerGridEngine
             }
             return Users[id];
         }
+
+        public User TryToLookupUser(string userId)
+        {
+            return Users.ContainsKey(userId ?? "") ? Users[userId] : null;
+        }
     }
 }

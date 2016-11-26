@@ -16,12 +16,29 @@ namespace PowerGridApi.Controllers
 	/// </summary>
 	[Route("api/[controller]")]
 	public class RoomsController : BaseController
-	{
-		/// <summary>
-		/// Rooms list
-		/// </summary>
-		/// <returns></returns>
-		[SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+    {
+        public RoomsController() : base()
+        {
+            WebSocketManager.Current.OnMessage += WebSocketManager_OnMessage;
+            WebSocketManager.Current.OnClose += WebSocketManager_OnClose;
+        }
+
+        private void WebSocketManager_OnMessage(string authToken, string message)
+        {
+            //todo: what to do when serv receives message from client? broadcast it? to who?
+        }
+
+
+        private void WebSocketManager_OnClose(string authToken, string message)
+        {
+            //todo: what code should be here?
+        }
+
+        /// <summary>
+        /// Rooms list
+        /// </summary>
+        /// <returns></returns>
+        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
 		[SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
 		[HttpGet]
 		public async Task<IActionResult> GetGameRoomList([FromHeader]string authToken)
@@ -78,12 +95,17 @@ namespace PowerGridApi.Controllers
 			ToggleReadyResponse response = null;
 			if (room.SetReadyMark)
 				response = EnergoServer.Current.RouteAction(new ToggleReadyAction(UserContext.User));
-
-			WebSocketManager.Current.Broadcast(UserContext.User.AuthToken, "new room created - for all");
-
+	
 			return await SuccessResponse(() =>
 			{
-				return new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions(true)
+                var broadcast = new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions(true)
+                {
+                    UserViewOptions = new UserModelViewOptions(false)
+                });
+
+                WebSocketManager.Current.Broadcast(broadcast, gameRoom.Id);
+
+                return new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions(true)
 				{
 					IsInGame = false,
 					UserCount = false,
@@ -92,66 +114,50 @@ namespace PowerGridApi.Controllers
 			}).Invoke();
 		}
 
+        /// <summary>
+        /// Join player into specific room
+        /// </summary>
+        /// <param name="joinModel"></param>
+        /// <returns></returns> 
+        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
+        [SwaggerResponse(System.Net.HttpStatusCode.BadRequest, "NotAllowed")]
+        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, "NotFound")]
+        [HttpPost("Join")]
+        public async Task<IActionResult> JoinGameRoom([FromHeader]string authToken, [FromBody]JoinRoomModel joinModel)
+        {
+            var errMsg = string.Empty;
+            var gameRoom = EnergoServer.Current.LookupGameRoom(UserContext.User, joinModel.RoomId, out errMsg);
+            if (!string.IsNullOrWhiteSpace(errMsg))
+                return await GenericResponse(ResponseType.NotFound, errMsg);
 
-		RoomsController()
-		{
-			WebSocketManager.Current.OnMessage += WebSocketManager_OnMessage;
-			WebSocketManager.Current.OnClose += WebSocketManager_OnClose;
-		}
+            gameRoom.Join(UserContext.User, out errMsg);
 
+            if (!string.IsNullOrWhiteSpace(errMsg))
+                return await GenericResponse(ResponseType.NotAllowed, errMsg);
 
-		private void WebSocketManager_OnMessage(string authToken, string message)
-		{
-			//todo: what to do when serv receives message from client? broadcast it? to who?
-		}
+            return await SuccessResponse(() =>
+            {
+                var broadcast = new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions()
+                {
+                    UserCount = true,
+                    IsInGame = true,
+                    UserViewOptions = new UserModelViewOptions(true) { GameRoomId = false }
+                });
 
+                WebSocketManager.Current.Broadcast(broadcast, gameRoom.Id);
 
-		private void WebSocketManager_OnClose(string authToken, string message)
-		{
-			//todo: what code should be here?
-		}
-
-
-
-		/// <summary>
-		/// Join player into specific room
-		/// </summary>
-		/// <param name="joinModel"></param>
-		/// <returns></returns> 
-		[SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
-		[SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
-		[SwaggerResponse(System.Net.HttpStatusCode.BadRequest, "NotAllowed")]
-		[SwaggerResponse(System.Net.HttpStatusCode.NotFound, "NotFound")]
-		[HttpPost("Join")]
-		public async Task<IActionResult> JoinGameRoom([FromHeader]string authToken, [FromBody]JoinRoomModel joinModel)
-		{
-			var errMsg = string.Empty;
-			var gameRoom = EnergoServer.Current.LookupGameRoom(UserContext.User, joinModel.RoomId, out errMsg);
-			if (!string.IsNullOrWhiteSpace(errMsg))
-				return await GenericResponse(ResponseType.NotFound, errMsg);
-
-			gameRoom.Join(UserContext.User, out errMsg);
-
-			if (!string.IsNullOrWhiteSpace(errMsg))
-				return await GenericResponse(ResponseType.NotAllowed, errMsg);
-
-			var result = await Task.Run(() =>
-			{
-				return new GameRoomModel(gameRoom).GetInfo(
-					new RoomModelViewOptions
-					{
-						Id = true,
-						Name = true,
-						UserCount = true,
-						UserDetails = true,
-						UserViewOptions = new UserModelViewOptions { Id = true, Name = true, ReadyMark = true }
-					});
-			});
-
-			WebSocketManager.Current.Broadcast(UserContext.User.AuthToken, "user joined - only for current room users");
-
-			return await SuccessResponse(result);
-		}
+                return new GameRoomModel(gameRoom).GetInfo(
+                    new RoomModelViewOptions
+                    {
+                        Id = true,
+                        Name = true,
+                        UserCount = true,
+                        UserDetails = true,
+                        UserViewOptions = new UserModelViewOptions { Id = true, Name = true, ReadyMark = true }
+                    });
+            }).Invoke();
+        }
 
 		/// <summary>
 		/// Leave from current room
@@ -166,15 +172,25 @@ namespace PowerGridApi.Controllers
 			var errMsg = string.Empty;
 
 			var user = UserContext.User;
-			//todo wtf again with UserContext.User....UserContext.User?
-			user.GameRoomRef.Leave(user);
+            var room = user.GameRoomRef;
+
+            //todo wtf again with UserContext.User....UserContext.User?
+            user.GameRoomRef.Leave(user);
 
 			if (user.GameRoomRef != null)
 				return await GenericResponse(ResponseType.UnexpectedError, Constants.Instance.ErrorMessage.You_Cant_Leave_This_Game_Room);
 
-			WebSocketManager.Current.Broadcast(UserContext.User.AuthToken, "user left room - only for current room users");
-			//todo why it is possible you couldn't leave room? Need to determine corrent status code here
-			return await SuccessResponse(true);
+            var broadcast = new GameRoomModel(room).GetInfo(new RoomModelViewOptions()
+            {
+                UserCount = true,
+                IsInGame = true,
+                UserViewOptions = new UserModelViewOptions(true) { GameRoomId = false }
+            });
+
+            WebSocketManager.Current.Broadcast(broadcast, room.Id);
+
+            //todo why it is possible you couldn't leave room? Need to determine corrent status code here
+            return await SuccessResponse(true);
 		}
 
 		/// <summary>

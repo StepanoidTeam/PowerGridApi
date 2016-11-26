@@ -10,20 +10,6 @@ using PowerGridEngine;
 
 namespace PowerGridApi
 {
-    public class WebSocketRequest
-    {
-        public string AuthToken { get; set; }
-
-        public string Message { get; set; }
-    }
-
-    public class WebSocketClient
-    {
-        public User User { get; set; }
-
-        public WebSocket Socket { get; set; }
-    }
-
     public class WebSocketManager
     {
         public delegate void NetworkDelegate(string authToken, string message);
@@ -53,14 +39,32 @@ namespace PowerGridApi
             OnMessage += WebSocketManager_onMessage;
         }
 
-        //todo: specify sender/receivers? not for all
-        public async void Broadcast(string authToken, string message)
+        /// <summary>
+        /// receiversId could be roomId, userId or null (global broadcast)
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="response"></param>
+        /// <param name="receiversId"></param>
+        public async void Broadcast<T>(T response, string receiversId = null)
         {
-            await Task.WhenAll(
-             _clients
-             .Where(s => s.Socket.State == WebSocketState.Open 
-                && s.User != null && s.User.AuthToken != authToken)
-             .Select(s => s.Socket.SendAsync(message.GetByteSegment(), WebSocketMessageType.Text, true, CancellationToken.None)));
+            var message = response.ToJson();
+            var data = message.GetByteSegment();
+
+            var receivers = _clients.Where(s => s.Socket.State == WebSocketState.Open && s.User != null);
+
+            var room = EnergoServer.Current.TryToLookupRoom(receiversId);
+            if (room != null)
+            {
+                receivers = receivers.Where(m => m.User.IsInRoom(room.Id));
+            }
+            else
+            {
+                var receiver = EnergoServer.Current.TryToLookupRoom(receiversId);
+                if (receiver != null)
+                    receivers = receivers.Where(m => m.User.Id == receiver.Id);
+            }
+            
+            await Task.WhenAll(receivers.Select(s => s.Socket.SendAsync(data, WebSocketMessageType.Text, true, CancellationToken.None)));
         }
 
         private bool CheckAuthorization(WebSocketClient client, WebSocketRequest request)
@@ -95,6 +99,7 @@ namespace PowerGridApi
                     {
                         try
                         {
+                            //todo buffer size means it will trunc or separate requests if they will exceed 4k? Need to handle this case?
                             var buffer = new ArraySegment<byte>(new byte[4096]);
                             var received = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
 
@@ -110,8 +115,6 @@ namespace PowerGridApi
                                     break;
                                 case WebSocketMessageType.Text:
                                     var message = Encoding.UTF8.GetString(buffer.Array, buffer.Offset, buffer.Count).Trim('\0');
-                                    //todo: somehow parse json to model?
-                                    //todo: route the requests to proper methods?
                                     var request = message.ToObject<WebSocketRequest>();
 
                                     if (CheckAuthorization(client, request))
@@ -153,7 +156,7 @@ namespace PowerGridApi
 
         private void WebSocketManager_onMessage(string authToken, string message)
         {
-            Broadcast(authToken, message);
+            //Broadcast(authToken, message);
             //todo: somehow parse json to model?
             //todo: route the requests to proper methods?
             Console.WriteLine("onMessage:");

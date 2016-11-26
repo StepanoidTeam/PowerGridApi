@@ -38,6 +38,7 @@ namespace PowerGridEngine
             public readonly string Duplicate_Map_Id_Detected = "Duplicated map Id.";
             public readonly string Cant_Find_Map = "Can't find map with this Id: {0}";
             public readonly string Is_In_Game_Room = "Is in Game Room already.";
+            public readonly string Not_In_Room = "Not in room.";
             public readonly string Cant_Find_Such_User = "Can't find such player.";
             public readonly string Cant_Find_Game_Room = "Can't find game room by this Id: {0}";
             public readonly string Cant_Join_To_Game_In_Proc = "You can't join to the game in process.";

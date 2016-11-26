@@ -85,5 +85,10 @@ namespace PowerGridEngine
             }
             return GameRooms[gameRoomId];
         }
+
+        public GameRoom TryToLookupRoom(string gameRoomId)
+        {
+            return GameRooms.ContainsKey(gameRoomId ?? "") ? GameRooms[gameRoomId] : null;
+        }
     }
 }
