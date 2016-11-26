@@ -34,6 +34,11 @@ namespace PowerGridApi
 			return JsonHelper.ToJson(@object);
 		}
 
+        public static T ToObject<T>(this string json)
+        {
+            return JsonHelper.ToObject<T>(json);
+        }
+
 		public static ArraySegment<byte> GetByteSegment(this string str)
 		{
 			byte[] bytes = new byte[str.Length * sizeof(char)];

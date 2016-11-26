@@ -83,7 +83,7 @@ namespace PowerGridApi.Controllers
             var inputStream = context.HttpContext.Request.Body;
             var curDt = DateTime.UtcNow;
             sb.AppendLine(string.Format("Request at {0}:", curDt.ToString("yyyy-MM-ddTHH:mm:ss")));
-            sb.AppendLine(string.Format("Path: {0}", Request.Path));
+            sb.AppendLine(string.Format("Path: {0} {1}", Request.Method, Request.Path));
             //sb.AppendLine(string.Format("User: {0}", UserContext == null ? "<none>" : UserContext.User.AuthToken));
             if (context.Exception != null)
             {

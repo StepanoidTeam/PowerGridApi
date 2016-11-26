@@ -96,7 +96,7 @@ namespace PowerGridApi
 			app.UseCors("CorsPolicy");
 
 			app.UseWebSockets();
-			app.Use(ws.WebSocketManager.Listen);
+			app.Use(WebSocketManager.Current.HandleRequests);
 
 			app.UseMvc(routes =>
 			{

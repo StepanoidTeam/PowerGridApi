@@ -79,7 +79,7 @@ namespace PowerGridApi.Controllers
 			if (room.SetReadyMark)
 				response = EnergoServer.Current.RouteAction(new ToggleReadyAction(UserContext.User));
 
-			ws.WebSocketManager.Broadcast("new room created - for all");
+			WebSocketManager.Current.Broadcast(UserContext.User.AuthToken, "new room created - for all");
 
 			return await SuccessResponse(() =>
 			{
@@ -95,18 +95,18 @@ namespace PowerGridApi.Controllers
 
 		RoomsController()
 		{
-			ws.WebSocketManager.OnMessage += WebSocketManager_OnMessage;
-			ws.WebSocketManager.OnClose += WebSocketManager_OnClose;
+			WebSocketManager.Current.OnMessage += WebSocketManager_OnMessage;
+			WebSocketManager.Current.OnClose += WebSocketManager_OnClose;
 		}
 
 
-		private void WebSocketManager_OnMessage(string message)
+		private void WebSocketManager_OnMessage(string authToken, string message)
 		{
 			//todo: what to do when serv receives message from client? broadcast it? to who?
 		}
 
 
-		private void WebSocketManager_OnClose(string message)
+		private void WebSocketManager_OnClose(string authToken, string message)
 		{
 			//todo: what code should be here?
 		}
@@ -148,7 +148,7 @@ namespace PowerGridApi.Controllers
 					});
 			});
 
-			ws.WebSocketManager.Broadcast("user joined - only for current room users");
+			WebSocketManager.Current.Broadcast(UserContext.User.AuthToken, "user joined - only for current room users");
 
 			return await SuccessResponse(result);
 		}
@@ -172,7 +172,7 @@ namespace PowerGridApi.Controllers
 			if (user.GameRoomRef != null)
 				return await GenericResponse(ResponseType.UnexpectedError, Constants.Instance.ErrorMessage.You_Cant_Leave_This_Game_Room);
 
-			ws.WebSocketManager.Broadcast("user left room - only for current room users");
+			WebSocketManager.Current.Broadcast(UserContext.User.AuthToken, "user left room - only for current room users");
 			//todo why it is possible you couldn't leave room? Need to determine corrent status code here
 			return await SuccessResponse(true);
 		}
@@ -210,7 +210,7 @@ namespace PowerGridApi.Controllers
 			if (gameRoom.Players.ContainsKey(userId))
 				errMsg = Constants.Instance.ErrorMessage.You_Cant_Kick_This_User;
 
-			ws.WebSocketManager.Broadcast("user kicked - for current room users");
+			WebSocketManager.Current.Broadcast(UserContext.User.AuthToken, "user kicked - for current room users");
 
 			return await GenericResponse(ResponseType.UnexpectedError, errMsg);
 		}
@@ -237,7 +237,7 @@ namespace PowerGridApi.Controllers
 				return await GenericResponse(ResponseType.UnexpectedError, toggleResponse.ErrorMsg);
 
 
-			ws.WebSocketManager.Broadcast("ready mark changed - for current room users");
+			WebSocketManager.Current.Broadcast(UserContext.User.AuthToken, "ready mark changed - for current room users");
 			return await SuccessResponse(toggleResponse.CurrentState);
 		}
 
@@ -255,7 +255,7 @@ namespace PowerGridApi.Controllers
 			var user = UserContext.User;
 
 			var startResponse = EnergoServer.Current.RouteAction(new StartGameAction(user));
-			ws.WebSocketManager.Broadcast("game started - for current room users");
+			WebSocketManager.Current.Broadcast(UserContext.User.AuthToken, "game started - for current room users");
 			return await GenericResponse(ResponseType.Ok, data: startResponse);
 		}
 
