@@ -47,7 +47,7 @@ namespace PowerGridApi
         /// <param name="receiversId"></param>
         public async void Broadcast<T>(T response, string receiversId = null)
         {
-            var message = response.ToJson();
+            var message = response.ToJson().Trim('\0');
             var data = message.GetByteSegment();
 
             var receivers = _clients.Where(s => s.Socket.State == WebSocketState.Open && s.User != null);
