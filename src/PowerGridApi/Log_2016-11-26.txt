@@ -1,0 +1,153 @@
+Request at 2016-11-26T13:13:32:
+Path: GET /api/Version
+Body: 
+Response: {"Value":{"Message":null,"Status":"Ok","Data":"0.0.6174.27373"},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:16:29:
+Path: GET /api/version
+Body: 
+Response: {"Value":{"Message":null,"Status":"Ok","Data":"0.0.6174.27373"},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:16:40:
+Path: GET /api/version
+Body: 
+Response: {"Value":{"Message":null,"Status":"Ok","Data":"0.0.6174.27373"},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:16:48:
+Path: POST /api/user/Login
+Body: loginInfo = {"Username":"bob","Password":"123"}
+
+Response: {"Value":{"Message":null,"Status":"Ok","Data":{"Id":"c000e6ee","Name":"bob","AuthToken":"cab0db5f-3cd5-413d-aefd-fbfe03900f07"}},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:16:49:
+Path: POST /api/user/Status
+Body: viewOptions = {"GameRoomId":true,"ReadyMark":true,"Id":true,"Name":true}
+
+Response: {"Value":{"Message":null,"Status":"Ok","Data":{"Id":"c000e6ee","Name":"bob","GameRoomId":null,"ReadyMark":null}},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:17:36:
+Path: POST /api/User/Login
+Body: loginInfo = {"Username":"dsds","Password":"f"}
+
+Response: {"Value":{"Message":null,"Status":"Ok","Data":{"Id":"1bded778","Name":"dsds","AuthToken":"5a3570bb-3c89-46e3-b701-ce95540239ea"}},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:17:38:
+Path: POST /api/User/Login
+Body: loginInfo = {"Username":"dsds","Password":"f"}
+
+Response: {"Value":{"Message":null,"Status":"Ok","Data":{"Id":"54d311c0","Name":"dsds","AuthToken":"61709454-f4a2-43c7-80e7-cd025d980ca1"}},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:17:39:
+Path: POST /api/User/Login
+Body: loginInfo = {"Username":"dsds","Password":"f"}
+
+Response: {"Value":{"Message":null,"Status":"Ok","Data":{"Id":"da545e05","Name":"dsds","AuthToken":"f4780479-cad2-4616-b8e3-6868dcc5aea7"}},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:17:41:
+Path: POST /api/User/Login
+Body: loginInfo = {"Username":"dsds","Password":"f"}
+
+Response: {"Value":{"Message":null,"Status":"Ok","Data":{"Id":"965bd8fe","Name":"dsds","AuthToken":"f8960bbd-1e59-472b-a15d-bb5cbabff9c1"}},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:17:41:
+Path: POST /api/User/Login
+Body: loginInfo = {"Username":"dsds","Password":"f"}
+
+Response: {"Value":{"Message":null,"Status":"Ok","Data":{"Id":"9784861e","Name":"dsds","AuthToken":"93347a60-27d9-4d7f-a42a-29dd97e3a6a7"}},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:17:43:
+Path: POST /api/User/Login
+Body: loginInfo = {"Username":"dsds","Password":"f"}
+
+Response: {"Value":{"Message":null,"Status":"Ok","Data":{"Id":"4b899993","Name":"dsds","AuthToken":"0dafb30f-8b70-44f5-85c7-e11996ee4921"}},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:18:05:
+Path: POST /api/User/Status
+Body: viewOptions = {"GameRoomId":false,"ReadyMark":false,"Id":false,"Name":false}
+
+Response: {"Value":{"Message":null,"Status":"Ok","Data":{}},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:18:51:
+Path: GET /api/version
+Body: 
+Response: {"Value":{"Message":null,"Status":"Ok","Data":"0.0.6174.27373"},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:18:51:
+Path: POST /api/user/Status
+Body: authToken = "cab0db5f-3cd5-413d-aefd-fbfe03900f07"
+
+Response: {"StatusCode":415}
+-----------------------------------------------
+Request at 2016-11-26T13:19:36:
+Path: POST /api/User/Status
+Body: viewOptions = {"GameRoomId":false,"ReadyMark":false,"Id":false,"Name":false}
+
+Response: {"Value":{"Message":null,"Status":"Ok","Data":{}},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:19:53:
+Path: GET /api/version
+Body: 
+Response: {"Value":{"Message":null,"Status":"Ok","Data":"0.0.6174.27373"},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:19:53:
+Path: POST /api/user/Status
+Body: viewOptions = {"GameRoomId":false,"ReadyMark":false,"Id":false,"Name":false}
+
+Response: {"Value":{"Message":null,"Status":"Ok","Data":{}},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:20:22:
+Path: POST /api/User/Status
+Body: viewOptions = {"GameRoomId":false,"ReadyMark":false,"Id":false,"Name":true}
+
+Response: {"Value":{"Message":null,"Status":"Ok","Data":{"Name":"dsds"}},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:31:36:
+Path: POST /api/user/Status
+Body: viewOptions = {"GameRoomId":false,"ReadyMark":false,"Id":false,"Name":true}
+
+Response: {"Value":{"Message":null,"Status":"Ok","Data":{"Name":"bob"}},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:32:39:
+Path: GET /api/version
+Body: 
+Response: {"Value":{"Message":null,"Status":"Ok","Data":"0.0.6174.27373"},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:32:52:
+Path: POST /api/user/Login
+Body: loginInfo = {"Username":"bob","Password":"123"}
+
+Response: {"Value":{"Message":null,"Status":"Ok","Data":{"Id":"ab4785de","Name":"bob","AuthToken":"692de008-7c71-43ae-8337-870429edb1de"}},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:32:52:
+Path: POST /api/user/Status
+Body: viewOptions = {"GameRoomId":false,"ReadyMark":false,"Id":false,"Name":true}
+
+Response: {"Value":{"Message":null,"Status":"Ok","Data":{"Name":"bob"}},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:33:56:
+Path: GET /api/version
+Body: 
+Response: {"Value":{"Message":null,"Status":"Ok","Data":"0.0.6174.27373"},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:33:58:
+Path: GET /api/version
+Body: 
+Response: {"Value":{"Message":null,"Status":"Ok","Data":"0.0.6174.27373"},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:34:02:
+Path: GET /api/version
+Body: 
+Response: {"Value":{"Message":null,"Status":"Ok","Data":"0.0.6174.27373"},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:34:05:
+Path: POST /api/user/Login
+Body: loginInfo = {"Username":"bob","Password":"123"}
+
+Response: {"Value":{"Message":null,"Status":"Ok","Data":{"Id":"1d06abe1","Name":"bob","AuthToken":"4c82ef30-f809-4325-a3a3-703d435c07c3"}},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------
+Request at 2016-11-26T13:34:06:
+Path: POST /api/user/Status
+Body: viewOptions = {"GameRoomId":false,"ReadyMark":false,"Id":false,"Name":true}
+
+Response: {"Value":{"Message":null,"Status":"Ok","Data":{"Name":"bob"}},"Formatters":[],"ContentTypes":[],"DeclaredType":null,"StatusCode":200}
+-----------------------------------------------

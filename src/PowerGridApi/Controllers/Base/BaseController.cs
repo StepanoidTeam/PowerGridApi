@@ -27,7 +27,7 @@ namespace PowerGridApi.Controllers
     {
         private static string _logFilePath = "Log_{0}.txt";
 
-        private static bool _enableLogging = true;
+        private static bool _enableLogging = false;
 
         private static decimal _version = 0.01m;
 

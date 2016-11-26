@@ -39,7 +39,8 @@
 	"buildOptions": {
 		"emitEntryPoint": true,
 		"preserveCompilationContext": true,
-		"xmlDoc": true
+        "xmlDoc": true,
+        "nowarn": [ "CS1591" ]
 	},
 
 	"runtimeOptions": {
