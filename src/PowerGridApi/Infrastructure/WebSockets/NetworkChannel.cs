@@ -1,10 +1,10 @@
 ﻿
 namespace PowerGridApi
 {
-    public enum NetworkChannel
-    {
-        Global,
-        Room,
-        Personal
-    }
+	public enum NetworkChannel
+	{
+		Global,
+		Room,
+		Personal
+	}
 }
