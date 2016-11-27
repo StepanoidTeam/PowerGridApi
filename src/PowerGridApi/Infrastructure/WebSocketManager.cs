@@ -63,7 +63,7 @@ namespace PowerGridApi
                 if (receiver != null)
                     receivers = receivers.Where(m => m.User.Id == receiver.Id);
             }
-            
+
             await Task.WhenAll(receivers.Select(s => s.Socket.SendAsync(data, WebSocketMessageType.Text, true, CancellationToken.None)));
         }
 

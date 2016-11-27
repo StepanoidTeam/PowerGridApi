@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using PowerGridEngine;
-using Microsoft.AspNetCore.Cors;
 using Swashbuckle.SwaggerGen.Annotations;
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
@@ -16,29 +13,29 @@ namespace PowerGridApi.Controllers
 	/// </summary>
 	[Route("api/[controller]")]
 	public class RoomsController : BaseController
-    {
-        public RoomsController() : base()
-        {
-            WebSocketManager.Current.OnMessage += WebSocketManager_OnMessage;
-            WebSocketManager.Current.OnClose += WebSocketManager_OnClose;
-        }
+	{
+		public RoomsController() : base()
+		{
+			WebSocketManager.Current.OnMessage += WebSocketManager_OnMessage;
+			WebSocketManager.Current.OnClose += WebSocketManager_OnClose;
+		}
 
-        private void WebSocketManager_OnMessage(string authToken, string message)
-        {
-            //todo: what to do when serv receives message from client? broadcast it? to who?
-        }
+		private void WebSocketManager_OnMessage(string authToken, string message)
+		{
+			//todo: what to do when serv receives message from client? broadcast it? to who?
+		}
 
 
-        private void WebSocketManager_OnClose(string authToken, string message)
-        {
-            //todo: what code should be here?
-        }
+		private void WebSocketManager_OnClose(string authToken, string message)
+		{
+			//todo: what code should be here?
+		}
 
-        /// <summary>
-        /// Rooms list
-        /// </summary>
-        /// <returns></returns>
-        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+		/// <summary>
+		/// Rooms list
+		/// </summary>
+		/// <returns></returns>
+		[SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
 		[SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
 		[HttpGet]
 		public async Task<IActionResult> GetGameRoomList([FromHeader]string authToken)
@@ -95,17 +92,17 @@ namespace PowerGridApi.Controllers
 			ToggleReadyResponse response = null;
 			if (room.SetReadyMark)
 				response = EnergoServer.Current.RouteAction(new ToggleReadyAction(UserContext.User));
-	
+
 			return await SuccessResponse(() =>
 			{
-                var broadcast = new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions(true)
-                {
-                    UserViewOptions = new UserModelViewOptions(false)
-                });
+				var broadcast = new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions(true)
+				{
+					UserViewOptions = new UserModelViewOptions(false)
+				});
 
-                WebSocketManager.Current.Broadcast(broadcast, gameRoom.Id);
+				WebSocketManager.Current.Broadcast(broadcast, gameRoom.Id);
 
-                return new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions(true)
+				return new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions(true)
 				{
 					IsInGame = false,
 					UserCount = false,
@@ -114,50 +111,50 @@ namespace PowerGridApi.Controllers
 			}).Invoke();
 		}
 
-        /// <summary>
-        /// Join player into specific room
-        /// </summary>
-        /// <param name="joinModel"></param>
-        /// <returns></returns> 
-        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
-        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
-        [SwaggerResponse(System.Net.HttpStatusCode.BadRequest, "NotAllowed")]
-        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, "NotFound")]
-        [HttpPost("Join")]
-        public async Task<IActionResult> JoinGameRoom([FromHeader]string authToken, [FromBody]JoinRoomModel joinModel)
-        {
-            var errMsg = string.Empty;
-            var gameRoom = EnergoServer.Current.LookupGameRoom(UserContext.User, joinModel.RoomId, out errMsg);
-            if (!string.IsNullOrWhiteSpace(errMsg))
-                return await GenericResponse(ResponseType.NotFound, errMsg);
+		/// <summary>
+		/// Join player into specific room
+		/// </summary>
+		/// <param name="joinModel"></param>
+		/// <returns></returns> 
+		[SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+		[SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
+		[SwaggerResponse(System.Net.HttpStatusCode.BadRequest, "NotAllowed")]
+		[SwaggerResponse(System.Net.HttpStatusCode.NotFound, "NotFound")]
+		[HttpPost("Join")]
+		public async Task<IActionResult> JoinGameRoom([FromHeader]string authToken, [FromBody]JoinRoomModel joinModel)
+		{
+			var errMsg = string.Empty;
+			var gameRoom = EnergoServer.Current.LookupGameRoom(UserContext.User, joinModel.RoomId, out errMsg);
+			if (!string.IsNullOrWhiteSpace(errMsg))
+				return await GenericResponse(ResponseType.NotFound, errMsg);
 
-            gameRoom.Join(UserContext.User, out errMsg);
+			gameRoom.Join(UserContext.User, out errMsg);
 
-            if (!string.IsNullOrWhiteSpace(errMsg))
-                return await GenericResponse(ResponseType.NotAllowed, errMsg);
+			if (!string.IsNullOrWhiteSpace(errMsg))
+				return await GenericResponse(ResponseType.NotAllowed, errMsg);
 
-            return await SuccessResponse(() =>
-            {
-                var broadcast = new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions()
-                {
-                    UserCount = true,
-                    IsInGame = true,
-                    UserViewOptions = new UserModelViewOptions(true) { GameRoomId = false }
-                });
+			return await SuccessResponse(() =>
+			{
+				var broadcast = new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions()
+				{
+					UserCount = true,
+					IsInGame = true,
+					UserViewOptions = new UserModelViewOptions(true) { GameRoomId = false }
+				});
 
-                WebSocketManager.Current.Broadcast(broadcast, gameRoom.Id);
+				WebSocketManager.Current.Broadcast(broadcast, gameRoom.Id);
 
-                return new GameRoomModel(gameRoom).GetInfo(
-                    new RoomModelViewOptions
-                    {
-                        Id = true,
-                        Name = true,
-                        UserCount = true,
-                        UserDetails = true,
-                        UserViewOptions = new UserModelViewOptions { Id = true, Name = true, ReadyMark = true }
-                    });
-            }).Invoke();
-        }
+				return new GameRoomModel(gameRoom).GetInfo(
+					new RoomModelViewOptions
+					{
+						Id = true,
+						Name = true,
+						UserCount = true,
+						UserDetails = true,
+						UserViewOptions = new UserModelViewOptions { Id = true, Name = true, ReadyMark = true }
+					});
+			}).Invoke();
+		}
 
 		/// <summary>
 		/// Leave from current room
@@ -172,25 +169,25 @@ namespace PowerGridApi.Controllers
 			var errMsg = string.Empty;
 
 			var user = UserContext.User;
-            var room = user.GameRoomRef;
+			var room = user.GameRoomRef;
 
-            //todo wtf again with UserContext.User....UserContext.User?
-            user.GameRoomRef.Leave(user);
+			//todo wtf again with UserContext.User....UserContext.User?
+			user.GameRoomRef.Leave(user);
 
 			if (user.GameRoomRef != null)
 				return await GenericResponse(ResponseType.UnexpectedError, Constants.Instance.ErrorMessage.You_Cant_Leave_This_Game_Room);
 
-            var broadcast = new GameRoomModel(room).GetInfo(new RoomModelViewOptions()
-            {
-                UserCount = true,
-                IsInGame = true,
-                UserViewOptions = new UserModelViewOptions(true) { GameRoomId = false }
-            });
+			var broadcast = new GameRoomModel(room).GetInfo(new RoomModelViewOptions()
+			{
+				UserCount = true,
+				IsInGame = true,
+				UserViewOptions = new UserModelViewOptions(true) { GameRoomId = false }
+			});
 
-            WebSocketManager.Current.Broadcast(broadcast, room.Id);
+			WebSocketManager.Current.Broadcast(broadcast, room.Id);
 
-            //todo why it is possible you couldn't leave room? Need to determine corrent status code here
-            return await SuccessResponse(true);
+			//todo why it is possible you couldn't leave room? Need to determine corrent status code here
+			return await SuccessResponse(true);
 		}
 
 		/// <summary>
