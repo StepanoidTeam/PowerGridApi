@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PowerGridEngine
 {
-    public class LoginModel 
+    public class LoginModel : IWebSocketRequestModel
     {
         [Required]
         public string Username { get; set; }

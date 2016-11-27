@@ -1,7 +1,7 @@
 ﻿
 namespace PowerGridEngine
 {
-    public class ChatSendModel
+    public class ChatSendModel : IWebSocketRequestModel
     {
         public string ToUserId { get; set; }
 

@@ -12,14 +12,15 @@ namespace PowerGridApi
 {
     public class WebSocketManager
     {
-        public delegate void NetworkDelegate(string authToken, string message);
+        public delegate void RequestRecievedDelegate(User user, NetworkRequestType type, string json);
+        public delegate void ConnectionCloseDelegate(User user);
 
         private static WebSocketManager _current;
 
         private ConcurrentBag<WebSocketClient> _clients { get; set; }
 
-        public event NetworkDelegate OnClose;
-        public event NetworkDelegate OnMessage;
+        public event ConnectionCloseDelegate OnClose;
+        public event RequestRecievedDelegate OnMessage;
 
         //todo: make it IoC/DI?
         public static WebSocketManager Current
@@ -67,7 +68,7 @@ namespace PowerGridApi
             await Task.WhenAll(receivers.Select(s => s.Socket.SendAsync(data, WebSocketMessageType.Text, true, CancellationToken.None)));
         }
 
-        private bool CheckAuthorization(WebSocketClient client, WebSocketRequest request)
+        private bool CheckAuthorization(WebSocketClient client, NetworkRequest request)
         {
             var errMsg = string.Empty;
             if (client.User == null) //try to authorize if not yet
@@ -111,14 +112,14 @@ namespace PowerGridApi
                                     //received.CloseStatus, 
 
                                     //todo: how we will indentify auth token here... ?
-                                    OnClose(null, received.CloseStatusDescription);
+                                    OnClose(null);//, received.CloseStatusDescription);
                                     break;
                                 case WebSocketMessageType.Text:
                                     var message = Encoding.UTF8.GetString(buffer.Array, buffer.Offset, buffer.Count).Trim('\0');
-                                    var request = message.ToObject<WebSocketRequest>();
+                                    var request = message.ToObject<NetworkRequest>();
 
                                     if (CheckAuthorization(client, request))
-                                        OnMessage(request.AuthToken, request.Message);
+                                        OnMessage(client.User, request.Type, request.Data);
                                     else
                                         Console.WriteLine("Unauthorized client trying to send something");
 
@@ -148,19 +149,18 @@ namespace PowerGridApi
                 await next();
         }
 
-        private void WebSocketManager_onClose(string authToken, string message)
+        private void WebSocketManager_onClose(User user)
         {
-            Console.WriteLine("onClose:");
-            Console.WriteLine(message);
+            Console.WriteLine(string.Format("onClose: {0}", user == null ? "" : user.Id));
         }
 
-        private void WebSocketManager_onMessage(string authToken, string message)
+        private void WebSocketManager_onMessage(User user, NetworkRequestType type, string json)
         {
             //Broadcast(authToken, message);
             //todo: somehow parse json to model?
             //todo: route the requests to proper methods?
-            Console.WriteLine("onMessage:");
-            Console.WriteLine(message);
+            Console.WriteLine(string.Format("onMessage from {0}:", user == null ? "" : user.Id));
+            Console.WriteLine(json);
         }
 
     }

@@ -30,7 +30,7 @@ namespace PowerGridApi.Controllers
         {
             return () =>
             {
-                return Task.Run( () => (IActionResult)Ok(new ApiResponseModel(dataFunc())));
+                return Task.Run(() => (IActionResult)Ok(new ApiResponseModel(dataFunc())));
             };
         }
 
@@ -110,6 +110,11 @@ namespace PowerGridApi.Controllers
                 default:
                     return await ErrorResponse(errMsg, status);
             }
+        }
+
+        protected async Task<IActionResult> GenericResponse(ApiResponseModel response)
+        {
+            return await GenericResponse(response.Status, response.Message, response.Data);
         }
 
     }

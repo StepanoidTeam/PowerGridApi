@@ -14,23 +14,6 @@ namespace PowerGridApi.Controllers
 	[Route("api/[controller]")]
 	public class RoomsController : BaseController
 	{
-		public RoomsController() : base()
-		{
-			WebSocketManager.Current.OnMessage += WebSocketManager_OnMessage;
-			WebSocketManager.Current.OnClose += WebSocketManager_OnClose;
-		}
-
-		private void WebSocketManager_OnMessage(string authToken, string message)
-		{
-			//todo: what to do when serv receives message from client? broadcast it? to who?
-		}
-
-
-		private void WebSocketManager_OnClose(string authToken, string message)
-		{
-			//todo: what code should be here?
-		}
-
 		/// <summary>
 		/// Rooms list
 		/// </summary>

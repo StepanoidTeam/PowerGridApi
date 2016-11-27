@@ -1,13 +1,16 @@
-﻿using System;
+﻿using PowerGridEngine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PowerGridEngine
+namespace PowerGridApi
 {
 	public class ServerContext
 	{
+        public Chat Chat { get; private set; }
+
 		public EnergoServer Server { get; private set; }
 
 		public ILogger Logger
@@ -32,6 +35,7 @@ namespace PowerGridEngine
 		{
 			Server = server;
 			Logger = logger;
+            Chat = new Chat();
 		}
 	}
 }

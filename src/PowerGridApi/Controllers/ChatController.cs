@@ -24,24 +24,15 @@ namespace PowerGridApi.Controllers
         /// <param name="message"></param>
         /// <returns></returns>
         [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
-		[SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
         [SwaggerResponse(System.Net.HttpStatusCode.BadRequest, "NotAllowed")]
         [HttpPost("Send")]
-		public async Task<IActionResult> CreateGameRoom([FromHeader]string authToken, [FromBody]ChatSendModel message)
-		{
-			if (message.InRoomChannel && !UserContext.User.IsInRoom())
-				return await GenericResponse(ResponseType.NotAllowed, Constants.Instance.ErrorMessage.Not_In_Room);
-
-            string reveivers = null;
-            if (message.InRoomChannel)
-                reveivers = UserContext.User.GameRoomRef.Id;
-            else if (!string.IsNullOrWhiteSpace(message.ToUserId))
-                reveivers = message.ToUserId;
-
-            WebSocketManager.Current.Broadcast(message, reveivers);
-
-            return await SuccessResponse(true);
-		}
+        public async Task<IActionResult> ReceiveMessage([FromHeader]string authToken, [FromBody]ChatSendModel message)
+        {
+            ApiResponseModel result = null;
+            await Task.Run(() => { result = ServerContext.Current.Chat.ReceiveMessage(UserContext.User, message); });
+            return await GenericResponse(result);
+        }
         
 	}
 }
