@@ -12,12 +12,12 @@ namespace PowerGridApi
 {
     public class WebSocketManager
     {
-        public delegate void RequestRecievedDelegate(User user, NetworkRequestType type, string json);
+        public delegate void RequestRecievedDelegate(User user, DuplexNetworkRequestType type, string json);
         public delegate void ConnectionCloseDelegate(User user);
 
         private static WebSocketManager _current;
 
-        private ConcurrentBag<WebSocketClient> _clients { get; set; }
+        private ConcurrentBag<DuplexNetworkClient> _clients { get; set; }
 
         public event ConnectionCloseDelegate OnClose;
         public event RequestRecievedDelegate OnMessage;
@@ -35,7 +35,7 @@ namespace PowerGridApi
 
         public WebSocketManager()
         {
-            _clients = new ConcurrentBag<WebSocketClient>();
+            _clients = new ConcurrentBag<DuplexNetworkClient>();
             OnClose += WebSocketManager_onClose;
             OnMessage += WebSocketManager_onMessage;
         }
@@ -51,7 +51,7 @@ namespace PowerGridApi
             var message = response.ToJson().Trim('\0');
             var data = message.GetByteSegment();
 
-            var receivers = _clients.Where(s => s.Socket.State == WebSocketState.Open && s.User != null);
+            var receivers = _clients.Where(s => s.Connection.State == WebSocketState.Open && s.User != null);
 
             var room = EnergoServer.Current.TryToLookupRoom(receiversId);
             if (room != null)
@@ -65,10 +65,10 @@ namespace PowerGridApi
                     receivers = receivers.Where(m => m.User.Id == receiver.Id);
             }
 
-            await Task.WhenAll(receivers.Select(s => s.Socket.SendAsync(data, WebSocketMessageType.Text, true, CancellationToken.None)));
+            await Task.WhenAll(receivers.Select(s => s.Connection.SendAsync(data, WebSocketMessageType.Text, true, CancellationToken.None)));
         }
 
-        private bool CheckAuthorization(WebSocketClient client, NetworkRequest request)
+        private bool CheckAuthorization(DuplexNetworkClient client, DuplexNetworkRequest request)
         {
             var errMsg = string.Empty;
             if (client.User == null) //try to authorize if not yet
@@ -92,7 +92,7 @@ namespace PowerGridApi
 
                 if (webSocket != null && webSocket.State == WebSocketState.Open)
                 {
-                    var client = new WebSocketClient { Socket = webSocket };
+                    var client = new DuplexNetworkClient { Connection = webSocket };
                     _clients.Add(client);
 
                     //todo: move this block to the separate method
@@ -116,7 +116,7 @@ namespace PowerGridApi
                                     break;
                                 case WebSocketMessageType.Text:
                                     var message = Encoding.UTF8.GetString(buffer.Array, buffer.Offset, buffer.Count).Trim('\0');
-                                    var request = message.ToObject<NetworkRequest>();
+                                    var request = message.ToObject<DuplexNetworkRequest>();
 
                                     if (CheckAuthorization(client, request))
                                         OnMessage(client.User, request.Type, request.Data);
@@ -154,7 +154,7 @@ namespace PowerGridApi
             Console.WriteLine(string.Format("onClose: {0}", user == null ? "" : user.Id));
         }
 
-        private void WebSocketManager_onMessage(User user, NetworkRequestType type, string json)
+        private void WebSocketManager_onMessage(User user, DuplexNetworkRequestType type, string json)
         {
             //Broadcast(authToken, message);
             //todo: somehow parse json to model?

@@ -8,7 +8,7 @@ using PowerGridApi.Controllers;
 
 namespace PowerGridApi
 { 
-	public class Chat: NetworktHandler
+	public class Chat: DuplexNetworktHandler
     {
         public Chat() 
         {
@@ -21,7 +21,7 @@ namespace PowerGridApi
             //to do?
         }
 
-        public void Chat_OnMessage(User user, NetworkRequestType type, string json)
+        public void Chat_OnMessage(User user, DuplexNetworkRequestType type, string json)
         {
             var request = TryToGetSpecificRequest<ChatSendModel>(type, json);
             if (request != null)

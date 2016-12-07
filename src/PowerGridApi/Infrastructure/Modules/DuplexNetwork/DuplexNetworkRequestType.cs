@@ -3,7 +3,7 @@ using System;
 
 namespace PowerGridApi
 {
-    public enum NetworkRequestType
+    public enum DuplexNetworkRequestType
     {
         Chat,
         Login

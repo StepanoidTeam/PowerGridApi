@@ -5,21 +5,21 @@ using PowerGridEngine;
 
 namespace PowerGridApi
 {
-    public abstract class NetworktHandler
+    public abstract class DuplexNetworktHandler
     {
         /// <summary>
         /// Determine if request has concrete type and parse it, if type is not expecting - return null
         /// </summary>
-        public T TryToGetSpecificRequest<T>(NetworkRequestType type, string json) where T : IWebSocketRequestModel
+        public T TryToGetSpecificRequest<T>(DuplexNetworkRequestType type, string json) where T : IWebSocketRequestModel
         { 
             var data = (json ?? "");
             try
             {
                 switch (type)
                 {
-                    case NetworkRequestType.Chat:
+                    case DuplexNetworkRequestType.Chat:
                         return (T)Convert.ChangeType(data.ToObject<ChatSendModel>(), typeof(T));
-                    case NetworkRequestType.Login:
+                    case DuplexNetworkRequestType.Login:
                         return (T)Convert.ChangeType(data.ToObject<LoginModel>(), typeof(T));
                 }
             }
