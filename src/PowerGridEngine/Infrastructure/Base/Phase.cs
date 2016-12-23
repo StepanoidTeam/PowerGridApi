@@ -7,34 +7,31 @@ namespace PowerGridEngine
     /// <summary>
     /// Base phase description. Round contais several phases. Active phase is always only one.
     /// </summary>
-    public abstract class Phase : IUserActionHandler
+    public abstract class Phase : State
     {
-        protected Round Container { get; private set; }
-
         private IDictionary<string, bool> _userStates { get; set; }
 
-        public bool IsFinished { get; private set; }
-
-        public Phase(Round container)
+        public Phase(StateBatch container) : base(container)
         {
-            Container = container;
-            StartNewRound();
         }
 
-        public virtual void Done(User user)
+        protected override bool TryToResolve(User user)
         {
             var userId = user == null ? "" : user.Id;
             if (_userStates.ContainsKey(userId))
                 _userStates[userId] = true;
-            IsFinished = _userStates.All(m => m.Value);
+
+            if (_userStates.All(m => m.Value))
+                return base.TryToResolve(user);
+
+            return false;
         }
 
-        public void StartNewRound()
+        protected override void Clear()
         {
-            _userStates = Container.GameContext.Players.ToDictionary(k => k.Id, v => false);
+            _userStates = Players.ToDictionary(k => k.Id, v => false);
+            base.Clear();
             //todo need to override it when need to do some specific New Round logic for some phase?
         }
-
-        public abstract T RouteAction<T>(UserAction<T> action) where T : ActionResponse;
     }
 }

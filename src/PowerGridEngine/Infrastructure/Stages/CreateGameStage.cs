@@ -7,7 +7,7 @@ namespace PowerGridEngine
     /// <summary>
     /// Stage for preparing user for game. Room should be filled by needed user qty and all users should check Ready mark
     /// </summary>
-    public class CreateGameStage: Stage
+    public class CreateGameStage: State
     {
         private IDictionary<string, bool> readyMarks { get; set; }
 
@@ -16,16 +16,16 @@ namespace PowerGridEngine
         /// </summary>
         /// <param name="gameContext"></param>
         /// <param name="userCount"></param>
-        public CreateGameStage(GameStages container) : base(container)
+        public CreateGameStage(StateBatch container) : base(container)
         {
             readyMarks = new Dictionary<string, bool>();
         }
 
-        protected override bool TryToResolve()
+        protected override bool TryToResolve(User user)
         {
             if (readyMarks.Count() == Players.Count() && readyMarks.Values.All(m => true))
             {
-                return base.TryToResolve();
+                return base.TryToResolve(user);
             }
             return false;
         }
@@ -79,7 +79,7 @@ namespace PowerGridEngine
 
         public ActionResponse StartGame(StartGameAction action)
         {
-            var result = TryToResolve();
+            var result = TryToResolve(action.User);
 
             if (result)
             {

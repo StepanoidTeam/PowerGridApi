@@ -7,18 +7,18 @@ namespace PowerGridEngine
     /// <summary>
     /// First stage of game
     /// </summary>
-    public class FirstStage: Stage
+    public class FirstStage: State
     {
-        private Round Round { get; set; }
+        private StateBatch Round { get; set; }
 
         /// <summary>
         /// Stage will finished when there will be <userCount> users and every one will check their ready mark
         /// </summary>
         /// <param name="gameContext"></param>
         /// <param name="userCount"></param>
-        public FirstStage(GameStages container) : base(container)
+        public FirstStage(StateBatch container) : base(container)
         {
-            Round = new Round(container.GameContext)
+            Round = new StateBatch(container.GameContext)
                 .Add<BuildPhase>()
                 .Add<ProduceEnergyPhase>();
         }
@@ -26,28 +26,13 @@ namespace PowerGridEngine
         public override void Begin()
         {
             base.Begin();
-            Round.Start();
+            Round.StartRound();
         }
 
         public override T RouteAction<T>(UserAction<T> action)
         {
-            return Round.CurrentPhase.RouteAction(action);
+            return Round.Current.RouteAction(action);
         }
-
-        //public ActionResponse StartGame(StartGameAction action)
-        //{
-        //    var result = TryToResolve();
-
-        //    if (result)
-        //    {
-        //        //todo move this out
-        //        foreach (var p in container.GameContext.PlayerBoards)
-        //            GameRule.PaymentTransaction(p.Value.PlayerRef, 50);
-        //        GameRule.ChangeTurnOrder(container.GameContext);
-        //    }
-
-        //    return new StartGameResponse(result);
-        //}
 
     }
 }

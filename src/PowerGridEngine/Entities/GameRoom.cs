@@ -24,11 +24,11 @@ namespace PowerGridEngine
         {
             get
             {
-                return !notInGameStages.Contains(Stages.CurrentStage.GetType());
+                return !notInGameStages.Contains(Stages.Current.GetType());
             }
         }
 
-        public GameStages Stages { get; private set; }
+        public StateBatch Stages { get; private set; }
 
         //public Round Round { get; private set; }
 
@@ -57,10 +57,10 @@ namespace PowerGridEngine
 
             EnergoServer.Current.CreateGameRoom(leader, this);
 
-            Stages = new GameStages(gameContext)
-                .AddStage<CreateGameStage>()
-                .AddStage<FirstStage>()
-                .Start();
+            Stages = new StateBatch(gameContext)
+                .Add<CreateGameStage>()
+                .Add<FirstStage>()
+                .StartRound();
         }
 
         private string GenerateGameRoomName(User leader)

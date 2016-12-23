@@ -57,7 +57,7 @@ namespace PowerGridEngine
             //todo do we need to check on GameRoomRef for ANY action?
             if (action == null || action.User == null || action.User.GameRoomRef == null)
                 return action.CreateErrorResponse("Unexpected error");
-            return action.User.GameRoomRef.Stages.CurrentStage.RouteAction(action); 
+            return action.User.GameRoomRef.Stages.Current.RouteAction(action); 
         }
 
         public static string GenerateId()
