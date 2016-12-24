@@ -48,10 +48,10 @@ namespace PowerGridApi
         /// <param name="receiversId"></param>
         public async void Broadcast<T>(T response, string receiverId = null)
         {
-            var message = response.ToJson().Trim('\0');
+            var message = response.ToJson();
             var data = message.GetByteSegment();
 
-            var receivers = _clients.Where(s => s.Connection.State == WebSocketState.Open && s.User != null);
+            var receivers = _clients.Where(s => s.Connection.State == WebSocketState.Open);
 
             var room = EnergoServer.Current.TryToLookupRoom(receiverId);
             if (room != null)

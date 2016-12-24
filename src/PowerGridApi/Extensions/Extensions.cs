@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Text;
 
 namespace PowerGridApi
 {
@@ -46,9 +47,10 @@ namespace PowerGridApi
 
 		public static ArraySegment<byte> GetByteSegment(this string str)
 		{
-			byte[] bytes = new byte[str.Length * sizeof(char)];
-			System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
-			return new ArraySegment<byte>(bytes);
+            return new ArraySegment<byte>(Encoding.UTF8.GetBytes(str));
+            //byte[] bytes = new byte[str.Length * sizeof(char)];
+			//System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
+			//return new ArraySegment<byte>(bytes);
 		}
 	}
 
