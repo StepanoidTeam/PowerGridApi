@@ -52,6 +52,7 @@ namespace PowerGridApi
             var data = message.GetByteSegment();
 
             var receivers = _clients.Where(s => s.Connection.State == WebSocketState.Open);
+            receivers = receivers.Where(s => s.User != null);
 
             var room = EnergoServer.Current.TryToLookupRoom(receiverId);
             if (room != null)
