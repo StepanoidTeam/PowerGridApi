@@ -119,7 +119,7 @@ namespace PowerGridApi
                                     var request = message.ToObject<DuplexNetworkRequest>();
 
                                     if (CheckAuthorization(client, request))
-                                        OnMessage(client.User, request.Type, request.Data);
+                                        OnMessage(client.User, request.Type, message);
                                     else
                                         Console.WriteLine("Unauthorized client trying to send something");
 

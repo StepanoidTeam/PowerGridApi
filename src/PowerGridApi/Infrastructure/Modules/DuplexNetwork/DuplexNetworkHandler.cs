@@ -15,24 +15,15 @@ namespace PowerGridApi
 			var data = (json ?? "");
 			try
 			{
-				//todo: dynamically get JSON obj type
-				//and create typed obj based on that type
-				//no JSON IN JSON !
-				var x = data.ToObject();
-
-
 				switch (type)
 				{
 					case DuplexNetworkRequestType.Chat:
-
-						
-
 						return (T)Convert.ChangeType(data.ToObject<ChatSendModel>(), typeof(T));
 					case DuplexNetworkRequestType.Login:
 						return (T)Convert.ChangeType(data.ToObject<LoginModel>(), typeof(T));
 				}
 			}
-			catch
+			catch(Exception ex)
 			{
 				//nothing to do. It means prefix is not corresponds to type T
 			}
