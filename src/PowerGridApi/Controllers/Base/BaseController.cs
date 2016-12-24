@@ -24,14 +24,16 @@ namespace PowerGridApi.Controllers
 	/// </summary>
 	[EnableCors("CorsPolicy")]
 	public abstract partial class BaseController : Controller
-	{
-		private static string _logFilePath = "Log_{0}.txt";
+    {
+        private static string _logFilePath = "Log_{0}.txt";
 
 		private static bool _enableLogging = false;
 
 		private static decimal _version = 0.01m;
 
-		public static string SwaggerVersion
+        protected const string BroadcastReason = "BroadcastReason";
+
+        public static string SwaggerVersion
 		{
 			get
 			{

@@ -33,6 +33,10 @@ namespace PowerGridApi
 			if (message.InRoomChannel && !user.IsInRoom())
 				return new ApiResponseModel(Constants.Instance.ErrorMessage.Not_In_Room, ResponseType.NotAllowed);
 
+            message.SenderId = user.Id;
+            message.SenderName = user.Username;
+            message.Date = DateTime.UtcNow;
+
             string receiver = null;
             if (message.InRoomChannel)
                 receiver = user.GameRoomRef.Id;

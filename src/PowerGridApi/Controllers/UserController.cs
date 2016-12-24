@@ -38,6 +38,14 @@ namespace PowerGridApi.Controllers
 
             return await GenericResponse(() =>
             {
+                var broadcast = new UserModel(user).GetInfo(new UserModelViewOptions()
+                {
+                    Id = true,
+                    Name = true
+                }).AddItem(BroadcastReason, "User/Login");
+
+                WebSocketManager.Current.Broadcast(broadcast);
+
                 var obj = new UserModel(user).GetInfo(new UserModelViewOptions() { Id = true, Name = true });
                 obj.Add("AuthToken", user.AuthToken);
                 return obj;
@@ -53,8 +61,22 @@ namespace PowerGridApi.Controllers
         [HttpPost("Logout")]
         public async Task<IActionResult> Logout([FromHeader]string authToken)
         {
-            var result = EnergoServer.Current.Logout(UserContext.User);
-            return await GenericResponse(result ? ResponseType.Ok : ResponseType.UnexpectedError);
+            var user = UserContext.User;
+            var result = EnergoServer.Current.Logout(user);
+
+            if (result)
+            {
+                var broadcast = new UserModel(user).GetInfo(new UserModelViewOptions()
+                {
+                    Id = true
+                }).AddItem(BroadcastReason, "User/Logout");
+
+                WebSocketManager.Current.Broadcast(broadcast);
+
+                return await GenericResponse(ResponseType.Ok);
+            }
+
+            return await GenericResponse(ResponseType.UnexpectedError);
         }
 
 	}

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace PowerGridApi
@@ -52,6 +53,12 @@ namespace PowerGridApi
 			//System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
 			//return new ArraySegment<byte>(bytes);
 		}
-	}
+
+        public static Dictionary<string, object> AddItem(this Dictionary<string, object> dict, string key, object value)
+        {
+            dict.Add(key, value);
+            return dict;
+        }
+    }
 
 }

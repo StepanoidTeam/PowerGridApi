@@ -14,11 +14,11 @@ namespace PowerGridApi.Controllers
 	[Route("api/[controller]")]
 	public class RoomsController : BaseController
 	{
-		/// <summary>
-		/// Rooms list
-		/// </summary>
-		/// <returns></returns>
-		[SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+        /// <summary>
+        /// Rooms list
+        /// </summary>
+        /// <returns></returns>
+        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
 		[SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
 		[HttpGet]
 		public async Task<IActionResult> GetGameRoomList([FromHeader]string authToken)
@@ -81,17 +81,17 @@ namespace PowerGridApi.Controllers
 				var broadcast = new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions(true)
 				{
 					UserViewOptions = new UserModelViewOptions(false)
-				});
+				}).AddItem(BroadcastReason, "Rooms/Create");
 
-				WebSocketManager.Current.Broadcast(broadcast, gameRoom.Id);
+                WebSocketManager.Current.Broadcast(broadcast);
 
-				return new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions(true)
-				{
-					IsInGame = false,
-					UserCount = false,
-					UserViewOptions = new UserModelViewOptions(false) { ReadyMark = true }
-				});
-			}).Invoke();
+                return new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions(true)
+                {
+                    IsInGame = false,
+                    UserCount = false,
+                    UserViewOptions = new UserModelViewOptions(false) { ReadyMark = true }
+                });
+            }).Invoke();
 		}
 
 		/// <summary>
@@ -121,9 +121,8 @@ namespace PowerGridApi.Controllers
 				var broadcast = new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions()
 				{
 					UserCount = true,
-					IsInGame = true,
-					UserViewOptions = new UserModelViewOptions(true) { GameRoomId = false }
-				});
+					UserViewOptions = new UserModelViewOptions(false) { Id = true}
+				}).AddItem(BroadcastReason, "Rooms/Join");
 
 				WebSocketManager.Current.Broadcast(broadcast, gameRoom.Id);
 
@@ -163,9 +162,8 @@ namespace PowerGridApi.Controllers
 			var broadcast = new GameRoomModel(room).GetInfo(new RoomModelViewOptions()
 			{
 				UserCount = true,
-				IsInGame = true,
-				UserViewOptions = new UserModelViewOptions(true) { GameRoomId = false }
-			});
+				UserViewOptions = new UserModelViewOptions(false) { Id = true }
+			}).AddItem(BroadcastReason, "Rooms/Leave");
 
 			WebSocketManager.Current.Broadcast(broadcast, room.Id);
 
@@ -206,9 +204,20 @@ namespace PowerGridApi.Controllers
 			if (gameRoom.Players.ContainsKey(userId))
 				errMsg = Constants.Instance.ErrorMessage.You_Cant_Kick_This_User;
 
-			WebSocketManager.Current.Broadcast(UserContext.User.AuthToken, "user kicked - for current room users");
+            var broadcast = new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions()
+            {
+                UserCount = true,
+                UserViewOptions = new UserModelViewOptions(false) { Id = true }
+            }).AddItem(BroadcastReason, "Rooms/Kick");
 
-			return await GenericResponse(ResponseType.UnexpectedError, errMsg);
+            WebSocketManager.Current.Broadcast(broadcast, gameRoom.Id);
+
+            var broadcastToKicked = new UserModel(user).GetInfo(new UserModelViewOptions() { Id = true, GameRoomId = true })
+                .AddItem(BroadcastReason, "Rooms/Kick"); ;
+            
+            WebSocketManager.Current.Broadcast(broadcastToKicked, user.Id);
+
+            return await GenericResponse(ResponseType.UnexpectedError, errMsg);
 		}
 
 		/// <summary>
@@ -232,8 +241,14 @@ namespace PowerGridApi.Controllers
 			if (!toggleResponse.IsSuccess)
 				return await GenericResponse(ResponseType.UnexpectedError, toggleResponse.ErrorMsg);
 
+            var room = user.GameRoomRef;
+            var broadcast = new GameRoomModel(room).GetInfo(new RoomModelViewOptions()
+            {
+                UserViewOptions = new UserModelViewOptions(false) { ReadyMark = true, Id = true }
+            }).AddItem(BroadcastReason, "Rooms/ToggleReady");
 
-			WebSocketManager.Current.Broadcast(UserContext.User.AuthToken, "ready mark changed - for current room users");
+            WebSocketManager.Current.Broadcast(broadcast, room.Id);
+            
 			return await SuccessResponse(toggleResponse.CurrentState);
 		}
 
@@ -253,8 +268,20 @@ namespace PowerGridApi.Controllers
             //todo start game only if creator
 
             var startResponse = EnergoServer.Current.RouteAction(new StartGameAction(user));
-			WebSocketManager.Current.Broadcast(UserContext.User.AuthToken, "game started - for current room users");
-			return await GenericResponse(ResponseType.Ok, data: startResponse);
+            if(!startResponse.IsSuccess)
+                return await GenericResponse(ResponseType.NotAllowed, errMsg: startResponse.ErrorMsg);
+
+            var broadcast = new GameRoomModel(user.GameRoomRef).GetInfo(new RoomModelViewOptions()
+            {
+                Id = true,
+                IsInGame = true,
+                UserCount = true,
+                UserViewOptions = new UserModelViewOptions(false)
+            }).AddItem(BroadcastReason, "Rooms/StartGame");
+
+            WebSocketManager.Current.Broadcast(broadcast);
+
+            return await GenericResponse(ResponseType.Ok, data: startResponse);
 		}
 
 	}
