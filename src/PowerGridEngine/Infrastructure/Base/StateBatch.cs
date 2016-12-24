@@ -19,6 +19,9 @@ namespace PowerGridEngine
 
         public State Current { get; private set; }
 
+        /// <summary>
+        /// helper, in case current State is StateBatch
+        /// </summary>
         public StateBatch CurrentBatch
         {
             get

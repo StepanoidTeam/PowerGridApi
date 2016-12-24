@@ -27,6 +27,8 @@ namespace PowerGridEngine
         {
             get
             {
+                if (Stages.Current == null)
+                    return false;
                 return !notInGameStages.Contains(Stages.Current.GetType());
             }
         }
