@@ -3,7 +3,7 @@ namespace PowerGridEngine
 {
     public class ChatSendModel : IWebSocketRequestModel
     {
-        public string ToUserId { get; set; }
+        public string To { get; set; }
 
         public bool InRoomChannel { get; set; }
 

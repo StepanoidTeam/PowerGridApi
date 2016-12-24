@@ -33,13 +33,13 @@ namespace PowerGridApi
 			if (message.InRoomChannel && !user.IsInRoom())
 				return new ApiResponseModel(Constants.Instance.ErrorMessage.Not_In_Room, ResponseType.NotAllowed);
 
-            string receivers = null;
+            string receiver = null;
             if (message.InRoomChannel)
-                receivers = user.GameRoomRef.Id;
-            else if (!string.IsNullOrWhiteSpace(message.ToUserId))
-                receivers = message.ToUserId;
+                receiver = user.GameRoomRef.Id;
+            else if (!string.IsNullOrWhiteSpace(message.To))
+                receiver = message.To;
 
-            WebSocketManager.Current.Broadcast(message, receivers);
+            WebSocketManager.Current.Broadcast(message, receiver);
 
             return new ApiResponseModel(true);
 		}

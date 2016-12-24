@@ -46,21 +46,21 @@ namespace PowerGridApi
         /// <typeparam name="T"></typeparam>
         /// <param name="response"></param>
         /// <param name="receiversId"></param>
-        public async void Broadcast<T>(T response, string receiversId = null)
+        public async void Broadcast<T>(T response, string receiverId = null)
         {
             var message = response.ToJson().Trim('\0');
             var data = message.GetByteSegment();
 
             var receivers = _clients.Where(s => s.Connection.State == WebSocketState.Open && s.User != null);
 
-            var room = EnergoServer.Current.TryToLookupRoom(receiversId);
+            var room = EnergoServer.Current.TryToLookupRoom(receiverId);
             if (room != null)
             {
                 receivers = receivers.Where(m => m.User.IsInRoom(room.Id));
             }
             else
             {
-                var receiver = EnergoServer.Current.TryToLookupRoom(receiversId);
+                var receiver = EnergoServer.Current.TryToLookupUser(receiverId);
                 if (receiver != null)
                     receivers = receivers.Where(m => m.User.Id == receiver.Id);
             }
