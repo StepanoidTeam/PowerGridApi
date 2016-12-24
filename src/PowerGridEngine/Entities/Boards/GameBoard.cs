@@ -81,22 +81,20 @@ namespace PowerGridEngine
 		public void ChangePlayerTurn()
 		{
 			CurrentTurnPlayer++;
-			if(CurrentTurnPlayer>=PlayersTurnOrder.Length)
-			{
-				//todo next stage
-			}
-		}
+            if (CurrentTurnPlayer >= PlayersTurnOrder.Length)
+                CurrentTurnPlayer = 0;
+        }
 
-		public bool AuctionPass(string userId, out string errMsg)
-		{
-			errMsg = string.Empty;
-			if (!CheckInStatus(GameStatusEnum.Auction, out errMsg))
-				return false;
-			if(!CheckInUserTurn(userId,out errMsg))
-				return false;
-			//todo pass
-			ChangePlayerTurn();
-			return true;
-		}
+		//public bool AuctionPass(string userId, out string errMsg)
+		//{
+		//	errMsg = string.Empty;
+		//	if (!CheckInStatus(GameStatusEnum.Auction, out errMsg))
+		//		return false;
+		//	if(!CheckInUserTurn(userId,out errMsg))
+		//		return false;
+		//	//todo pass
+		//	ChangePlayerTurn();
+		//	return true;
+		//}
 	}
 }

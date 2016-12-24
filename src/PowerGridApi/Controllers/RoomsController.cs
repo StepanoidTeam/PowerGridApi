@@ -250,7 +250,9 @@ namespace PowerGridApi.Controllers
 		{
 			var user = UserContext.User;
 
-			var startResponse = EnergoServer.Current.RouteAction(new StartGameAction(user));
+            //todo start game only if creator
+
+            var startResponse = EnergoServer.Current.RouteAction(new StartGameAction(user));
 			WebSocketManager.Current.Broadcast(UserContext.User.AuthToken, "game started - for current room users");
 			return await GenericResponse(ResponseType.Ok, data: startResponse);
 		}

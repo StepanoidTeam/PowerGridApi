@@ -64,6 +64,11 @@ namespace PowerGridApi.Controllers
             var user = UserContext.User;
 
             var context = GameContext.GetContextByPlayer(user);
+
+            var errMsg = string.Empty;
+            if (!context.GameBoard.CheckInUserTurn(user.Id,out errMsg))
+                return await ErrorResponse(errMsg, ResponseType.NotYourTurn);
+
             var citites = context.GameBoard.MapRef.Cities;
             if (!citites.ContainsKey(buildCityModel.CityId))
                 return await ErrorResponse("No such city", ResponseType.InvalidModel);

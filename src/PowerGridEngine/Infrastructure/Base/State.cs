@@ -12,13 +12,13 @@ namespace PowerGridEngine
     /// </summary>
     public abstract class State : IUserActionHandler
     {
-        protected StateBatch container;
+        protected StateBatch _container;
 
         protected IEnumerable<User> Players
         {
             get
             {
-                return container.GameContext.Players;
+                return _container.GameContext.Players;
             }
         }
 
@@ -26,7 +26,7 @@ namespace PowerGridEngine
 
         public State(StateBatch container)
         {
-            this.container = container;
+            _container = container;
             Clear();
         }
 
@@ -40,8 +40,11 @@ namespace PowerGridEngine
         /// </summary>
         protected virtual bool TryToResolve(User user)
         {
+            if (IsFinished)
+                return true;
+
             IsFinished = true;
-            container.Next();
+            _container.Next();
             return IsFinished;
         }
 

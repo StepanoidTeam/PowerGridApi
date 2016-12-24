@@ -5,7 +5,7 @@ using System.Linq;
 namespace PowerGridEngine
 {    
     /// <summary>
-    /// Base phase description. Round contais several phases. Active phase is always only one.
+    /// Base phase description. Round contains several phases. Active phase is always only one.
     /// </summary>
     public abstract class Phase : State
     {
@@ -19,10 +19,13 @@ namespace PowerGridEngine
         {
             var userId = user == null ? "" : user.Id;
             if (_userStates.ContainsKey(userId))
+            {
                 _userStates[userId] = true;
+                _container.GameContext.GameBoard.ChangePlayerTurn();
+            }
 
             if (_userStates.All(m => m.Value))
-                return base.TryToResolve(user);
+                return base.TryToResolve(user);             
 
             return false;
         }

@@ -86,7 +86,7 @@ namespace PowerGridEngine
                 //todo move this out
                 foreach (var p in Players)
                     GameRule.PaymentTransaction(p, 50);
-                GameRule.ChangeTurnOrder(container.GameContext);
+                GameRule.ChangeTurnOrder(_container.GameContext);
                 return new StartGameResponse();
             }
 

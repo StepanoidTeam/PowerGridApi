@@ -7,6 +7,9 @@ namespace PowerGridEngine
 
     public class GameRoom : BaseEnergoEntity
     {
+        private const string RoomNameTemplate1 = "{0}'s Room";
+        private const string RoomNameTemplate2 = "New Room {0}";
+
         public int MaxPlayers { get; private set; }
 
         public string Id { get; private set; }
@@ -59,15 +62,18 @@ namespace PowerGridEngine
 
             Stages = new StateBatch(gameContext)
                 .Add<CreateGameStage>()
-                .Add<FirstStage>()
+                .Add(new StateBatch(gameContext, context =>
+                    { return context.Room.Stages.CurrentBatch.RoundNumber < 2; }) //it will re-run round 3 times
+                    .Add<BuildPhase>())
+                // .Add<ProduceEnergyPhase>())
                 .StartRound();
         }
 
         private string GenerateGameRoomName(User leader)
         {
-            var name = string.Format("{0}'s Room", leader.Username);
+            var name = string.Format(RoomNameTemplate1, leader.Username);
             if (!name.CheckIfNameIsOk())
-                name = string.Format("New Room {0}", EnergoServer.Current.GetRoomsQty() + 1);
+                name = string.Format(RoomNameTemplate2, EnergoServer.Current.GetRoomsQty() + 1);
             return name;
         }
 

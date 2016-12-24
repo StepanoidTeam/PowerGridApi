@@ -29,8 +29,8 @@ namespace PowerGridEngine
 
         public ActionResponse BuildCity(BuildCityAction action)
         {
-            var board = container.GameContext.GameBoard;
-            var wasMoney = container.GameContext.PlayerBoards[action.User.Id].Money;
+            var board = _container.GameContext.GameBoard;
+            var wasMoney = _container.GameContext.PlayerBoards[action.User.Id].Money;
 
             var playerCities = new PlayerBuiltCities(action.User);
             if (board.BuildPlayersCities.ContainsKey(action.User.Id))
@@ -41,7 +41,7 @@ namespace PowerGridEngine
             var result = playerCities.Build(action.City);
             if (result)
             {
-                var nowMoney = container.GameContext.PlayerBoards[action.User.Id].Money;
+                var nowMoney = _container.GameContext.PlayerBoards[action.User.Id].Money;
                 TryToResolve(action.User);
                 return new BuildCityResponse(wasMoney - nowMoney);
             }
