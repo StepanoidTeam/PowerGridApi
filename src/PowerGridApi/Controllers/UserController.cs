@@ -42,7 +42,7 @@ namespace PowerGridApi.Controllers
                 {
                     Id = true,
                     Name = true
-                }).AddItem(BroadcastReason, "User/Login");
+                }).AddItem(BroadcastReason, Request.Path.Value);
 
                 WebSocketManager.Current.Broadcast(broadcast);
 
@@ -69,7 +69,7 @@ namespace PowerGridApi.Controllers
                 var broadcast = new UserModel(user).GetInfo(new UserModelViewOptions()
                 {
                     Id = true
-                }).AddItem(BroadcastReason, "User/Logout");
+                }).AddItem(BroadcastReason, Request.Path.Value);
 
                 WebSocketManager.Current.Broadcast(broadcast);
 

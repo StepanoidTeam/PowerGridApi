@@ -81,7 +81,7 @@ namespace PowerGridApi.Controllers
 				var broadcast = new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions(true)
 				{
 					UserViewOptions = new UserModelViewOptions(false)
-				}).AddItem(BroadcastReason, "Rooms/Create");
+				}).AddItem(BroadcastReason, Request.Path.Value);
 
                 WebSocketManager.Current.Broadcast(broadcast);
 
@@ -122,7 +122,7 @@ namespace PowerGridApi.Controllers
 				{
 					UserCount = true,
 					UserViewOptions = new UserModelViewOptions(false) { Id = true}
-				}).AddItem(BroadcastReason, "Rooms/Join");
+				}).AddItem(BroadcastReason, Request.Path.Value);
 
 				WebSocketManager.Current.Broadcast(broadcast, gameRoom.Id);
 
@@ -163,7 +163,7 @@ namespace PowerGridApi.Controllers
 			{
 				UserCount = true,
 				UserViewOptions = new UserModelViewOptions(false) { Id = true }
-			}).AddItem(BroadcastReason, "Rooms/Leave");
+			}).AddItem(BroadcastReason, Request.Path.Value);
 
 			WebSocketManager.Current.Broadcast(broadcast, room.Id);
 
@@ -208,12 +208,12 @@ namespace PowerGridApi.Controllers
             {
                 UserCount = true,
                 UserViewOptions = new UserModelViewOptions(false) { Id = true }
-            }).AddItem(BroadcastReason, "Rooms/Kick");
+            }).AddItem(BroadcastReason, Request.Path.Value);
 
             WebSocketManager.Current.Broadcast(broadcast, gameRoom.Id);
 
             var broadcastToKicked = new UserModel(user).GetInfo(new UserModelViewOptions() { Id = true, GameRoomId = true })
-                .AddItem(BroadcastReason, "Rooms/Kick"); ;
+                .AddItem(BroadcastReason, Request.Path.Value); ;
             
             WebSocketManager.Current.Broadcast(broadcastToKicked, user.Id);
 
@@ -245,7 +245,7 @@ namespace PowerGridApi.Controllers
             var broadcast = new GameRoomModel(room).GetInfo(new RoomModelViewOptions()
             {
                 UserViewOptions = new UserModelViewOptions(false) { ReadyMark = true, Id = true }
-            }).AddItem(BroadcastReason, "Rooms/ToggleReady");
+            }).AddItem(BroadcastReason, Request.Path.Value);
 
             WebSocketManager.Current.Broadcast(broadcast, room.Id);
             
@@ -277,7 +277,7 @@ namespace PowerGridApi.Controllers
                 IsInGame = true,
                 UserCount = true,
                 UserViewOptions = new UserModelViewOptions(false)
-            }).AddItem(BroadcastReason, "Rooms/StartGame");
+            }).AddItem(BroadcastReason, Request.Path.Value);
 
             WebSocketManager.Current.Broadcast(broadcast);
 
