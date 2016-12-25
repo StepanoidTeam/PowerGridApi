@@ -61,22 +61,9 @@ namespace PowerGridApi.Controllers
         [HttpPost("Logout")]
         public async Task<IActionResult> Logout([FromHeader]string authToken)
         {
-            var user = UserContext.User;
-            var result = EnergoServer.Current.Logout(user);
-
-            if (result)
-            {
-                var broadcast = new UserModel(user).GetInfo(new UserModelViewOptions()
-                {
-                    Id = true
-                }).AddItem(BroadcastReason, Request.Path.Value);
-
-                WebSocketManager.Current.Broadcast(broadcast);
-
-                return await GenericResponse(ResponseType.Ok);
-            }
-
-            return await GenericResponse(ResponseType.UnexpectedError);
+            ApiResponseModel result = null;
+            await Task.Run(() => { result = ServerContext.Current.UserModule.Logout(UserContext.User); });
+            return await GenericResponse(result);
         }
 
 	}

@@ -9,9 +9,11 @@ namespace PowerGridApi
 {
 	public class ServerContext
 	{
-        public Chat Chat { get; private set; }
+        public ChatNetworkModule Chat { get; private set; }
 
-		public EnergoServer Server { get; private set; }
+        public UserNetworkModule UserModule { get; private set; }
+        
+        public EnergoServer Server { get; private set; }
 
 		public ILogger Logger
 		{
@@ -35,7 +37,8 @@ namespace PowerGridApi
 		{
 			Server = server;
 			Logger = logger;
-            Chat = new Chat();
-		}
+            Chat = new ChatNetworkModule();
+            UserModule = new UserNetworkModule();
+        }
 	}
 }

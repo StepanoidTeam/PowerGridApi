@@ -8,9 +8,9 @@ using PowerGridApi.Controllers;
 
 namespace PowerGridApi
 { 
-	public class Chat: DuplexNetworktHandler
+	public class ChatNetworkModule: DuplexNetworktHandler
     {
-        public Chat() 
+        public ChatNetworkModule() 
         {
             WebSocketManager.Current.OnMessage += Chat_OnMessage;
             WebSocketManager.Current.OnClose += Chat_OnClose;

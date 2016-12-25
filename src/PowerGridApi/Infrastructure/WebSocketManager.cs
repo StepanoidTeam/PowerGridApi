@@ -12,12 +12,12 @@ namespace PowerGridApi
 {
     public class WebSocketManager
     {
-        public delegate void RequestRecievedDelegate(User user, DuplexNetworkRequestType type, string json);
-        public delegate void ConnectionCloseDelegate(User user);
-
         private static WebSocketManager _current;
 
         private ConcurrentBag<DuplexNetworkClient> _clients { get; set; }
+
+        public delegate void RequestRecievedDelegate(User user, DuplexNetworkRequestType type, string json);
+        public delegate void ConnectionCloseDelegate(User user);
 
         public event ConnectionCloseDelegate OnClose;
         public event RequestRecievedDelegate OnMessage;
@@ -40,6 +40,19 @@ namespace PowerGridApi
             OnMessage += WebSocketManager_onMessage;
         }
 
+        private void CloseUnactiveConnections(WebSocketState[] statuses = null)
+        {
+            statuses = statuses ?? new[] { WebSocketState.Aborted, WebSocketState.Closed };
+            var closedClients = _clients.Where(m => statuses.Contains(m.Connection.State));
+            foreach (var closed in closedClients)
+            {
+                var user = closed.User;
+                closed.User = null;
+                _clients.RemoveItem(closed);
+                OnClose(user);
+            }
+        }
+
         /// <summary>
         /// receiversId could be roomId, userId or null (global broadcast)
         /// </summary>
@@ -48,6 +61,8 @@ namespace PowerGridApi
         /// <param name="receiversId"></param>
         public async void Broadcast<T>(T response, string receiverId = null)
         {
+            CloseUnactiveConnections();
+
             var message = response.ToJson();
             var data = message.GetByteSegment();
 
@@ -79,6 +94,15 @@ namespace PowerGridApi
         }
 
         /// <summary>
+        /// Unassign logged out user from Socket Connection
+        /// </summary>
+        public void ForgotUser(User user)
+        {
+            var client = _clients.FirstOrDefault(m => m.User != null && m.User.Id == user.Id);
+            client.User = null;
+        }
+
+        /// <summary>
         /// It will expecting to recieve AuthToken as Json parameter from client to join it to network
         /// </summary>
         /// <param name="http"></param>
@@ -93,6 +117,8 @@ namespace PowerGridApi
 
                 if (webSocket != null && webSocket.State == WebSocketState.Open)
                 {
+                    CloseUnactiveConnections();
+
                     var client = new DuplexNetworkClient { Connection = webSocket };
                     _clients.Add(client);
 
@@ -109,12 +135,9 @@ namespace PowerGridApi
                             switch (received.MessageType)
                             {
                                 case WebSocketMessageType.Close:
-                                    //todo: somehow delete closed sockets
-                                    //received.CloseStatus, 
-
-                                    //todo: how we will indentify auth token here... ?
-                                    OnClose(null);//, received.CloseStatusDescription);
+                                    CloseUnactiveConnections(new[] { WebSocketState.CloseReceived });
                                     break;
+
                                 case WebSocketMessageType.Text:
                                     var message = Encoding.UTF8.GetString(buffer.Array, buffer.Offset, buffer.Count).Trim('\0');
                                     var request = message.ToObject<DuplexNetworkRequest>();
@@ -122,19 +145,19 @@ namespace PowerGridApi
                                     if (CheckAuthorization(client, request))
                                         OnMessage(client.User, request.Type, message);
                                     else
-                                        Console.WriteLine("Unauthorized client trying to send something");
-
+                                        ServerContext.Current.Logger.Log(LogDestination.Console, LogType.Info, "Websocket Unauthorized client trying to send something");
                                     break;
+
                                 case WebSocketMessageType.Binary:
                                     //todo: not impl yet for binary - do we need this case?
-                                    Console.WriteLine("binary:");
-                                    Console.WriteLine(buffer.Array);
+                                    ServerContext.Current.Logger.Log(LogDestination.Console, LogType.Info, "Websocket Binary recieved:");
+                                    ServerContext.Current.Logger.Log(LogDestination.Console, LogType.Info, buffer.Array);
                                     break;
                             }
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine(ex);
+                            ServerContext.Current.Logger.LogError(LogDestination.Console, ex);
                             break;
                         }
                     }
@@ -152,17 +175,26 @@ namespace PowerGridApi
 
         private void WebSocketManager_onClose(User user)
         {
-            Console.WriteLine(string.Format("onClose: {0}", user == null ? "" : user.Id));
+            string userId = null;
+            string userName = null;
+            if (user != null)
+            {
+                userId = user.Id;
+                userName = user.Username;
+            }
+            ServerContext.Current.Logger.Log(LogDestination.Console, LogType.Info, "Websocket onClose from Id = {0}, name = {1}.", userId, userName);
         }
 
         private void WebSocketManager_onMessage(User user, DuplexNetworkRequestType type, string json)
         {
-            //Broadcast(authToken, message);
-            //todo: somehow parse json to model?
-            //todo: route the requests to proper methods?
-            Console.WriteLine(string.Format("onMessage from {0}:", user == null ? "" : user.Id));
-            Console.WriteLine(json);
+            string userId = null;
+            string userName = null;
+            if (user != null)
+            {
+                userId = user.Id;
+                userName = user.Username;
+            }
+            ServerContext.Current.Logger.Log(LogDestination.Console, LogType.Info, "Websocket onMessage from Id = {0}, name = {1}: {2}", userId, userName, json);
         }
-
     }
 }
