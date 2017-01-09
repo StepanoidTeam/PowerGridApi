@@ -29,19 +29,24 @@ namespace PowerGridApi
         public ApiResponseModel Logout(User user)
 		{
             var result = EnergoServer.Current.Logout(user);
-            WebSocketManager.Current.ForgotUser(user);
-
-            ServerContext.Current.Logger.Log(LogDestination.Console, LogType.Info, "Logout Id = {0}, name = {1}.", user.Id, user.Username);
-
-            var broadcast = new UserModel(user).GetInfo(new UserModelViewOptions()
-            {
-                Id = true
-            }).AddItem("BroadcastReason", "Logout");
-
-            WebSocketManager.Current.Broadcast(broadcast);
 
             if (result)
+            {
+                ServerContext.Current.Chat.DropChannel(user, user.Id);
+
+                WebSocketManager.Current.ForgotUser(user);
+
+                ServerContext.Current.Logger.Log(LogDestination.Console, LogType.Info, "Logout Id = {0}, name = {1}.", user.Id, user.Username);
+
+                var broadcast = new UserModel(user).GetInfo(new UserModelViewOptions()
+                {
+                    Id = true
+                }).AddItem("BroadcastReason", "Logout");
+
+                WebSocketManager.Current.Broadcast(broadcast);
+                
                 return new ApiResponseModel(true);
+            }
 
             return new ApiResponseModel("Couldn't logout", ResponseType.UnexpectedError);
 		}

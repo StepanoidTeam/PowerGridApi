@@ -14,6 +14,8 @@ namespace PowerGridEngine
     /// </summary>
 	public partial class EnergoServer
 	{
+        private static object _lock = new object();
+
         private static EnergoServer _current;
 
         /// <summary>
@@ -69,13 +71,16 @@ namespace PowerGridEngine
 
         public static string GenerateSmallUniqueId()
         {
-            var newId = string.Empty;
-            do
+            lock (_lock)
             {
-                newId = GenerateId().Substring(0, 8);
-            } while (_uniqueIds.ContainsKey(newId));
-            _uniqueIds.Add(newId, null);
-            return newId;
+                var newId = string.Empty;
+                do
+                {
+                    newId = GenerateId().Substring(0, 8);
+                } while (_uniqueIds.ContainsKey(newId));
+                _uniqueIds.Add(newId, null);
+                return newId;
+            }
         }
     }
 }

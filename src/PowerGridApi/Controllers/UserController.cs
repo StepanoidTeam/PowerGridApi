@@ -35,9 +35,11 @@ namespace PowerGridApi.Controllers
 
             var errMsg = string.Empty;
             var user = EnergoServer.Current.Login(loginInfo.Username, out errMsg);
-
+            
             return await GenericResponse(() =>
             {
+                ServerContext.Current.Chat.AddChannel(user, ChatChannelType.Private, user.Id);
+
                 var broadcast = new UserModel(user).GetInfo(new UserModelViewOptions()
                 {
                     Id = true,

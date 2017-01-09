@@ -78,6 +78,8 @@ namespace PowerGridApi.Controllers
 
 			return await SuccessResponse(() =>
 			{
+                ServerContext.Current.Chat.AddChannel(UserContext.User, ChatChannelType.Room);
+
 				var broadcast = new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions(true)
 				{
 					UserViewOptions = new UserModelViewOptions(false)
@@ -152,12 +154,16 @@ namespace PowerGridApi.Controllers
 
 			var user = UserContext.User;
 			var room = user.GameRoomRef;
+            var roomId = room.Id;
 
 			//todo wtf again with UserContext.User....UserContext.User?
 			user.GameRoomRef.Leave(user);
 
 			if (user.GameRoomRef != null)
 				return await GenericResponse(ResponseType.UnexpectedError, Constants.Instance.ErrorMessage.You_Cant_Leave_This_Game_Room);
+
+            if (user.GameRoomRef != null && room.Players.Count == 0)
+                ServerContext.Current.Chat.DropChannel(user, roomId);
 
 			var broadcast = new GameRoomModel(room).GetInfo(new RoomModelViewOptions()
 			{

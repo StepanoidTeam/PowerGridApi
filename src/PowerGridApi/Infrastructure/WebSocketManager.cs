@@ -43,14 +43,12 @@ namespace PowerGridApi
         private void CloseUnactiveConnections(WebSocketState[] statuses = null)
         {
             statuses = statuses ?? new[] { WebSocketState.Aborted, WebSocketState.Closed };
-            var closedClients = _clients.Where(m => statuses.Contains(m.Connection.State));
-            foreach (var closed in closedClients)
-            {
-                var user = closed.User;
-                closed.User = null;
-                _clients.RemoveItem(closed);
-                OnClose(user);
-            }
+
+            var closedClients = _clients.Where(m => statuses.Contains(m.Connection.State)).ToArray();
+            var closedUsers = closedClients.Where(m => m.User != null).Select(m => m.User).ToList();
+
+            _clients.RemoveItems(closedClients);
+            closedUsers.ForEach(m => OnClose(m));
         }
 
         /// <summary>
@@ -94,12 +92,13 @@ namespace PowerGridApi
         }
 
         /// <summary>
-        /// Unassign logged out user from Socket Connection
+        /// Unassign logged out user from Socket Connection. Needed to logout user (unattach it from connection)
         /// </summary>
         public void ForgotUser(User user)
         {
             var client = _clients.FirstOrDefault(m => m.User != null && m.User.Id == user.Id);
-            client.User = null;
+            if (client != null)
+                client.User = null;
         }
 
         /// <summary>

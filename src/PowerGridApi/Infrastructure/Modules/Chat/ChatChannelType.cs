@@ -1,10 +1,11 @@
 ﻿
 namespace PowerGridApi
 {
-	public enum DuplexNetworkChannel
+	public enum ChatChannelType
     {
 		Global,
 		Room,
-		Personal
+		Private,
+        Custom
 	}
 }

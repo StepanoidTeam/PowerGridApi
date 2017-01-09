@@ -3,6 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace PowerGridApi
 {
@@ -65,28 +66,41 @@ namespace PowerGridApi
 
         public static void RemoveItem<T>(this ConcurrentBag<T> bag, T removeItem)
         {
+            RemoveItems(bag, new[] { removeItem });
+        }
+
+        public static void RemoveItems<T>(this ConcurrentBag<T> bag, T[] removeItems)
+        {
+            if (removeItems.Length < 1)
+                return;
+
             lock (RemoveConcurrentBagLocker)
             {
+                var qty = 0;
                 var lst = new List<T>();
                 T item;
                 do
                 {
                     if (bag.TryTake(out item))
                     {
-                        if (!item.Equals(removeItem))
+                        if (!removeItems.Any(m => item.Equals(m)))
                             lst.Add(item);
                         else
-                            break;
+                        {
+                            qty++;
+                            if (qty == removeItems.Length)
+                                break;
+                        }
                     }
                 }
                 while (bag.Count > 0);
+
                 foreach (var i in lst)
                 {
                     bag.Add(i);
                 }
             }
         }
-
     }
 
 }
