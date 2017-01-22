@@ -113,14 +113,14 @@ namespace PowerGridApi
             }
         }
 
-        private List<ChatSendModel> _messages { get; set; }
+        private List<ChatMessage> _messages { get; set; }
 
         /// <summary>
         /// White/Black list (according to value, means if true - it's whitelist) with userIds.
         /// It's active only if appopriate setting is true (IsBlackListActive, IsWhiteListActive).
         /// But if even whilelist is not active - it's used to check to which channels user have invites.
         /// </summary>
-        public List<ChatSendModel> Messages
+        public List<ChatMessage> Messages
         {
             get
             {
@@ -156,7 +156,7 @@ namespace PowerGridApi
 
             _subscribers = new Dictionary<string, DateTime>();
             AccessList = new Dictionary<string, bool>();
-            _messages = new List<ChatSendModel>();
+            _messages = new List<ChatMessage>();
         }
 
         public void CheckPermissions(string userId)
@@ -221,7 +221,7 @@ namespace PowerGridApi
                 ServerContext.Current.Chat.AddOrUpdateChannelToUser(user, this, false);
         }
 
-        public void AddMessage(User user, ChatSendModel message)
+        public void AddMessage(User user, ChatMessage message)
         {
             Messages.Add(message);
 
@@ -229,8 +229,9 @@ namespace PowerGridApi
             if (Type == ChatChannelType.Private)
                 subscribers = subscribers.Where(m => message.SenderId == m || Id == m).ToList();
 
+            var data = new ChatMessageModel(message).GetInfo(new ChatMessageModelViewOptions(true));
             //todo move this static link outside
-            WebSocketManager.Current.Broadcast(message, subscribers);
+            WebSocketManager.Current.Broadcast(data, subscribers);
         }
     }
 }

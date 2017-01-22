@@ -34,6 +34,24 @@ namespace PowerGridApi.Controllers
             return await GenericResponse(result);
         }
 
+        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
+        [SwaggerResponse(System.Net.HttpStatusCode.BadRequest, "InvalidModel")]
+        [HttpPost("GetMessages")]
+        public async Task<IActionResult> GetMessages([FromHeader]string authToken, [FromBody]GetChatMessagesRequestModel model)
+        {
+            var channel = ServerContext.Current.Chat.LookupChannel(UserContext.User, model.Id, null, CheckAccessRule.IsSubscribed);
+            if (channel == null)
+                return await GenericResponse(ResponseType.InvalidModel, string.Format(ChatNetworkModule.ErrMsg_NoSuchChannelOrNotAllow, "get messages"));
+
+            return await SuccessResponse(() =>
+            {
+                var messages = channel.Messages.Where(m => m.Date >= model.Start && m.Date <= model.End);
+                return new ApiResponseModel(messages.Select(m => new ChatMessageModel(m).GetInfo(
+                    new ChatMessageModelViewOptions(true) { ChannelId = false })));
+            }).Invoke();
+        }
+
         /// <summary>
         /// Get list of active chat channels or chat channels where you have invite to
         /// </summary>

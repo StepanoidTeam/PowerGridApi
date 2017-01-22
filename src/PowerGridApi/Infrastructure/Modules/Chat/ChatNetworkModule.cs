@@ -83,9 +83,14 @@ namespace PowerGridApi
             if (message == null)
                 return new ApiResponseModel(false);
 
-            message.SenderId = user.Id;
-            message.SenderName = user.Username;
-            message.Date = DateTime.UtcNow;
+            var chatMessage = new ChatMessage
+            {
+                ChannelId = message.ChannelId,
+                Message = message.Message,
+                SenderId = user.Id,
+                SenderName = user.Username,
+                Date = DateTime.UtcNow,
+            };
 
             var channel = LookupChannel(user, message.ChannelId,
                 message.ChannelId == null ? ChatChannelType.Global : (ChatChannelType?)null);
@@ -96,7 +101,7 @@ namespace PowerGridApi
             if (channel.Type != ChatChannelType.Private && !channel.Subscribers.ContainsKey(user.Id))
                 return new ApiResponseModel(ErrMsg_UserIsNotSubscribed, ResponseType.NotAllowed);
 
-            channel.AddMessage(user, message);
+            channel.AddMessage(user, chatMessage);
             return new ApiResponseModel(true);
         }
 
