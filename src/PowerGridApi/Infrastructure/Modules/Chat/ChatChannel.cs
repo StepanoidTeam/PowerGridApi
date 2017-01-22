@@ -12,10 +12,11 @@ namespace PowerGridApi
     /// Custom channels could be closed only if only one man in there.
     /// Todo: Who can invite to custom (now everyone)
     /// </summary>
-	public class ChatChannel: BaseEnergoEntity
+	public class ChatChannel : BaseEnergoEntity
     {
         private object _lockSubscr = new object();
         private object _lockAccessLst = new object();
+        private object _lockMessages = new object();
 
         public string Id { get; private set; }
 
@@ -36,18 +37,38 @@ namespace PowerGridApi
         }
 
         private Dictionary<string, DateTime> _subscribers { get; set; }
-    
+
         /// <summary>
-        /// Key - user Id (Custom type) or room Id (Room type), value - when subscribed (to control which messages could see). 
-        /// Ignored for Global channel type, in this case just sending message for ALL.
-        /// For Private ignored too and just used channel id (receiver) and sender to broadcast them messages.
+        /// Key - user Id, value - when subscribed (to control which messages could see). 
+        /// Only for custom it will return right connected datetime, otherwise it will return current time.
+        /// For Global channel type - All connected users (it doesn't mean they are really online, but mostly there are user with recently activity).
+        /// For Private there will be senders, who sent their messages recently on current user Private.
+        /// For Room - active users in room.
         /// </summary>
         public Dictionary<string, DateTime> Subscribers
         {
             get
             {
-                lock (_lockSubscr)
-                    return _subscribers;
+                var server = ServerContext.Current.Server;
+                switch (Type)
+                {
+                    case ChatChannelType.Custom:
+                        lock (_lockSubscr)
+                            return _subscribers;
+                    case ChatChannelType.Global:
+                        return server.GetUsers().ToDictionary(k => k.Id, v => DateTime.UtcNow);
+                    case ChatChannelType.Room:
+                        var room = server.TryToLookupRoom(Id);
+                        if (room == null)
+                            return new Dictionary<string, DateTime>();
+                        return room.Players.ToDictionary(k => k.Key, v => DateTime.UtcNow);
+                    case ChatChannelType.Private:
+                        var lst = Messages.Select(m => m.SenderId).Distinct().ToList();
+                        if (!lst.Contains(Id))
+                            lst.Add(Id);
+                        return lst.ToDictionary(k => k, v => DateTime.UtcNow);
+                }
+                return null;
             }
         }
 
@@ -92,6 +113,27 @@ namespace PowerGridApi
             }
         }
 
+        private List<ChatSendModel> _messages { get; set; }
+
+        /// <summary>
+        /// White/Black list (according to value, means if true - it's whitelist) with userIds.
+        /// It's active only if appopriate setting is true (IsBlackListActive, IsWhiteListActive).
+        /// But if even whilelist is not active - it's used to check to which channels user have invites.
+        /// </summary>
+        public List<ChatSendModel> Messages
+        {
+            get
+            {
+                lock (_lockMessages)
+                    return _messages;
+            }
+            private set
+            {
+                lock (_lockMessages)
+                    _messages = value;
+            }
+        }
+
         /// <summary>
         /// Create new channel in system
         /// </summary>
@@ -106,34 +148,50 @@ namespace PowerGridApi
                 Id = id;
 
             Type = type;
+
             if (Type == ChatChannelType.Custom && !string.IsNullOrWhiteSpace(name))
-                Name = name;
+                this.name = name;
             else
-                Name = Type.ToString();
+                this.name = Type.ToString();
 
             _subscribers = new Dictionary<string, DateTime>();
             AccessList = new Dictionary<string, bool>();
+            _messages = new List<ChatSendModel>();
+        }
+
+        public void CheckPermissions(string userId)
+        {
+            if (IsBlackListActive && BlackList.Contains(userId))
+                throw new Exception(ChatNetworkModule.ErrMsg_UserInBlackList);
+
+            if (!WhiteList.Contains(userId))
+            {
+                if (IsWhiteListActive)
+                    throw new Exception(ChatNetworkModule.ErrMsg_UserInNotInWhiteList);
+                else
+                    throw new Exception(ChatNetworkModule.ErrMsg_UserDontHaveInvite);
+            }
         }
 
         /// <summary>
         /// Return false if already subscribed
         /// </summary>
-        /// <param name="id">user or room id</param>
+        /// <param name="userId">user or room id</param>
+        /// <param name="checkAccess"></param>
         /// <returns></returns>
-        public void Subscribe(string id)
+        public void Subscribe(User user, bool checkAccess = false)
         {
             lock (_lockSubscr)
             {
-                if (_subscribers.ContainsKey(id))
+                if (_subscribers.ContainsKey(user.Id))
                     throw new Exception(ChatNetworkModule.ErrMsg_AlreadyInThisChannel);
 
-                if (IsBlackListActive && BlackList.Contains(id))
-                    throw new Exception(ChatNetworkModule.ErrMsg_UserInBlackList);
+                if (checkAccess)
+                    CheckPermissions(user.Id);
 
-                if (IsWhiteListActive && !WhiteList.Contains(id))
-                    throw new Exception(ChatNetworkModule.ErrMsg_UserInNotInWhiteList);
+                ServerContext.Current.Chat.AddOrUpdateChannelToUser(user, this, true);
 
-                _subscribers.Add(id, DateTime.UtcNow);
+                _subscribers.Add(user.Id, DateTime.UtcNow);
             }
         }
 
@@ -145,19 +203,34 @@ namespace PowerGridApi
         {
             lock (_lockSubscr)
             {
-                if (!_subscribers.ContainsKey(user.Id))
-                    return false;
-                _subscribers.Remove(user.Id);
-                return true;
+                //it means if user leave, he can anyway back. Maybe need to drop invite?
+                ServerContext.Current.Chat.AddOrUpdateChannelToUser(user, this, false);
+
+                return _subscribers.Remove(user.Id);
             }
         }
 
-        public void AddOrUpdateAccess(string userId, bool hasAccess)
+        public void AddOrUpdateAccess(User user, bool hasAccess)
         {
-            if (AccessList.ContainsKey(userId))
-                AccessList[userId] = hasAccess;
+            if (AccessList.ContainsKey(user.Id))
+                AccessList[user.Id] = hasAccess;
             else
-                AccessList.Add(userId, hasAccess);
+                AccessList.Add(user.Id, hasAccess);
+
+            if (hasAccess)
+                ServerContext.Current.Chat.AddOrUpdateChannelToUser(user, this, false);
+        }
+
+        public void AddMessage(User user, ChatSendModel message)
+        {
+            Messages.Add(message);
+
+            var subscribers = Subscribers.Keys.ToList();
+            if (Type == ChatChannelType.Private)
+                subscribers = subscribers.Where(m => message.SenderId == m || Id == m).ToList();
+
+            //todo move this static link outside
+            WebSocketManager.Current.Broadcast(message, subscribers);
         }
     }
 }

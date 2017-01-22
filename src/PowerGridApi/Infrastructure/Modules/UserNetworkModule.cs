@@ -32,7 +32,7 @@ namespace PowerGridApi
 
             if (result)
             {
-                ServerContext.Current.Chat.DropChannel(user, user.Id);
+                ServerContext.Current.Chat.DropChannel(user, user.Id, CheckAccessRule.IsSubscribed);
 
                 WebSocketManager.Current.ForgotUser(user);
 

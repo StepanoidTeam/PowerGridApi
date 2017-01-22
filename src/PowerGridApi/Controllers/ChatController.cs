@@ -93,7 +93,7 @@ namespace PowerGridApi.Controllers
         [HttpPost("Close")]
         public async Task<IActionResult> CloseChannel([FromHeader]string authToken, [FromBody]ChannelRequestModel model)
         {
-            var channel = ServerContext.Current.Chat.LookupChannel(model.Id, ChatChannelType.Custom);
+            var channel = ServerContext.Current.Chat.LookupChannel(UserContext.User, model.Id, ChatChannelType.Custom, CheckAccessRule.IsSubscribed);
             if (channel == null)
                 return await GenericResponse(ResponseType.InvalidModel, string.Format(ChatNetworkModule.ErrMsg_NoSuchChannelOrNotAllow, "close it"));
 

@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using PowerGridEngine;
+using System.Collections.Generic;
 
 namespace PowerGridApi
 {
@@ -78,6 +79,19 @@ namespace PowerGridApi
                 if (receiver != null)
                     receivers = receivers.Where(m => m.User.Id == receiver.Id);
             }
+
+            await Task.WhenAll(receivers.Select(s => s.Connection.SendAsync(data, WebSocketMessageType.Text, true, CancellationToken.None)));
+        }
+
+        public async void Broadcast<T>(T response, List<string> receiverIds)
+        {
+            CloseUnactiveConnections();
+
+            var message = response.ToJson();
+            var data = message.GetByteSegment();
+
+            var receivers = _clients.Where(s => s.Connection.State == WebSocketState.Open);
+            receivers = receivers.Where(s => receiverIds.Contains(s.User.Id));
 
             await Task.WhenAll(receivers.Select(s => s.Connection.SendAsync(data, WebSocketMessageType.Text, true, CancellationToken.None)));
         }

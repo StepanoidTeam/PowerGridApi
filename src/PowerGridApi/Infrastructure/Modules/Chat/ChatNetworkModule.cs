@@ -9,6 +9,13 @@ using System.Collections.Concurrent;
 
 namespace PowerGridApi
 {
+    public enum CheckAccessRule
+    {
+        None,
+        HasInviteOrInWhiteListAndNotInBlackList,
+        IsSubscribed
+    }
+
     public class ChatNetworkModule : DuplexNetworktHandler
     {
         private object _lockUCM = new object();
@@ -18,11 +25,13 @@ namespace PowerGridApi
         private const string ErrMsg_CantDropChannelType = "Is not allowing to drop such channel type";
 
         public readonly static string ErrMsg_UserInBlackList = "This user inside black list";
-        public readonly static string ErrMsg_UserInNotInWhiteList = "Could not join to channel with active whitelist, you are not in whitelist";
+        public readonly static string ErrMsg_UserInNotInWhiteList = "You are not in whitelist in channel with active whitelist";
+        public readonly static string ErrMsg_UserDontHaveInvite = "You don't have invite to this channel";
         public readonly static string ErrMsg_AlreadyInThisChannel = "Already in this channel";        
         public readonly static string ErrMsg_NoSuchChannelOrNotAllow = "No such channel or you are not allow to {0}";
         public readonly static string ErrMsg_NoSuchChannel = "No such channel";
         public readonly static string ErrMsg_CantDropChannelWithSubscribers = "Channel couldn't be closed while there are users";
+        public readonly static string ErrMsg_UserIsNotSubscribed = "You didn't joined in this channel";
 
         public ConcurrentBag<ChatChannel> Channels { get; set; }
 
@@ -74,39 +83,67 @@ namespace PowerGridApi
             if (message == null)
                 return new ApiResponseModel(false);
 
-            if (message.InRoomChannel && !user.IsInRoom())
-                return new ApiResponseModel(Constants.Instance.ErrorMessage.Not_In_Room, ResponseType.NotAllowed);
-
             message.SenderId = user.Id;
             message.SenderName = user.Username;
             message.Date = DateTime.UtcNow;
 
-            string receiver = null;
-            if (message.InRoomChannel)
-                receiver = user.GameRoomRef.Id;
-            else if (!string.IsNullOrWhiteSpace(message.To))
-                receiver = message.To;
+            var channel = LookupChannel(user, message.ChannelId,
+                message.ChannelId == null ? ChatChannelType.Global : (ChatChannelType?)null);
+            if (channel == null)
+                return new ApiResponseModel(ErrMsg_NoSuchChannel, ResponseType.InvalidModel);
 
-            WebSocketManager.Current.Broadcast(message, receiver);
+            //Private don't have restriction, anybody can send to private
+            if (channel.Type != ChatChannelType.Private && !channel.Subscribers.ContainsKey(user.Id))
+                return new ApiResponseModel(ErrMsg_UserIsNotSubscribed, ResponseType.NotAllowed);
 
+            channel.AddMessage(user, message);
             return new ApiResponseModel(true);
         }
 
-        public ChatChannel LookupChannel(string id = null, ChatChannelType? type = null)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="id"></param>
+        /// <param name="type"></param>
+        /// <param name="checkAccess">if None - do not check any permission,
+        /// Otwerwise depends from type (Global - always has access, Room - if in room, Private - only for self private). For Custom:
+        /// if HasInviteOrInWhiteListAndNotInBlackList - check if has invite (or in whiteList) and not in blackList - exception on error,
+        /// if IsSubscribed - check if subscribed and return null if not</param>
+        /// <returns></returns>
+        public ChatChannel LookupChannel(User user, string id = null, ChatChannelType? type = null, CheckAccessRule checkAccess = CheckAccessRule.None)
         {
-            return Channels.FirstOrDefault(m => (id == null || m.Id == id) && (type == null || type == m.Type));
+            var channel = Channels.FirstOrDefault(m => (id == null || m.Id == id) && (type == null || type == m.Type));
+            if (channel != null && checkAccess != CheckAccessRule.None)
+            {
+                if (channel.Type == ChatChannelType.Global)
+                    return channel;
+                if (channel.Type == ChatChannelType.Private)
+                    return user.Id == id ? channel : null;
+                if (channel.Type == ChatChannelType.Room)
+                    return (user.GameRoomRef == null || user.GameRoomRef.Id != id) ? null : channel;
+
+                if (checkAccess == CheckAccessRule.HasInviteOrInWhiteListAndNotInBlackList)
+                    channel.CheckPermissions(user.Id);
+                else
+                {
+                    if (!channel.Subscribers.ContainsKey(user.Id))
+                        return null;
+                }
+            }
+            return channel;
         }
 
         public ChatChannel AddChannel(User user, ChatChannelType type, string id = null, string name = null)
         {
-            string subscriberId = null;
+            //string subscriberId = null;
             if (type == ChatChannelType.Custom)
             {
                 id = null; //can't setup id for custom, it should be generated by system
             }
             else
             {
-                var sameChannel = LookupChannel(id, type);
+                var sameChannel = LookupChannel(user, id, type);
                 if (sameChannel != null)
                     throw new ArgumentException(ErrMsg_SuchChannelExists);
             }
@@ -116,31 +153,38 @@ namespace PowerGridApi
                 var room = ServerContext.Current.Server.TryToLookupRoom(id);
                 if (room == null)
                     throw new ArgumentException("No such room");
-                subscriberId = room.Id;
+                //subscriberId = room.Id;
             }
             else if (type == ChatChannelType.Private)
             {
                 var priv = ServerContext.Current.Server.TryToLookupUser(id);
                 if (priv == null)
                     throw new ArgumentException("No such user");
-                subscriberId = priv.Id;
+                //subscriberId = priv.Id;
             }
 
             var channel = new ChatChannel(type, id, name);
 
-            if (subscriberId != null)
-                channel.Subscribe(subscriberId);
-            else if (type == ChatChannelType.Custom)
-                Join(user, channel);
-
             Channels.Add(channel);
+            
+            //if (subscriberId != null)
+            //    channel.Subscribe(subscriberId);
+            //else 
+            if (type == ChatChannelType.Custom)
+                Join(user, channel);
 
             return channel;
         }
 
-        public void DropChannel(User user, string id)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="id"></param>
+        /// <param name="checkAccess">if null - do nothing, if false - check if has invite, if true - check if subscribed</param>
+        public void DropChannel(User user, string id, CheckAccessRule checkAccess = CheckAccessRule.None)
         {
-            var channel = LookupChannel(id);
+            var channel = LookupChannel(user, id, checkAccess: checkAccess);
             if (channel != null)
                 DropChannel(user, channel);
         }
@@ -164,7 +208,8 @@ namespace PowerGridApi
                 if (room == null || user == null || room.Leader.Id != user.Id)
                     throw new Exception(ErrMsg_NoSuchChannelOrNotAllow);
             }
-            else if (channel.Type == ChatChannelType.Custom)
+
+            if (channel.Type == ChatChannelType.Custom)
             {
                 if (channel.Subscribers.Count > 1)
                     throw new Exception(ErrMsg_CantDropChannelWithSubscribers);
@@ -175,43 +220,35 @@ namespace PowerGridApi
 
         public ChatChannel Join(User user, string channelId)
         {
-            var channel = LookupChannel(channelId, ChatChannelType.Custom);
-            if (channel == null)
+            var channel = LookupChannel(user, channelId, ChatChannelType.Custom, CheckAccessRule.HasInviteOrInWhiteListAndNotInBlackList);
+            if (channel == null || channel.Subscribers.ContainsKey(user.Id))
                 throw new Exception(string.Format(ErrMsg_NoSuchChannelOrNotAllow, "join into channel"));
 
-            Join(user, channelId);
-
-            return channel;
+            return Join(user, channel);
         }
 
-        public ChatChannel Join(User user, ChatChannel channel)
+        public ChatChannel Join(User user, ChatChannel channel, bool checkAccess = false)
         {
-            channel.Subscribe(user.Id);
-            AddOrUpdateChannelToUser(user, channel, true);
-
+            channel.Subscribe(user, checkAccess);
             return channel;
         }
-
 
         public ChatChannel Leave(User user, string channelId)
         {
-            var channel = LookupChannel(channelId, ChatChannelType.Custom);
+            var channel = LookupChannel(user, channelId, ChatChannelType.Custom, CheckAccessRule.IsSubscribed);
             if (channel == null)
                 throw new Exception(string.Format(ErrMsg_NoSuchChannelOrNotAllow, "leave from channel"));
 
             if (!channel.Unsubscribe(user))
                 throw new Exception("You are not in this channel");
 
-            //it means if user leave, he can anyway back. Maybe need to drop invite?
-            AddOrUpdateChannelToUser(user, channel, false);
-
             return channel;
         }
 
         public void InviteToChannel(User inviter, string inviteWhoId, string channelId)
         {
-            var channel = ServerContext.Current.Chat.LookupChannel(channelId, ChatChannelType.Custom);
-            if (channel == null || !channel.Subscribers.ContainsKey(inviter.Id))
+            var channel = ServerContext.Current.Chat.LookupChannel(inviter, channelId, ChatChannelType.Custom, CheckAccessRule.IsSubscribed);
+            if (channel == null)
                 throw new Exception(string.Format(ErrMsg_NoSuchChannelOrNotAllow, "invite into this channel"));
 
             var user = ServerContext.Current.Server.TryToLookupUser(inviteWhoId);
@@ -221,9 +258,22 @@ namespace PowerGridApi
             if (channel.Subscribers.ContainsKey(user.Id))
                 throw new Exception(ErrMsg_AlreadyInThisChannel);
 
-            channel.AddOrUpdateAccess(inviteWhoId, true);
+            channel.AddOrUpdateAccess(user, true);
+        }
 
-            AddOrUpdateChannelToUser(user, channel, false);
+        /// <summary>
+        /// Add user to white/black list
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="channelId"></param>
+        /// <param name="toBlackOrWhiteList"></param>
+        public void ChangePermission(User user, string channelId, bool toBlackOrWhiteList)
+        {
+            var channel = ServerContext.Current.Chat.LookupChannel(user, channelId, ChatChannelType.Custom);
+            if (channel == null)
+                throw new Exception(string.Format(ErrMsg_NoSuchChannelOrNotAllow, "change permission for selected user"));
+
+            channel.AddOrUpdateAccess(user, toBlackOrWhiteList);
         }
 
         /// <summary>
@@ -234,13 +284,16 @@ namespace PowerGridApi
         /// <param name="isJoinOrInvite">false if just invite</param>
         public void AddOrUpdateChannelToUser(User user, ChatChannel channel, bool isJoinOrInvite)
         {
-            if (!UserChannelsMap.ContainsKey(user.Id))
-                UserChannelsMap.Add(user.Id, new Dictionary<string, bool>());
+            lock (_lockUCM)
+            {
+                if (!userChannelsMap.ContainsKey(user.Id))
+                    userChannelsMap.Add(user.Id, new Dictionary<string, bool>());
 
-            if (UserChannelsMap[user.Id].ContainsKey(channel.Id))
-                UserChannelsMap[user.Id][channel.Id] = isJoinOrInvite;
-            else
-                UserChannelsMap[user.Id].Add(channel.Id, isJoinOrInvite);
+                if (userChannelsMap[user.Id].ContainsKey(channel.Id))
+                    userChannelsMap[user.Id][channel.Id] = isJoinOrInvite;
+                else
+                    userChannelsMap[user.Id].Add(channel.Id, isJoinOrInvite);
+            }
         }
 
         public Dictionary<ChatChannel, bool> GetUserChannels(User user, bool withSystems = true)
@@ -264,7 +317,7 @@ namespace PowerGridApi
                     var map = UserChannelsMap[user.Id];
                     foreach (var channel in map)
                     {
-                        var chan = LookupChannel(channel.Key);
+                        var chan = LookupChannel(user, channel.Key);
                         if (chan != null)
                             result.Add(chan, channel.Value);
                     }

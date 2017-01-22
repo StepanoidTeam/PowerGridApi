@@ -78,7 +78,7 @@ namespace PowerGridApi.Controllers
 
 			return await SuccessResponse(() =>
 			{
-                ServerContext.Current.Chat.AddChannel(UserContext.User, ChatChannelType.Room);
+                ServerContext.Current.Chat.AddChannel(UserContext.User, ChatChannelType.Room, gameRoom.Id);
 
 				var broadcast = new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions(true)
 				{

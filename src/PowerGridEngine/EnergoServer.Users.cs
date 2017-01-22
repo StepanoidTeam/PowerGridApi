@@ -152,5 +152,10 @@ namespace PowerGridEngine
         {
             return Users.ContainsKey(userId ?? "") ? Users[userId] : null;
         }
+
+        public List<User> GetUsers()
+        {
+            return Users.Values.ToList();
+        }
     }
 }
