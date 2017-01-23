@@ -227,7 +227,7 @@ namespace PowerGridApi
 
             var subscribers = Subscribers.Keys.ToList();
             if (Type == ChatChannelType.Private)
-                subscribers = subscribers.Where(m => message.SenderId == m || Id == m).ToList();
+                subscribers = new List<string> { Id };
 
             var data = new ChatMessageModel(message).GetInfo(new ChatMessageModelViewOptions(true));
             //todo move this static link outside

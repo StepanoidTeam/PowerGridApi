@@ -97,8 +97,15 @@ namespace PowerGridApi
             if (channel == null)
                 return new ApiResponseModel(ErrMsg_NoSuchChannel, ResponseType.InvalidModel);
 
-            //Private don't have restriction, anybody can send to private
-            if (channel.Type != ChatChannelType.Private && !channel.Subscribers.ContainsKey(user.Id))
+            if (channel.Type == ChatChannelType.Private)
+            {
+                //find sender private channel to send his message to him too (not only on destination channel)
+                var senderChannel = LookupChannel(user, user.Id, ChatChannelType.Private);
+                if (senderChannel != null)
+                    senderChannel.AddMessage(user, chatMessage);
+            }
+            //Non-Private have restriction, so can send only subscriber
+            else if (!channel.Subscribers.ContainsKey(user.Id))
                 return new ApiResponseModel(ErrMsg_UserIsNotSubscribed, ResponseType.NotAllowed);
 
             channel.AddMessage(user, chatMessage);
@@ -106,7 +113,9 @@ namespace PowerGridApi
         }
 
         /// <summary>
-        /// 
+        /// Be careful. Check access checking admin-like permissions (means if allow to invite, close and so on), but
+        /// not if you allow to send to channel (it should be checked separately), for example Private allows to recieve 
+        /// messages from ANY user on site (Not only subscribers).
         /// </summary>
         /// <param name="user"></param>
         /// <param name="id"></param>
