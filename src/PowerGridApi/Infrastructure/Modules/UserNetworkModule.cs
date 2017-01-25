@@ -19,7 +19,11 @@ namespace PowerGridApi
         private void OnClose(User user)
         {
             if (user != null)
-                Logout(user);
+            {
+                WebSocketManager.Current.ForgotUser(user);
+                //todo really don't need?
+                //Logout(user);
+            }
         }
 
         public void OnMessage(User user, DuplexNetworkRequestType type, string json)
