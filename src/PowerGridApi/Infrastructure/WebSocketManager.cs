@@ -90,7 +90,7 @@ namespace PowerGridApi
             var message = response.ToJson();
             var data = message.GetByteSegment();
 
-            var receivers = _clients.Where(s => s.Connection.State == WebSocketState.Open);
+            var receivers = _clients.Where(s => s.Connection.State == WebSocketState.Open && s.User != null);
             receivers = receivers.Where(s => receiverIds.Contains(s.User.Id));
 
             await Task.WhenAll(receivers.Select(s => s.Connection.SendAsync(data, WebSocketMessageType.Text, true, CancellationToken.None)));
@@ -106,9 +106,10 @@ namespace PowerGridApi
         }
 
         /// <summary>
-        /// Unassign logged out user from Socket Connection. Needed to logout user (unattach it from connection)
+        /// Unassign logged user from Socket Connection in case connection closed (it means user is not logged out, but is offline).
+        /// Todo: Needed to logout user after timeout
         /// </summary>
-        public void ForgotUser(User user)
+        public void SetUserAsOffline(User user)
         {
             var client = _clients.FirstOrDefault(m => m.User != null && m.User.Id == user.Id);
             if (client != null)

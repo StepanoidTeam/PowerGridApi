@@ -20,9 +20,10 @@ namespace PowerGridApi
         {
             if (user != null)
             {
-                WebSocketManager.Current.ForgotUser(user);
+                WebSocketManager.Current.SetUserAsOffline(user);
                 //todo really don't need?
                 //Logout(user);
+                //Need to setup some timeout after which log out (or let's user be logged even if it's not online?)
             }
         }
 
@@ -38,7 +39,7 @@ namespace PowerGridApi
             {
                 ServerContext.Current.Chat.DropChannel(user, user.Id, CheckAccessRule.IsSubscribed);
 
-                WebSocketManager.Current.ForgotUser(user);
+                WebSocketManager.Current.SetUserAsOffline(user);
 
                 ServerContext.Current.Logger.Log(LogDestination.Console, LogType.Info, "Logout Id = {0}, name = {1}.", user.Id, user.Username);
 
