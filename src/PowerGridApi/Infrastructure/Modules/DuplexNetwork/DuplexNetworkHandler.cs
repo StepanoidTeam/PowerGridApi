@@ -21,7 +21,9 @@ namespace PowerGridApi
 						return (T)Convert.ChangeType(data.ToObject<ChatSendModel>(), typeof(T));
 					case DuplexNetworkRequestType.Login:
 						return (T)Convert.ChangeType(data.ToObject<LoginModel>(), typeof(T));
-				}
+                    case DuplexNetworkRequestType.UserStatus:
+                        return (T)Convert.ChangeType(data.ToObject<DuplexNetworkRequest>(), typeof(T));
+                }
 			}
 			catch(Exception ex)
 			{

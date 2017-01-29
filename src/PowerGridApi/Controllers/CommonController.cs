@@ -50,24 +50,5 @@ namespace PowerGridApi.Controllers
             return await SuccessResponse(result);
 		}
 
-        /// <summary>
-        /// Player info
-        /// </summary>
-        /// <returns></returns>        
-        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
-        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
-        [HttpPost("User/Status")]
-        public async Task<IActionResult> GetUserInfo([FromHeader]string authToken, [FromBody]UserModelViewOptions viewOptions)
-        {
-            var userModel = new UserModel(UserContext.User);
-
-            var responseGetter = SuccessResponse(() =>
-            {
-                return userModel.GetInfo(viewOptions);
-            });
-
-            return await responseGetter();
-        }
-
 	}
 }

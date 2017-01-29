@@ -29,6 +29,9 @@ namespace PowerGridApi
 
         public void OnRequestRecieved(User user, DuplexNetworkRequestType type, string json)
         {
+            var request = TryToGetSpecificRequest<DuplexNetworkRequest>(type, json);
+            if (request != null)
+                GetStatus(user, null, broadcastResponse: true);
         }
 
         public ApiResponseModel Logout(User user)
@@ -55,6 +58,20 @@ namespace PowerGridApi
 
             return new ApiResponseModel("Couldn't logout", ResponseType.UnexpectedError);
 		}
-        
-	}
+
+        public ApiResponseModel GetStatus(User user, UserModelViewOptions viewOptions = null, bool broadcastResponse = false)
+        {
+            if (user == null)
+                return new ApiResponseModel(false);
+
+            var userModel = new UserModel(user);
+
+            var response = new ApiResponseModel(userModel.GetInfo(viewOptions));
+
+            ServerContext.Current.DuplexNetwork.Broadcast(response, user.Id, SubscriberType.User);
+
+            return response;
+        }
+
+    }
 }

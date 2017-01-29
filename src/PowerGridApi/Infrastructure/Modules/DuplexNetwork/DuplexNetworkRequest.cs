@@ -1,6 +1,8 @@
-﻿namespace PowerGridApi
+﻿using PowerGridEngine;
+
+namespace PowerGridApi
 {
-	public class DuplexNetworkRequest
+	public class DuplexNetworkRequest: IWebSocketRequestModel
     {
 		public string AuthToken { get; set; }
 

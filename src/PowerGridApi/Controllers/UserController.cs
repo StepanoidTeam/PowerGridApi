@@ -68,5 +68,21 @@ namespace PowerGridApi.Controllers
             return await GenericResponse(result);
         }
 
-	}
+        /// <summary>
+        /// Get Player info. It also could be good enter point to check if Auth Token is not expired yet.
+        /// </summary>
+        /// <returns></returns>        
+        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
+        [HttpPost("Status")]
+        public async Task<IActionResult> GetUserInfo([FromHeader]string authToken, [FromBody]UserModelViewOptions viewOptions)
+        {
+            var responseGetter = SuccessResponse(() =>
+            {
+                return ServerContext.Current.UserModule.GetStatus(UserContext.User, viewOptions);
+            });
+
+            return await responseGetter();
+        }
+    }
 }

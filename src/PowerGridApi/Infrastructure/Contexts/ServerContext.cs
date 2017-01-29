@@ -33,15 +33,17 @@ namespace PowerGridApi
         public static void InitCurrentContext(EnergoServer server, ILogger logger)
         {
             Current = new ServerContext(server, logger);
+
+            Current.DuplexNetwork = new WebSocketManager();
+
+            Current.Chat = new ChatNetworkModule();
+            Current.UserModule = new UserNetworkModule();
         }
 
         public ServerContext(EnergoServer server, ILogger logger)
         {
             Server = server;
             Logger = logger;
-            Chat = new ChatNetworkModule();
-            UserModule = new UserNetworkModule();
-            DuplexNetwork = new WebSocketManager();
         }
 
     }

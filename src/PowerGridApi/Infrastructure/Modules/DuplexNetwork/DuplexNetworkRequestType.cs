@@ -6,6 +6,7 @@ namespace PowerGridApi
     public enum DuplexNetworkRequestType
     {
         Chat,
-        Login
+        Login,
+        UserStatus
     }
 }

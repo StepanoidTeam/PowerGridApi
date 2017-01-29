@@ -84,6 +84,8 @@ namespace PowerGridApi
         /// <param name="receiverType">Ignored in case ReceiverIds is null or empty</param>
         public async Task Broadcast<T>(T response, List<string> receiverIds, SubscriberType receiverType = SubscriberType.None)
         {
+            receiverIds = receiverIds ?? new List<string>();
+
             CloseUnactiveConnections();
 
             var message = response.ToJson();
@@ -167,7 +169,10 @@ namespace PowerGridApi
         public async Task HandleRequests(HttpContext http, Func<Task> next)
         {
             if (!http.WebSockets.IsWebSocketRequest)
+            {
                 await next();
+                return;
+            }
 
             var webSocket = await http.WebSockets.AcceptWebSocketAsync();
 
