@@ -16,12 +16,13 @@ namespace PowerGridApi
 
         public EnergoServer Server { get; private set; }
 
+        public WebSocketManager DuplexNetwork { get; private set; }
+ 
         public ILogger Logger
         {
             get;
             private set;
         }
-
 
         public static ServerContext Current
         {
@@ -40,6 +41,7 @@ namespace PowerGridApi
             Logger = logger;
             Chat = new ChatNetworkModule();
             UserModule = new UserNetworkModule();
+            DuplexNetwork = new WebSocketManager();
         }
 
     }

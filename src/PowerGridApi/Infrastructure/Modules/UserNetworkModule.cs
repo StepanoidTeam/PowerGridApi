@@ -12,22 +12,22 @@ namespace PowerGridApi
     {
         public UserNetworkModule() 
         {
-            WebSocketManager.Current.OnMessage += OnMessage;
-            WebSocketManager.Current.OnClose += OnClose;
+            ServerContext.Current.DuplexNetwork.OnRequestRecieved += OnRequestRecieved;
+            ServerContext.Current.DuplexNetwork.OnClose += OnClose;
         }
 
         private void OnClose(User user)
         {
             if (user != null)
             {
-                WebSocketManager.Current.SetUserAsOffline(user);
+                ServerContext.Current.DuplexNetwork.SetUserAsOffline(user);
                 //todo really don't need?
                 //Logout(user);
                 //Need to setup some timeout after which log out (or let's user be logged even if it's not online?)
             }
         }
 
-        public void OnMessage(User user, DuplexNetworkRequestType type, string json)
+        public void OnRequestRecieved(User user, DuplexNetworkRequestType type, string json)
         {
         }
 
@@ -39,7 +39,7 @@ namespace PowerGridApi
             {
                 ServerContext.Current.Chat.DropChannel(user, user.Id, CheckAccessRule.IsSubscribed);
 
-                WebSocketManager.Current.SetUserAsOffline(user);
+                ServerContext.Current.DuplexNetwork.SetUserAsOffline(user);
 
                 ServerContext.Current.Logger.Log(LogDestination.Console, LogType.Info, "Logout Id = {0}, name = {1}.", user.Id, user.Username);
 
@@ -48,7 +48,7 @@ namespace PowerGridApi
                     Id = true
                 }).AddItem("BroadcastReason", "Logout");
 
-                WebSocketManager.Current.Broadcast(broadcast);
+                ServerContext.Current.DuplexNetwork.Broadcast(broadcast);
                 
                 return new ApiResponseModel(true);
             }

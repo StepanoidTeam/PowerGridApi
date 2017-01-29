@@ -85,7 +85,7 @@ namespace PowerGridApi.Controllers
 					UserViewOptions = new UserModelViewOptions(false)
 				}).AddItem(BroadcastReason, Request.Path.Value);
 
-                WebSocketManager.Current.Broadcast(broadcast);
+                ServerContext.Current.DuplexNetwork.Broadcast(broadcast);
 
                 return new GameRoomModel(gameRoom).GetInfo(new RoomModelViewOptions(true)
                 {
@@ -126,7 +126,7 @@ namespace PowerGridApi.Controllers
 					UserViewOptions = new UserModelViewOptions(false) { Id = true}
 				}).AddItem(BroadcastReason, Request.Path.Value);
 
-				WebSocketManager.Current.Broadcast(broadcast, gameRoom.Id);
+                ServerContext.Current.DuplexNetwork.Broadcast(broadcast, gameRoom.Id, SubscriberType.Room);
 
 				return new GameRoomModel(gameRoom).GetInfo(
 					new RoomModelViewOptions
@@ -171,7 +171,7 @@ namespace PowerGridApi.Controllers
 				UserViewOptions = new UserModelViewOptions(false) { Id = true }
 			}).AddItem(BroadcastReason, Request.Path.Value);
 
-			WebSocketManager.Current.Broadcast(broadcast, room.Id);
+            ServerContext.Current.DuplexNetwork.Broadcast(broadcast, room.Id, SubscriberType.Room);
 
 			//todo why it is possible you couldn't leave room? Need to determine corrent status code here
 			return await SuccessResponse(true);
@@ -216,12 +216,12 @@ namespace PowerGridApi.Controllers
                 UserViewOptions = new UserModelViewOptions(false) { Id = true }
             }).AddItem(BroadcastReason, Request.Path.Value);
 
-            WebSocketManager.Current.Broadcast(broadcast, gameRoom.Id);
+            ServerContext.Current.DuplexNetwork.Broadcast(broadcast, gameRoom.Id, SubscriberType.Room);
 
             var broadcastToKicked = new UserModel(user).GetInfo(new UserModelViewOptions() { Id = true, GameRoomId = true })
                 .AddItem(BroadcastReason, Request.Path.Value); ;
-            
-            WebSocketManager.Current.Broadcast(broadcastToKicked, user.Id);
+
+            ServerContext.Current.DuplexNetwork.Broadcast(broadcastToKicked, user.Id, SubscriberType.User);
 
             return await GenericResponse(ResponseType.UnexpectedError, errMsg);
 		}
@@ -253,7 +253,7 @@ namespace PowerGridApi.Controllers
                 UserViewOptions = new UserModelViewOptions(false) { ReadyMark = true, Id = true }
             }).AddItem(BroadcastReason, Request.Path.Value);
 
-            WebSocketManager.Current.Broadcast(broadcast, room.Id);
+            ServerContext.Current.DuplexNetwork.Broadcast(broadcast, room.Id, SubscriberType.Room);
             
 			return await SuccessResponse(toggleResponse.CurrentState);
 		}
@@ -285,7 +285,7 @@ namespace PowerGridApi.Controllers
                 UserViewOptions = new UserModelViewOptions(false)
             }).AddItem(BroadcastReason, Request.Path.Value);
 
-            WebSocketManager.Current.Broadcast(broadcast);
+            ServerContext.Current.DuplexNetwork.Broadcast(broadcast);
 
             return await GenericResponse(ResponseType.Ok, data: startResponse);
 		}

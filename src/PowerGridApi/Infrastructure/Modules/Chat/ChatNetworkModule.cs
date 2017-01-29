@@ -60,8 +60,8 @@ namespace PowerGridApi
 
         public ChatNetworkModule()
         {
-            WebSocketManager.Current.OnMessage += Chat_OnMessage;
-            WebSocketManager.Current.OnClose += Chat_OnClose;
+            ServerContext.Current.DuplexNetwork.OnRequestRecieved += Chat_OnMessage;
+            ServerContext.Current.DuplexNetwork.OnClose += Chat_OnClose;
 
             Channels = new ConcurrentBag<ChatChannel>();
             AddChannel(null, ChatChannelType.Global);

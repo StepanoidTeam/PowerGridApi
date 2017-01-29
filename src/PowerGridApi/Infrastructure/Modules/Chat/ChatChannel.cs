@@ -231,7 +231,7 @@ namespace PowerGridApi
 
             var data = new ChatMessageModel(message).GetInfo(new ChatMessageModelViewOptions(true));
             //todo move this static link outside
-            WebSocketManager.Current.Broadcast(data, subscribers);
+            ServerContext.Current.DuplexNetwork.Broadcast(data, subscribers);
         }
     }
 }

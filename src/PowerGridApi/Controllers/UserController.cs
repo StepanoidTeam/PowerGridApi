@@ -46,7 +46,7 @@ namespace PowerGridApi.Controllers
                     Name = true
                 }).AddItem(BroadcastReason, Request.Path.Value);
 
-                WebSocketManager.Current.Broadcast(broadcast);
+                ServerContext.Current.DuplexNetwork.Broadcast(broadcast);
 
                 var obj = new UserModel(user).GetInfo(new UserModelViewOptions() { Id = true, Name = true });
                 obj.Add("AuthToken", user.AuthToken);
