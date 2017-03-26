@@ -46,7 +46,7 @@ namespace PowerGridEngine
             public readonly string Already_In_The_Game = "You already in the game.";
             public readonly string YouAre_Outside_Of_Game_Rooms = "You are outside of game rooms.";
             public readonly string YouAre_Not_In_Game = "You are not in game.";
-            public readonly string You_Cant_Leave_This_Game_Room = "You can't leave game room.";
+            public readonly string You_Cant_Leave_This_Game_Room = "You are not in room.";
             public readonly string There_No_Such_User = "There no such user.";
             public readonly string You_Cant_Kick_This_User = "You can't kick this user.";
             public readonly string User_Cant_Be_Null = "Player can't be null.";

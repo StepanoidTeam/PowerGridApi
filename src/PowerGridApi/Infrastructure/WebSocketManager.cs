@@ -134,6 +134,15 @@ namespace PowerGridApi
             await Task.WhenAll(receivers.Select(s => s.Connection.SendAsync(data, WebSocketMessageType.Text, true, CancellationToken.None)));
         }
 
+        private async Task DirectResponse<T>(DuplexNetworkClient client, T response)
+        {
+            var message = response.ToJson();
+            var data = message.GetByteSegment();
+
+            if (client.Connection.State == WebSocketState.Open)
+                await client.Connection.SendAsync(data, WebSocketMessageType.Text, true, CancellationToken.None);
+        }
+
         /// <summary>
         /// It will also put user into status 'Online' (means it's available to get messages via socket) if authorized
         /// and also updated last connection activity (for destroy connections it they was not active some time)
@@ -206,7 +215,11 @@ namespace PowerGridApi
                                 if (CheckAuthorization(client, request))
                                     OnRequestRecieved(client.User, request.Type, message);
                                 else
+                                {
+                                    var response = new { IsSuccess = false, Message = "You are not authorized" };
+                                    await DirectResponse(client, response);
                                     ServerContext.Current.Logger.Log(LogDestination.Console, LogType.Info, "Websocket Unauthorized client trying to send something");
+                                }
                                 break;
 
                             case WebSocketMessageType.Binary:
