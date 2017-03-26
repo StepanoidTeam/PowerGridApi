@@ -24,8 +24,7 @@ namespace PowerGridApi
 			Configuration = builder.Build();
 
 			//init energo server
-			EnergoServer.Current.Settings.SimpleOrGuidPlayerId = false;
-			ServerContext.InitCurrentContext(EnergoServer.Current, new Logger());
+			ServerContext.InitCurrentContext();
 		}
 
 		public IConfigurationRoot Configuration { get; }

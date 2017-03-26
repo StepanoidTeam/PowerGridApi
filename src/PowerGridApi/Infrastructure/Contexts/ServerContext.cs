@@ -46,5 +46,11 @@ namespace PowerGridApi
             Logger = logger;
         }
 
+        public static void InitCurrentContext()
+        {
+            EnergoServer.Init();
+            InitCurrentContext(EnergoServer.Current, new Logger());
+        }
+
     }
 }

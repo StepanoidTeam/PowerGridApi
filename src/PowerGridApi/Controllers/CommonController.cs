@@ -30,6 +30,25 @@ namespace PowerGridApi.Controllers
 		}
 
         /// <summary>
+        /// Restart Server
+        /// </summary>
+        /// <returns></returns>
+        [SwaggerResponse(System.Net.HttpStatusCode.Unauthorized, "Unauthorized")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, "Ok")]
+        [SwaggerResponse(System.Net.HttpStatusCode.BadRequest, "NotInGame")]
+        [HttpGet("Admin/RestartServer")]
+        public async Task<IActionResult> RestartServer([FromHeader]string authToken)
+        {
+            var user = UserContext.User;
+            if (user.Id != EnergoServer.AdminId)
+                return await ErrorResponse("Unauthorized");
+
+            ServerContext.InitCurrentContext();
+            return await SuccessResponse(true);
+        }
+
+
+        /// <summary>
         /// Get status of active for current user game
         /// </summary>
         /// <returns></returns>
