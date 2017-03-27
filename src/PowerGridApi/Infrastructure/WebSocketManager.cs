@@ -135,7 +135,7 @@ namespace PowerGridApi
             if (userReceiverIds.Any())
                 receivers = receivers.Where(s => userReceiverIds.Contains(s.User.Id));
 
-            await Task.WhenAll(receivers.Select(s => s.Connection.SendAsync(data, WebSocketMessageType.Text, true, CancellationToken.None)));
+            await Task.WhenAll(receivers.Select(s => s.SendData(data)));
         }
 
         private async Task DirectResponse<T>(DuplexNetworkClient client, T response)
@@ -144,7 +144,7 @@ namespace PowerGridApi
             var data = message.GetByteSegment();
 
             if (client.Connection.State == WebSocketState.Open)
-                await client.Connection.SendAsync(data, WebSocketMessageType.Text, true, CancellationToken.None);
+                await client.SendData(data);
         }
 
         /// <summary>
@@ -156,6 +156,8 @@ namespace PowerGridApi
         /// <returns></returns>
         private bool CheckAuthorization(DuplexNetworkClient client, DuplexNetworkRequest request)
         {
+            client.UpdateActivity();
+
             var errMsg = string.Empty;
             if (client.User == null) //try to authorize if not yet
                 client.User = EnergoServer.Current.FindUserByAuthToken(request.AuthToken, out errMsg);
