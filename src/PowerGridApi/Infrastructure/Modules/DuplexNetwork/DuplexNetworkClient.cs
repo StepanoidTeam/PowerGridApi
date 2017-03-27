@@ -15,6 +15,11 @@ namespace PowerGridApi
         public DuplexNetworkClient(WebSocket connection)
         {
             Connection = connection;
+            UpdateActivity();
+        }
+
+        public void UpdateActivity()
+        {
             LastActivityTime = DateTime.UtcNow;
         }
     }

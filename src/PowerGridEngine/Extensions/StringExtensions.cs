@@ -43,7 +43,7 @@ namespace PowerGridEngine
         public static bool CheckIfNameIsOk(this string str)
         {
             var regexp = new Regex(@"^\w+( {0,1}[\w'])*$", RegexOptions.Compiled);
-            return regexp.IsMatch(str ?? "");
+            return regexp.IsMatch(str ?? "") && !str.ToLowerInvariant().Contains("admin");
         }
     }
 }

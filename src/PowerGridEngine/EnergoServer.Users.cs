@@ -58,7 +58,7 @@ namespace PowerGridEngine
 
         public bool Logout(User user)
         {
-            if (!Users.ContainsKey(user.Id))
+            if (!Users.ContainsKey(user.Id) || user.Id == AdminId)
                 return false;
             return Users.Remove(user.Id);
         }

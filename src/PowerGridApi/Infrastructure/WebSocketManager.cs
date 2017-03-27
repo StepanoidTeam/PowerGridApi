@@ -81,14 +81,18 @@ namespace PowerGridApi
         /// <typeparam name="T"></typeparam>
         /// <param name="response"></param>
         /// <param name="receiverIds"></param>
-        /// <param name="receiverType">Ignored in case ReceiverIds is null or empty</param>
+        /// <param name="receiverType">Ignored in case ReceiverIds is null or empty. If none - will send wide broadcast</param>
         public async Task Broadcast<T>(T response, List<string> receiverIds, SubscriberType receiverType = SubscriberType.None)
         {
             receiverIds = receiverIds ?? new List<string>();
 
             CloseUnactiveConnections();
 
-            var message = response.ToJson();
+            string message = "";
+            if (response is string)
+                message = response.ToString();
+            else
+                response.ToJson();
             var data = message.GetByteSegment();
 
             var receivers = _clients.Where(s => s.Connection.State == WebSocketState.Open);
@@ -258,14 +262,16 @@ namespace PowerGridApi
 
         private void WebSocketManager_OnRequestRecieved(User user, DuplexNetworkRequestType type, string json)
         {
-            string userId = null;
-            string userName = null;
+            var userId = "";
+            var userName = "";
             if (user != null)
             {
                 userId = user.Id;
                 userName = user.Username;
             }
-            ServerContext.Current.Logger.Log(LogDestination.Console, LogType.Info, "Websocket onMessage from Id = {0}, name = {1}: {2}", userId, userName, json);
+            var logFormat = "Websocket onMessage from Id = {0}, name = {1}: {2}";
+            Broadcast(string.Format(logFormat, userId, userName, json), EnergoServer.AdminId, SubscriberType.User);
+            ServerContext.Current.Logger.Log(LogDestination.Console, LogType.Info, logFormat, userId, userName, json);
         }
     }
 }
