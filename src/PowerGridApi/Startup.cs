@@ -29,7 +29,9 @@ namespace PowerGridApi
 
             try
             {
-                var defaultMapPath = "App_Data/Maps/map-cities.json";
+
+                var filePath = "Data\\Maps\\map-cities.json";
+                var defaultMapPath = System.IO.Path.Combine(env.WebRootPath, filePath);
                 if (File.Exists(defaultMapPath))
                 {
                     var fileData = File.ReadAllText(defaultMapPath);
