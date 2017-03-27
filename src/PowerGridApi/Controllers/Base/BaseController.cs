@@ -14,8 +14,7 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using System.IO;
 using System.Text;
 
-// For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
-[assembly: AssemblyVersion("0.0.*")]
+//[assembly: AssemblyVersion("0.0.*")]
 
 namespace PowerGridApi.Controllers
 {
