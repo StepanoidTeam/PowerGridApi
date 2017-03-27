@@ -39,7 +39,7 @@ namespace PowerGridEngine
 		/// </summary>
 		public Tuple<decimal, decimal> Coords { get; private set; }
 
-		public IDictionary<string, Connector> Conntectors
+		public IDictionary<string, Connector> Connectors
 		{
 			get
 			{

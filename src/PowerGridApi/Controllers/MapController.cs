@@ -51,7 +51,7 @@ namespace PowerGridApi.Controllers
             var map = EnergoServer.Current.LookupMap(mapId, out errMsg);
             if (!string.IsNullOrWhiteSpace(errMsg))
                 return await GenericResponse(ResponseType.NotFound, errMsg);
-
+           
             var mapModel = new MapModel(map);
             var result = await Task.Run(() => { return mapModel.GetInfo(options); });
 

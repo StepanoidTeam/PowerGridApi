@@ -20,9 +20,9 @@ namespace PowerGridEngine
 
         public int[] Levels { get { return Entity.Levels.OrderBy(m => m.Key).Select(m => m.Value).ToArray(); } }
 
-        public object[] GetConntectors(ConnectorModelViewOptions options)
+        public object[] GetConnectors(ConnectorModelViewOptions options)
         {
-            return Entity.Conntectors.Select(m => new ConnectorModel(m.Value).GetInfo(options)).ToArray();
+            return Entity.Connectors.Select(m => new ConnectorModel(m.Value).GetInfo(options)).ToArray();
         }
 
         public CityModel(City entity) : base(entity)
@@ -50,8 +50,8 @@ namespace PowerGridEngine
             }
             if (options.Levels)
                 result.Add("Levels", this.Levels);
-            if (options.Conntectors)
-                result.Add("Conntectors", this.GetConntectors(options.ConnectorViewOptions));
+            if (options.Connectors)
+                result.Add("Connectors", this.GetConnectors(options.ConnectorViewOptions));
             return result;
         }
     }

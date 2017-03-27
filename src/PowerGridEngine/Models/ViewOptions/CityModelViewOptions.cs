@@ -11,7 +11,7 @@ namespace PowerGridEngine
 
         public bool Levels { get; set; }
 
-        public bool Conntectors { get; set; }
+        public bool Connectors { get; set; }
 
         public ConnectorModelViewOptions ConnectorViewOptions { get; set; }    
 
@@ -21,7 +21,7 @@ namespace PowerGridEngine
             RegionName = defaultValue;
             Coords = defaultValue;
             Levels = defaultValue;
-            Conntectors = defaultValue;
+            Connectors = defaultValue;
             ConnectorViewOptions = new ConnectorModelViewOptions(defaultValue);
         }
     }

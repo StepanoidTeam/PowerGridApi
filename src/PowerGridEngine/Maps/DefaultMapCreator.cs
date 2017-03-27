@@ -22,13 +22,30 @@ namespace PowerGridEngine
             }
         }
 
+        public static void CreateDefaultRegions(Map map)
+        {
+            var redRegion = new Region("Red", map);
+            var blueRegion = new Region("Blue", map);
+            var brownRegion = new Region("Brown", map);
+            var yelRegion = new Region("Yellow", map);
+            var greenRegion = new Region("Green", map);
+            var violetRegion = new Region("Violet", map);
+        }
+
+        public static void CreateDefaultConnectors(Map map)
+        {
+            map.AddConnector("omaha", "denver", 7);
+            //will not be added because it's duplicate
+            map.AddConnector("denver", "omaha", 8);
+        }
+
         private Map Create()
         {
             //City level means how much money will needed to buy city (different cost for each lvl).
             //Levels opened according to STATE(ЭТАП) of game (at begining allowable only first level) 
             var staticMarginCLR = new DefaultStaticMarginCityLevelRule(3, 10, 5);
 
-            var defaultMap = new Map(Constants.CONST_DEFAULT_MAP_ID, new MapSettings()
+            var defaultMap = new Map("old_one", new MapSettings()
             {
                 CityLevelRule = staticMarginCLR,
                 OverrideCityLevelsByRule = true//means that no matter what levels setting will be for 
@@ -88,9 +105,7 @@ namespace PowerGridEngine
               .AddCity("Boise").AddCity("Seattle").AddCity("Portland");
 
             //Another part - connectors between cities
-            defaultMap.AddConnector("omaha", "denver", 7);
-            //will not be added because it's duplicate
-            defaultMap.AddConnector("denver", "omaha", 8);
+            CreateDefaultConnectors(defaultMap);
 
             return defaultMap;
         }

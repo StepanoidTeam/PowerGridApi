@@ -15,19 +15,20 @@ namespace PowerGridEngine
                 return Regions.SelectMany(m => m.Value.Cities).ToDictionary(k => k.Key, v => v.Value);
             }
         }
-
+    
         public MapSettings Settings { get; private set; }
 
         public IDictionary<string, Connector> Connectors { get; private set; }
 
-		public Map(string name, MapSettings settings = null): base(name)
+        public Map(string name, MapSettings settings = null, bool registerInstantly = true): base(name)
 		{
 			Settings = settings;
 			if (Settings == null)
 				Settings = new MapSettings();
 			//Regions = new Dictionary<string, Region>();
 			Connectors = new Dictionary<string, Connector>();
-			EnergoServer.Current.RegisterMap(this);
+            if(registerInstantly)
+			    EnergoServer.Current.RegisterMap(this);
 		}
 
 		public Map AddRegion(Region region)
