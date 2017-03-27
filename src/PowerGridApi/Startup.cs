@@ -27,41 +27,48 @@ namespace PowerGridApi
             //init energo server
             ServerContext.InitCurrentContext();
 
-            var defaultMapPath = "Data/Maps/map-cities.json";
-            if (File.Exists(defaultMapPath))
+            try
             {
-                var fileData = File.ReadAllText(defaultMapPath);
-                var loadMap = fileData.ToObject<LoadMapModel>();
-
-                var staticMarginCLR = new DefaultStaticMarginCityLevelRule(3, 10, 5);
-
-                var map = new Map(Constants.CONST_DEFAULT_MAP_ID, new MapSettings()
+                var defaultMapPath = "App_Data/Maps/map-cities.json";
+                if (File.Exists(defaultMapPath))
                 {
-                    CityLevelRule = staticMarginCLR,
-                    OverrideCityLevelsByRule = true
-                }, false);
+                    var fileData = File.ReadAllText(defaultMapPath);
+                    var loadMap = fileData.ToObject<LoadMapModel>();
 
-                try
-                {
-                    //todo load regions
-                    DefaultMapCreator.CreateDefaultRegions(map);
-                    foreach (var city in loadMap.Cities)
+                    var staticMarginCLR = new DefaultStaticMarginCityLevelRule(3, 10, 5);
+
+                    var map = new Map(Constants.CONST_DEFAULT_MAP_ID, new MapSettings()
                     {
-                        var region = map.LookupRegion(city.RegionKey);
-                        if (region == null)
-                            throw new Exception("Can't find region ");
-                        map.AddCity(new City(city.Name, region, null, new Tuple<decimal, decimal>(city.CoordX, city.CoordY)));
+                        CityLevelRule = staticMarginCLR,
+                        OverrideCityLevelsByRule = true
+                    }, false);
+
+                    try
+                    {
+                        //todo load regions
+                        DefaultMapCreator.CreateDefaultRegions(map);
+                        foreach (var city in loadMap.Cities)
+                        {
+                            var region = map.LookupRegion(city.RegionKey);
+                            if (region == null)
+                                throw new Exception("Can't find region ");
+                            map.AddCity(new City(city.Name, region, null, new Tuple<decimal, decimal>(city.CoordX, city.CoordY)));
+                        }
+                        //todo load connectors
+                        DefaultMapCreator.CreateDefaultConnectors(map);
                     }
-                    //todo load connectors
-                    DefaultMapCreator.CreateDefaultConnectors(map);
+                    catch (Exception ex)
+                    {
+                        ServerContext.Current.Logger.Log(LogDestination.Console, LogType.Info, ex.Message);
+                        map = null;
+                    }
+                    if (map != null)
+                        EnergoServer.Current.RegisterMap(map);
                 }
-                catch (Exception ex)
-                {
-                    ServerContext.Current.Logger.Log(LogDestination.Console, LogType.Info, ex.Message);
-                    map = null;
-                }
-                if (map != null)
-                    EnergoServer.Current.RegisterMap(map);
+            }
+            catch(Exception ex)
+            {
+                ServerContext.Current.Logger.Log(LogDestination.Console, LogType.Info, ex.Message);
             }
         }
 
