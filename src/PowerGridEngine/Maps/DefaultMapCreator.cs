@@ -25,7 +25,7 @@ namespace PowerGridEngine
         public static void CreateDefaultRegions(Map map)
         {
             var redRegion = new Region("Red", map);
-            var blueRegion = new Region("Blue", map);
+            var blueRegion = new Region("Teal", map);
             var brownRegion = new Region("Brown", map);
             var yelRegion = new Region("Yellow", map);
             var greenRegion = new Region("Green", map);

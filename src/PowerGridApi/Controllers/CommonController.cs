@@ -26,7 +26,8 @@ namespace PowerGridApi.Controllers
         [HttpGet("Version")]
 		public async Task<IActionResult> GetVersion()
 		{
-            return await SuccessResponse(Version);
+            var version = Version;
+            return await SuccessResponse(new { Version = version.Item1, PublishedDt = version.Item2 });
 		}
 
         /// <summary>

@@ -45,43 +45,43 @@
 
     {
       "Name": "Santa Fe",
-      "RegionKey": "blue",
+      "RegionKey": "teal",
       "CoordX": 555,
       "CoordY": 555
     },
     {
       "Name": "Phoenix",
-      "RegionKey": "blue",
+      "RegionKey": "teal",
       "CoordX": 385,
       "CoordY": 630
     },
     {
       "Name": "San Diego",
-      "RegionKey": "blue",
+      "RegionKey": "teal",
       "CoordX": 225,
       "CoordY": 675
     },
     {
       "Name": "Los Angeles",
-      "RegionKey": "blue",
+      "RegionKey": "teal",
       "CoordX": 160,
       "CoordY": 600
     },
     {
       "Name": "Las Vegas",
-      "RegionKey": "blue",
+      "RegionKey": "teal",
       "CoordX": 290,
       "CoordY": 520
     },
     {
       "Name": "Salt Lake City",
-      "RegionKey": "blue",
+      "RegionKey": "teal",
       "CoordX": 400,
       "CoordY": 380
     },
     {
       "Name": "San Francisco",
-      "RegionKey": "blue",
+      "RegionKey": "teal",
       "CoordX": 60,
       "CoordY": 465
     },

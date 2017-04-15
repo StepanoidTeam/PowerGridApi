@@ -140,7 +140,12 @@ namespace PowerGridApi
 
         private async Task DirectResponse<T>(DuplexNetworkClient client, T response)
         {
-            var message = response.ToJson();
+            var message = "";
+            if (response is string)
+                message = response.ToString();
+            else
+                response.ToJson();
+
             var data = message.GetByteSegment();
 
             if (client.Connection.State == WebSocketState.Open)
@@ -215,11 +220,11 @@ namespace PowerGridApi
                                 break;
 
                             case WebSocketMessageType.Text:
-                                var message = Encoding.UTF8.GetString(buffer.Array, buffer.Offset, buffer.Count).Trim('\0');
-                                var request = message.ToObject<DuplexNetworkRequest>();
+                                var socketMessage = Encoding.UTF8.GetString(buffer.Array, buffer.Offset, buffer.Count).Trim('\0');
+                                var request = socketMessage.ToObject<DuplexNetworkRequest>();
 
                                 if (CheckAuthorization(client, request))
-                                    OnRequestRecieved(client.User, request.Type, message);
+                                    OnRequestRecieved(client.User, request.Type, socketMessage);
                                 else
                                 {
                                     var response = new { IsSuccess = false, Message = "You are not authorized" };
@@ -272,7 +277,10 @@ namespace PowerGridApi
                 userName = user.Username;
             }
             var logFormat = "Websocket onMessage from Id = {0}, name = {1}: {2}";
-            Broadcast(string.Format(logFormat, userId, userName, json), EnergoServer.AdminId, SubscriberType.User);
+            var admin = _clients.FirstOrDefault(s => s.User != null && s.User.Id == EnergoServer.AdminId);
+            if (admin != null)
+                DirectResponse(admin, string.Format(logFormat, userId, userName, json));
+
             ServerContext.Current.Logger.Log(LogDestination.Console, LogType.Info, logFormat, userId, userName, json);
         }
     }

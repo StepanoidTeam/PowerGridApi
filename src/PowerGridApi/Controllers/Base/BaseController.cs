@@ -43,17 +43,30 @@ namespace PowerGridApi.Controllers
 		/// <summary>
 		/// Version of current API
 		/// </summary>
-		public static string Version
-		{
-			get
-			{
-				var vers = System.Reflection.Assembly.GetEntryAssembly()
-										   .GetName()
-										   .Version
-										   .ToString();
-				return vers;
-			}
-		}
+		public static Tuple<string, string> Version
+        {
+            get
+            {
+                var vers = System.Reflection.Assembly.GetEntryAssembly()
+                                           .GetName()
+                                           .Version
+                                           .ToString();
+                //version has such format: <VersionMajor.VersionMinor.MonthDay.HoursMinutes> (0.0.327.1851)
+                var parts = vers.Split('.');
+                var year = DateTime.UtcNow.Year;
+                var monthAndDay = int.Parse(parts[2]);
+                var month = monthAndDay / 100;
+                var day = monthAndDay - month * 100;
+                var hoursAndMins = int.Parse(parts[3]);
+                var hours = hoursAndMins / 100;
+                var mins = hoursAndMins - hours * 100;
+                var updatedUtcTime = new DateTime(year, month, day, hours, mins, 0, DateTimeKind.Utc);
+                var timeZone = "FLE Standard Time";
+                var updatetTime = TimeZoneInfo.ConvertTime(updatedUtcTime, TimeZoneInfo.FindSystemTimeZoneById(timeZone));
+
+                return new Tuple<string, string>(vers, string.Format("{0}({1})", updatetTime.ToString("yyyy-MM-dd HH:mm"), timeZone));
+            }
+        }
 
 
 		protected BaseController()
